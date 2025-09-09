@@ -6,9 +6,12 @@
 # Firebase config with sensitive data (local development only)
 firebase-config.js
 firebase-config-secure.js
+firebase-config-local.json
 
-# Keep GitHub Pages config in repository
-# firebase-config-github.js - This file is safe to commit
+# Keep safe configs in repository
+# firebase-config-github.js - Safe to commit (placeholder values)
+# firebase-config-env.js - Safe to commit (uses environment variables)
+# firebase-config-client.js - Safe to commit (loads config dynamically)
 
 # Node modules
 node_modules/

@@ -1,0 +1,170 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Create Firebase Config
+      run: |
+        cat > firebase-config.js << 'EOF'
+        // Firebase Configuration for GitHub Pages
+        // This file is generated automatically during deployment
+        
+        const firebaseConfig = {
+          apiKey: "${{ secrets.FIREBASE_API_KEY }}",
+          authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",
+          projectId: "${{ secrets.FIREBASE_PROJECT_ID }}",
+          storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",
+          messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",
+          appId: "${{ secrets.FIREBASE_APP_ID }}",
+          measurementId: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
+        };
+        
+        // Check if running on GitHub Pages
+        const isGitHubPages = window.location.hostname === 'mot90.github.io';
+        
+        // Initialize Firebase
+        let app;
+        let auth;
+        let db;
+        let storage;
+        let functions;
+        let isFirebaseReady = false;
+        
+        // Function to initialize Firebase
+        function initializeFirebase() {
+          if (isFirebaseReady) {
+            console.log('Firebase already initialized.');
+            return true;
+          }
+        
+          if (typeof firebase === 'undefined') {
+            console.error('Firebase SDK not loaded. Please include Firebase scripts.');
+            return false;
+          }
+        
+          // Initialize Firebase app
+          app = firebase.initializeApp(firebaseConfig);
+          console.log('🔥 Firebase app initialized:', app);
+          
+          // Initialize services
+          auth = firebase.auth(app);
+          db = firebase.firestore(app);
+          storage = firebase.storage(app);
+          functions = firebase.functions(app);
+          
+          console.log('🔥 Firebase services initialized:', { auth, db, storage, functions });
+        
+          // Configure Firestore settings
+          if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            console.log('🌐 Online deployment - configuring Firestore');
+            db.settings({
+              cacheSizeBytes: firebase.firestore.CACHE_UNLIMITED,
+              ignoreUndefinedProperties: true
+            });
+          }
+        
+          // Enable Firestore offline persistence
+          enableFirestorePersistence(db);
+        
+          console.log('Firebase initialized successfully');
+          isFirebaseReady = true;
+          return true;
+        }
+        
+        // Function to enable Firestore offline persistence
+        function enableFirestorePersistence(db) {
+          if (db && typeof db.enablePersistence === 'function') {
+            db.enablePersistence({
+              synchronizeTabs: true
+            }).then(() => {
+              console.log('✅ Firestore offline persistence enabled');
+            }).catch((err) => {
+              if (err.code === 'failed-precondition') {
+                console.warn('⚠️ Multiple tabs open, persistence can only be enabled in one tab at a time.');
+              } else if (err.code === 'unimplemented') {
+                console.warn('⚠️ The current browser does not support all features required for persistence');
+              } else {
+                console.error('❌ Error enabling Firestore persistence:', err);
+              }
+            });
+          } else {
+            console.warn('⚠️ Firestore persistence not available');
+          }
+        }
+        
+        // Function to get Firebase services
+        function getAuth() {
+          return auth;
+        }
+        
+        function getFirestore() {
+          return db;
+        }
+        
+        function getStorage() {
+          return storage;
+        }
+        
+        function getFunctions() {
+          return functions;
+        }
+        
+        function getApp() {
+          return app;
+        }
+        
+        function isFirebaseInitialized() {
+          return isFirebaseReady;
+        }
+        
+        // Export functions for use in other scripts
+        window.FirebaseConfig = {
+          initializeFirebase,
+          getAuth,
+          getFirestore,
+          getStorage,
+          getFunctions,
+          getApp,
+          isFirebaseInitialized
+        };
+        
+        // Auto-initialize Firebase when script loads
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initializeFirebase);
+        } else {
+          initializeFirebase();
+        }
+        EOF
+        
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
