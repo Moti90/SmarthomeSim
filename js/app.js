@@ -29,12 +29,22 @@ class AppManager {
     }
 
     initializeFirebase() {
+        console.log('🔥 Initializing Firebase...');
+        console.log('🔥 FirebaseConfig available:', !!window.FirebaseConfig);
+        
         // Initialize Firebase using your existing setup
         if (window.FirebaseConfig) {
-            window.FirebaseConfig.initializeFirebase();
-            this.setupAuthStateListener();
+            const success = window.FirebaseConfig.initializeFirebase();
+            console.log('🔥 Firebase initialization result:', success);
+            
+            if (success) {
+                this.setupAuthStateListener();
+                console.log('✅ Firebase setup complete');
+            } else {
+                console.error('❌ Firebase initialization failed');
+            }
         } else {
-            console.error('Firebase configuration not found');
+            console.error('❌ Firebase configuration not found');
         }
     }
 
@@ -132,9 +142,18 @@ class AppManager {
         try {
             this.showLoading('Opretter konto...');
             const auth = window.FirebaseConfig.getAuth();
+            console.log('🔥 Attempting to create user with email:', email);
+            console.log('🔥 Auth object:', auth);
+            
+            if (!auth) {
+                throw new Error('Firebase Auth not initialized');
+            }
+            
             await auth.createUserWithEmailAndPassword(email, password);
+            console.log('✅ User created successfully');
             // Auth state listener will handle the rest
         } catch (error) {
+            console.error('❌ Error creating user:', error);
             this.hideLoading();
             this.showError(this.getErrorMessage(error.code));
         }

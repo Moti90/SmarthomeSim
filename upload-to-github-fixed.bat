@@ -23,18 +23,14 @@ if not exist ".git" (
     echo.
 )
 
-REM Get repository URL from user
+REM Set repository URL automatically
 echo ========================================
 echo    GitHub Repository Setup
 echo ========================================
 echo.
-set /p REPO_URL="Indtast din GitHub repository URL (fx: https://github.com/brugernavn/repository-navn.git): "
-
-if "%REPO_URL%"=="" (
-    echo FEJL: Ingen repository URL indtastet!
-    pause
-    exit /b 1
-)
+set REPO_URL=https://github.com/Moti90/SmarthomeSim.git
+echo Bruger automatisk URL: %REPO_URL%
+echo.
 
 REM Add remote origin
 echo.

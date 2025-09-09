@@ -114,12 +114,15 @@ function initializeFirebase() {
 
     // Initialize Firebase app
     app = firebase.initializeApp(firebaseConfig);
+    console.log('🔥 Firebase app initialized:', app);
     
     // Initialize services
     auth = firebase.auth();
     db = firebase.firestore();
     storage = firebase.storage();
     functions = firebase.functions();
+    
+    console.log('🔥 Firebase services initialized:', { auth, db, storage, functions });
 
     // Configure Firestore settings FIRST (before any other operations)
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
