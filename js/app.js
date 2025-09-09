@@ -262,7 +262,10 @@ class AppManager {
         document.querySelectorAll('.theme-option').forEach(option => {
             option.classList.remove('active');
         });
-        document.querySelector(`[data-theme="${themeName}"]`).classList.add('active');
+        const themeElement = document.querySelector(`[data-theme="${themeName}"]`);
+        if (themeElement) {
+            themeElement.classList.add('active');
+        }
         
         // Apply theme
         document.body.classList.remove('theme-crimson-gold', 'theme-warm-green');
@@ -279,7 +282,10 @@ class AppManager {
     loadStoredTheme() {
         const storedTheme = localStorage.getItem('selectedTheme');
         if (storedTheme) {
-            this.switchTheme(storedTheme);
+            // Wait for DOM to be ready before switching theme
+            setTimeout(() => {
+                this.switchTheme(storedTheme);
+            }, 100);
         }
     }
 

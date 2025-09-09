@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smarthome Simulator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
     <link rel="stylesheet" href="css/style.css">
     
     <!-- Firebase SDK -->
@@ -26,7 +27,7 @@
                     <input type="email" id="email" placeholder="Email" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="password" placeholder="Adgangskode" required>
+                            <input type="password" id="password" placeholder="Adgangskode" autocomplete="current-password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Log Ind</button>
             </form>
@@ -51,7 +52,7 @@
                     <input type="email" id="register-email" placeholder="Email" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="register-password" placeholder="Adgangskode" required>
+                            <input type="password" id="register-password" placeholder="Adgangskode" autocomplete="new-password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Opret Konto</button>
             </form>
@@ -1166,7 +1167,7 @@
             </div>
             <div class="password-popup-body">
                 <div class="password-input-group">
-                    <input type="password" id="advanced-password-input" placeholder="Indtast kode..." maxlength="20">
+                        <input type="password" id="advanced-password-input" placeholder="Indtast kode..." autocomplete="current-password" maxlength="20">
                     <button type="button" id="toggle-password-visibility" class="password-toggle">
                         <span class="password-icon">👁️</span>
                     </button>

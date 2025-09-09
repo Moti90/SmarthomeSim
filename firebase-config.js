@@ -13,6 +13,9 @@ const firebaseConfig = {
   measurementId: "G-YR3XWP3RVH"
 };
 
+// Check if running on GitHub Pages
+const isGitHubPages = window.location.hostname === 'mot90.github.io';
+
 // Initialize Firebase
 let app;
 let auth;
