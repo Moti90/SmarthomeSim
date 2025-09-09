@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smarthome Simulator</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
+</head>
+<body>
+    <!-- Login Container -->
+    <div id="login-container" class="container">
+        <div class="login-card">
+            <div class="logo">
+                <img src="LOGO.png" alt="Smarthome Logo" class="logo-image">
+            </div>
+            
+            <form id="login-form" class="auth-form">
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Adgangskode" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Log Ind</button>
+            </form>
+            
+            <div class="auth-links">
+                <a href="#" id="register-link">Opret konto</a>
+                <a href="#" id="forgot-link">Glemt adgangskode?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Container -->
+    <div id="register-container" class="container hidden">
+        <div class="register-card">
+            <div class="logo">
+                <img src="LOGO.png" alt="Smarthome Logo" class="logo-image">
+                <p>Opret Konto</p>
+            </div>
+            
+            <form id="register-form" class="auth-form">
+                <div class="input-group">
+                    <input type="email" id="register-email" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="register-password" placeholder="Adgangskode" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Opret Konto</button>
+            </form>
+            
+            <div class="auth-links">
+                <a href="#" id="login-back-link">Tilbage til login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="container hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo-small">
+                        <img src="LOGO.png" alt="Logo" class="logo-icon">
+                        <span class="app-title">Smarthome Simulator</span>
+                    </div>
+                </div>
+                
+                <nav class="header-nav">
+                    <button class="nav-btn active" data-tab="home">
+                        <span class="nav-icon">⌂</span>
+                        <span class="nav-label">Forside</span>
+                    </button>
+                    <button class="nav-btn" data-tab="elearning">
+                        <span class="nav-icon">◊</span>
+                        <span class="nav-label">E-Learning</span>
+                    </button>
+                    <button class="nav-btn advanced-tab" data-tab="advanced">
+                        <span class="nav-icon">☆</span>
+                        <span class="nav-label">Advanced</span>
+                    </button>
+                    <button class="nav-btn" data-tab="smarthome">
+                        <span class="nav-icon">▶</span>
+                        <span class="nav-label">Smarthome Sim</span>
+                    </button>
+                    <button class="nav-btn" data-tab="settings">
+                        <span class="nav-icon">⚙</span>
+                        <span class="nav-label">Indstillinger</span>
+                    </button>
+                </nav>
+                
+                <div class="header-right">
+                    <span id="user-info" class="user-info">rasmusjakobsen1990@gmail.com</span>
+                    <button id="logout-btn" class="logout-btn">Log Ud</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Forside Tab -->
+            <div id="home-tab" class="tab-content active">
+                <div class="content-section">
+                    <div class="welcome-section">
+                        <h1>Velkommen til Smarthome Simulator</h1>
+                        <p class="subtitle">Din intelligente hjemmestyring starter her</p>
+                    </div>
+                    
+                    <div class="video-section">
+                        <div class="video-container">
+                            <video 
+                                id="intro-video" 
+                                class="intro-video" 
+                                controls 
+                                preload="metadata"
+                                aria-label="Smarthome Simulator Introduktionsvideo">
+                                <source src="Introvideo.mp4" type="video/mp4">
+                                <p>Din browser understøtter ikke video elementet. <a href="Introvideo.mp4">Download videoen her</a>.</p>
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E-Learning Tab -->
+            <div id="elearning-tab" class="tab-content">
+                <div class="elearning-container">
+                    <!-- Header Section -->
+                    <div class="elearning-header">
+                        <div class="header-content">
+                            <h1>Smarthome Teknologi</h1>
+                        </div>
+                        <div class="header-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">📡</div>
+                                <div class="stat-info">
+                                    <span class="stat-number">10+</span>
+                                    <span class="stat-label">Sensortyper</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🧠</div>
+                                <div class="stat-info">
+                                    <span class="stat-number">74+</span>
+                                    <span class="stat-label">Quiz Spørgsmål</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🏆</div>
+                                <div class="stat-info">
+                                    <span class="stat-number">0%</span>
+                                    <span class="stat-label">Samlet Fremgang</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Learning Interface -->
+                    <div class="learning-interface">
+                        <!-- Topic Selection Panel -->
+                        <div class="topic-panel">
+                            <div class="panel-header">
+                                <h2>Vælg Emne</h2>
+                                <div class="search-box">
+                                    <input type="text" id="topic-search" placeholder="Søg emner...">
+                                    <span class="search-icon">🔍</span>
+                                </div>
+                            </div>
+                            
+                            <div class="topics-grid">
+                                <!-- Sensoere Topic -->
+                                <div class="topic-card" data-topic="sensoere">
+                                    <div class="topic-icon">📡</div>
+                                    <div class="topic-info">
+                                        <h3>Sensoere</h3>
+                                        <p>Lær om forskellige typer sensoere og deres anvendelse</p>
+                                        <div class="topic-stats">
+                                            <span class="subtopic-count">10 underemner</span>
+                                            <span class="completion-rate">0% gennemført</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-arrow">→</div>
+                                </div>
+
+                                <!-- Forbindelsestyper Topic -->
+                                <div class="topic-card" data-topic="forbindelser">
+                                    <div class="topic-icon">🔗</div>
+                                    <div class="topic-info">
+                                        <h3>Forbindelsestyper</h3>
+                                        <p>Forstå forskellige kommunikationsprotokoller og netværk</p>
+                                        <div class="topic-stats">
+                                            <span class="subtopic-count">8 underemner</span>
+                                            <span class="completion-rate">0% gennemført</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-arrow">→</div>
+                                </div>
+
+                                <!-- Automatisering Topic -->
+                                <div class="topic-card" data-topic="automatisering">
+                                    <div class="topic-icon">⚡</div>
+                                    <div class="topic-info">
+                                        <h3>Automatisering</h3>
+                                        <p>Opret intelligente automatiseringer og scenarier</p>
+                                        <div class="topic-stats">
+                                            <span class="subtopic-count">6 underemner</span>
+                                            <span class="completion-rate">0% gennemført</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-arrow">→</div>
+                                </div>
+
+                                <!-- Sikkerhed Topic -->
+                                <div class="topic-card" data-topic="sikkerhed">
+                                    <div class="topic-icon">🔒</div>
+                                    <div class="topic-info">
+                                        <h3>Sikkerhed & Privatliv</h3>
+                                        <p>Beskyt dit smarthome mod trusler og sikkerhedsrisici</p>
+                                        <div class="topic-stats">
+                                            <span class="subtopic-count">4 underemner</span>
+                                            <span class="completion-rate">0% gennemført</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-arrow">→</div>
+                                </div>
+
+                                <!-- Energistyring Topic -->
+                                <div class="topic-card" data-topic="energi">
+                                    <div class="topic-icon">🌱</div>
+                                    <div class="topic-info">
+                                        <h3>Energistyring</h3>
+                                        <p>Optimér energiforbrug og bæredygtige løsninger</p>
+                                        <div class="topic-stats">
+                                            <span class="subtopic-count">5 underemner</span>
+                                            <span class="completion-rate">0% gennemført</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-arrow">→</div>
+                                </div>
+
+                                <!-- Fejlfinding Topic -->
+                                <div class="topic-card" data-topic="fejlfinding">
+                                    <div class="topic-icon">🔧</div>
+                                    <div class="topic-info">
+                                        <h3>Fejlfinding</h3>
+                                        <p>Lær at diagnosticere og løse almindelige problemer</p>
+                                        <div class="topic-stats">
+                                            <span class="subtopic-count">4 underemner</span>
+                                            <span class="completion-rate">0% gennemført</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-arrow">→</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Panel -->
+                        <div class="content-panel">
+                            <div class="content-header">
+                                <button class="back-btn" id="back-to-topics" style="display: none;">
+                                    <span>←</span> Tilbage til emner
+                                </button>
+                                <div class="current-topic-info">
+                                    <h2 id="current-topic-title">Vælg et emne for at begynde</h2>
+                                    <p id="current-topic-description">Klik på et emne til venstre for at se underemner og begynde læring</p>
+                                </div>
+                            </div>
+
+                            <div class="content-body">
+                                <!-- Default State -->
+                                <div class="welcome-content" id="welcome-content">
+                                    <div class="welcome-illustration">
+                                        <div class="floating-icons">
+                                            <div class="floating-icon" style="--delay: 0s">📡</div>
+                                            <div class="floating-icon" style="--delay: 1s">🔗</div>
+                                            <div class="floating-icon" style="--delay: 2s">⚡</div>
+                                            <div class="floating-icon" style="--delay: 3s">🔒</div>
+                                        </div>
+                                    </div>
+                                    <h3>Velkommen til Smarthome E-Learning!</h3>
+                                    <p>Udforsk vores omfattende læringsmoduler og byg din ekspertise op trin for trin. Hvert emne indeholder detaljerede underemner med interaktive øvelser og praktiske eksempler.</p>
+                                    <div class="quick-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-number">6</span>
+                                            <span class="stat-label">Hovedemner</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-number">37</span>
+                                            <span class="stat-label">Underemner</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-number">74+</span>
+                                            <span class="stat-label">Quiz Spørgsmål</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Subtopic Content -->
+                                <div class="subtopics-container" id="subtopics-container" style="display: none;">
+                                    <div class="subtopics-grid" id="subtopics-grid">
+                                        <!-- Dynamic content will be inserted here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievement Panel -->
+                    <div class="achievement-panel">
+                        <div class="achievement-header">
+                            <h3>🏆 Præstationer</h3>
+                        </div>
+                        <div class="achievements-grid">
+                            <div class="achievement-badge locked">
+                                <div class="badge-icon">🥇</div>
+                                <span>Første Skridt</span>
+                            </div>
+                            <div class="achievement-badge locked">
+                                <div class="badge-icon">📚</div>
+                                <span>Lærelyst</span>
+                            </div>
+                            <div class="achievement-badge locked">
+                                <div class="badge-icon">🎯</div>
+                                <span>Målrettet</span>
+                            </div>
+                            <div class="achievement-badge locked">
+                                <div class="badge-icon">💎</div>
+                                <span>Ekspert</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Smarthome Sim Tab -->
+            <div id="smarthome-tab" class="tab-content">
+                <div class="simulator-layout">
+                    <div class="floor-plan-section">
+                        <div class="floor-plan-container">
+                            <img src="plantegning.png" alt="Plantegning" class="floor-plan-image">
+                            
+                            <!-- Draggable Smart Home Icons -->
+                            <div class="smart-icons-container">
+                                <!-- Stue Lampe -->
+                                <div class="smart-icon" data-device="stue-lampe" data-type="boolean" data-value="false" data-default-left="25" data-default-top="35" data-device-name="Stue Lampe" style="left: 25%; top: 35%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">💡</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Badeværelses Lampe -->
+                                <div class="smart-icon" data-device="badevaerelse-lampe" data-type="boolean" data-value="false" data-default-left="20" data-default-top="65" data-device-name="Badeværelses Lampe" style="left: 20%; top: 65%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">💡</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Soveværelse Lampe -->
+                                <div class="smart-icon" data-device="sovevaerelse-lampe" data-type="boolean" data-value="false" data-default-left="75" data-default-top="25" data-device-name="Soveværelse Lampe" style="left: 75%; top: 25%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">💡</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Køkken Lampe -->
+                                <div class="smart-icon" data-device="koekken-lampe" data-type="boolean" data-value="false" data-default-left="35" data-default-top="75" data-device-name="Køkken Lampe" style="left: 35%; top: 75%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">💡</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Spisestue Lampe -->
+                                <div class="smart-icon" data-device="spisestue-lampe" data-type="boolean" data-value="false" data-default-left="55" data-default-top="55" data-device-name="Spisestue Lampe" style="left: 55%; top: 55%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">💡</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Vindue Soveværelse -->
+                                <div class="smart-icon" data-device="vindue-sovevaerelse" data-type="boolean" data-value="false" data-default-left="15" data-default-top="40" data-device-name="Vindue Soveværelse" style="left: 15%; top: 40%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">🪟</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Vindue Stue -->
+                                <div class="smart-icon" data-device="vindue-stue" data-type="boolean" data-value="false" data-default-left="85" data-default-top="40" data-device-name="Vindue Stue" style="left: 85%; top: 40%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">🪟</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dørlås -->
+                                <div class="smart-icon" data-device="doerlaas" data-type="boolean" data-value="false" data-default-left="50" data-default-top="15" data-device-name="Dørlås" style="left: 50%; top: 15%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">🔒</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Bevægelsessensor Entre -->
+                                <div class="smart-icon" data-device="bevaegelsessensor-entre" data-type="boolean" data-value="false" data-default-left="45" data-default-top="30" data-device-name="Bevægelsessensor Entre" style="left: 45%; top: 30%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">📡</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Bevægelsessensor Stue -->
+                                <div class="smart-icon" data-device="bevaegelsessensor-stue" data-type="boolean" data-value="false" data-default-left="30" data-default-top="45" data-device-name="Bevægelsessensor Stue" style="left: 30%; top: 45%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">📡</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Aktuator/Radiator -->
+                                <div class="smart-icon" data-device="aktuator-radiator" data-type="boolean" data-value="false" data-default-left="60" data-default-top="40" data-device-name="Aktuator/Radiator" style="left: 60%; top: 40%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">🌡️</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Udvendig Vejrstation -->
+                                <div class="smart-icon" data-device="udvendig-vejrstation" data-type="boolean" data-value="false" data-default-left="10" data-default-top="10" data-device-name="Udvendig Vejrstation" style="left: 10%; top: 10%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">🌤️</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Badeværelse Ventilator -->
+                                <div class="smart-icon" data-device="badevaerelse-ventilator" data-type="boolean" data-value="false" data-default-left="25" data-default-top="25" data-device-name="Badeværelse Ventilator" style="left: 25%; top: 25%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">🌀</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Badeværelse Fugtmåler -->
+                                <div class="smart-icon" data-device="badevaerelse-fugtmaaler" data-type="numeric" data-value="45" data-default-left="30" data-default-top="20" data-device-name="Badeværelse Fugtmåler" style="left: 30%; top: 20%;">
+                                    <div class="icon-content">
+                                        <span class="icon-symbol">💧</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                <div class="control-section">
+                    <div class="control-panel">
+                        <h3>Kontrolpanel</h3>
+                        
+                        <!-- Weather Indicator -->
+                        <div class="weather-indicator">
+                            <div class="weather-item">
+                                <span class="weather-icon">🌡️</span>
+                                <span class="weather-value" id="outdoor-temp">15°C</span>
+                            </div>
+                            <div class="weather-item">
+                                <span class="weather-icon">☀️</span>
+                                <span class="weather-value" id="outdoor-light">Mørkt</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Scenarie Kontrol -->
+                        <div class="scenario-controls">
+                            <h4>Scenarier</h4>
+                            <div class="scenario-grid">
+                                <button class="scenario-btn" data-scenario="morning">
+                                    <span class="scenario-icon">🌅</span>
+                                    <span class="scenario-name">Morgen</span>
+                                </button>
+                                <button class="scenario-btn" data-scenario="night">
+                                    <span class="scenario-icon">🌙</span>
+                                    <span class="scenario-name">Nat</span>
+                                </button>
+                                <button class="scenario-btn" data-scenario="coming-home">
+                                    <span class="scenario-icon">🏠</span>
+                                    <span class="scenario-name">Kommer Hjem</span>
+                                </button>
+                                <button class="scenario-btn" data-scenario="leaving-home">
+                                    <span class="scenario-icon">🚪</span>
+                                    <span class="scenario-name">Forlader Hjemmet</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="device-controls">
+                                <div class="control-group">
+                                    <h4>Lys</h4>
+                                    
+                                    <!-- Stue Lampe -->
+                                    <div class="control-item">
+                                        <label for="stue-lampe-switch">Stue Lampe</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="stue-lampe-switch" class="lamp-switch" data-device="stue-lampe">
+                                            <label for="stue-lampe-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Badeværelses Lampe -->
+                                    <div class="control-item">
+                                        <label for="badevaerelse-lampe-switch">Badeværelses Lampe</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="badevaerelse-lampe-switch" class="lamp-switch" data-device="badevaerelse-lampe">
+                                            <label for="badevaerelse-lampe-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Soveværelse Lampe -->
+                                    <div class="control-item">
+                                        <label for="sovevaerelse-lampe-switch">Soveværelse Lampe</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="sovevaerelse-lampe-switch" class="lamp-switch" data-device="sovevaerelse-lampe">
+                                            <label for="sovevaerelse-lampe-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Køkken Lampe -->
+                                    <div class="control-item">
+                                        <label for="koekken-lampe-switch">Køkken Lampe</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="koekken-lampe-switch" class="lamp-switch" data-device="koekken-lampe">
+                                            <label for="koekken-lampe-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Spisestue Lampe -->
+                                    <div class="control-item">
+                                        <label for="spisestue-lampe-switch">Spisestue Lampe</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="spisestue-lampe-switch" class="lamp-switch" data-device="spisestue-lampe">
+                                            <label for="spisestue-lampe-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                
+                                
+                                <div class="control-group">
+                                    <h4>Sensorer</h4>
+                                    
+                                    <!-- Bevægelsessensor Entre -->
+                                    <div class="control-item">
+                                        <label for="bevaegelsessensor-entre-switch">Bevægelsessensor Entre</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="bevaegelsessensor-entre-switch" class="lamp-switch" data-device="bevaegelsessensor-entre">
+                                            <label for="bevaegelsessensor-entre-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bevægelsessensor Stue -->
+                                    <div class="control-item">
+                                        <label for="bevaegelsessensor-stue-switch">Bevægelsessensor Stue</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="bevaegelsessensor-stue-switch" class="lamp-switch" data-device="bevaegelsessensor-stue">
+                                            <label for="bevaegelsessensor-stue-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Alarmsystem -->
+                                    <div class="control-item">
+                                        <label for="alarmsystem-switch">Alarmsystem</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="alarmsystem-switch" class="lamp-switch" data-device="alarmsystem">
+                                            <label for="alarmsystem-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="control-group">
+                                    <h4>Klima & Miljø</h4>
+                                    
+                                    <!-- Aktuator/Radiator -->
+                                    <div class="control-item">
+                                        <label for="aktuator-radiator-switch">Aktuator/Radiator</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="aktuator-radiator-switch" class="lamp-switch" data-device="aktuator-radiator">
+                                            <label for="aktuator-radiator-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="control-item">
+                                        <label for="radiator-temp-display">Temperatur</label>
+                                        <div class="temp-display">
+                                            <span id="radiator-temp-display">21.0°C</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Badeværelse Ventilator -->
+                                    <div class="control-item">
+                                        <label for="badevaerelse-ventilator-switch">Badeværelse Ventilator</label>
+                                        <div class="switch-container">
+                                            <input type="checkbox" id="badevaerelse-ventilator-switch" class="lamp-switch" data-device="badevaerelse-ventilator">
+                                            <label for="badevaerelse-ventilator-switch" class="switch-label"></label>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div id="advanced-tab" class="tab-content">
+                <div class="advanced-container">
+                    <div class="advanced-header">
+                        <h1>⚡ Advanced Mode</h1>
+                        <p>Avancerede funktioner og eksperimentelle features</p>
+                    </div>
+                    
+                    <div class="advanced-content">
+                        <div class="advanced-section">
+                            <h2>🔧 System Information</h2>
+                            <div class="info-grid">
+                                <div class="info-card">
+                                    <h3>Browser Info</h3>
+                                    <p id="browser-info">Loading...</p>
+                                </div>
+                                <div class="info-card">
+                                    <h3>Screen Resolution</h3>
+                                    <p id="screen-info">Loading...</p>
+                                </div>
+                                <div class="info-card">
+                                    <h3>Local Storage</h3>
+                                    <p id="storage-info">Loading...</p>
+                                </div>
+                                <div class="info-card">
+                                    <h3>Performance</h3>
+                                    <p id="performance-info">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="advanced-section">
+                            <h2>🧪 Experimental Features</h2>
+                            <div class="feature-grid">
+                                <div class="feature-card">
+                                    <h3>🔮 AI Assistant</h3>
+                                    <p>Intelligent hjælper til smarthome optimering</p>
+                                    <button class="btn btn-primary" onclick="window.appManager.toggleAIAssistant()">Aktiver</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h3>📊 Advanced Analytics</h3>
+                                    <p>Detaljerede brugerstatistikker og mønstre</p>
+                                    <button class="btn btn-primary" onclick="window.appManager.toggleAnalytics()">Aktiver</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h3>🔐 Security Scanner</h3>
+                                    <p>Automatisk sikkerhedsgennemgang af systemet</p>
+                                    <button class="btn btn-primary" onclick="window.appManager.runSecurityScan()">Start Scan</button>
+                                </div>
+                                <div class="feature-card">
+                                    <h3>⚡ Performance Monitor</h3>
+                                    <p>Real-time overvågning af system ydeevne</p>
+                                    <button class="btn btn-primary" onclick="window.appManager.togglePerformanceMonitor()">Aktiver</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="advanced-section">
+                            <h2>🛠️ Developer Tools</h2>
+                            <div class="tools-grid">
+                                <div class="tool-card">
+                                    <h3>Console Access</h3>
+                                    <p>Direkte adgang til browser console</p>
+                                    <button class="btn btn-secondary" onclick="window.appManager.openConsole()">Åbn Console</button>
+                                </div>
+                                <div class="tool-card">
+                                    <h3>Data Export</h3>
+                                    <p>Eksporter alle applikationsdata</p>
+                                    <button class="btn btn-secondary" onclick="window.appManager.exportData()">Eksporter</button>
+                                </div>
+                                <div class="tool-card">
+                                    <h3>Cache Clear</h3>
+                                    <p>Ryd browser cache og lokale data</p>
+                                    <button class="btn btn-secondary" onclick="window.appManager.clearCache()">Ryd Cache</button>
+                                </div>
+                                <div class="tool-card">
+                                    <h3>System Reset</h3>
+                                    <p>Nulstil hele systemet til standard</p>
+                                    <button class="btn btn-danger" onclick="window.appManager.systemReset()">Nulstil System</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Smarthome Sim Sektion -->
+                        <div class="advanced-section">
+                            <h2>🏠 Smarthome Simulator</h2>
+                            <p>Simuler smarthome enheder og test automationsregler i realtid</p>
+                            
+                            <div class="smarthome-sim-container">
+                                <!-- Første kolonne: Simulation Control -->
+                                <div class="sim-column">
+                                    <div class="sim-section">
+                                        <h3>📊 Simulation Control</h3>
+                                        <div class="sim-controls">
+                                            <div class="time-controls">
+                                                <div class="time-display">
+                                                    <span>Klokkeslæt: </span>
+                                                    <span id="sim-time">21:30</span>
+                                                </div>
+                                                <div class="day-display">
+                                                    <span>Ugedag: </span>
+                                                    <span id="sim-day">Mon</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="global-variables">
+                                                <h4>Globale variabler</h4>
+                                                <div class="variable-inputs">
+                                                    <input type="text" id="global-var-1" placeholder="fx mode" value="fx mode">
+                                                    <input type="text" id="global-var-2" placeholder="fx night" value="fx night">
+                                                </div>
+                                                <div class="variable-actions">
+                                                    <button class="btn btn-primary" onclick="window.appManager.setGlobalVariables()">Sæt (buffer)</button>
+                                                    <button class="btn btn-secondary" onclick="window.appManager.clearAllVariables()">Clear alle</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="sim-section">
+                                        <h3>🎛️ Aktører</h3>
+                                        <div class="actors-grid">
+                                            <div class="actor-card" onclick="window.appManager.toggleActor('light')">
+                                                <div class="actor-name">Lampe</div>
+                                                <div class="actor-status" id="light-status">OFF</div>
+                                            </div>
+                                            
+                                            <div class="actor-card" onclick="window.appManager.openDimmerDialog('dimmer')">
+                                                <div class="actor-name">Dæmper</div>
+                                                <div class="actor-status" id="dimmer-status">0%</div>
+                                            </div>
+                                            
+                                            <div class="actor-card" onclick="window.appManager.toggleActor('fan')">
+                                                <div class="actor-name">Ventilator</div>
+                                                <div class="actor-status" id="fan-status">OFF</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="sim-section">
+                                        <h3>📡 Z-Wave Sensorer</h3>
+                                        <p class="sensor-description">Z-Wave-inspirerede sensorer mappes til globale variabler</p>
+                                        
+                                        <div class="sensor-controls">
+                                            <select id="sensor-type" onchange="window.appManager.updateSensorStates()">
+                                                <option value="">Vælg sensor type</option>
+                                                <option value="pir">PIR (bevægelse)</option>
+                                                <option value="door">Dør-/vindueskontakt</option>
+                                                <option value="humidity">Fugtighed (%)</option>
+                                                <option value="light">Lys (lux)</option>
+                                                <option value="wind">Vind (m/s)</option>
+                                                <option value="temp">Temperatur (°C)</option>
+                                                <option value="smoke">Røgalarm</option>
+                                                <option value="water">Vandlækage</option>
+                                                <option value="co2">CO₂ (ppm)</option>
+                                                <option value="presence">Tilstedeværelse</option>
+                                                <option value="alarm">Alarm (Armed)</option>
+                                                <option value="home">Home Mode</option>
+                                            </select>
+                                            
+                                            <div id="sensor-state-container" style="display: none;">
+                                                <!-- Dynamisk indhold baseret på sensor type -->
+                                            </div>
+                                            
+                                            <button class="btn btn-primary" onclick="window.appManager.addSensor()" style="display: none;">+ Tilføj sensor</button>
+                                        </div>
+                                        
+                                        <div class="sensors-list" id="sensors-list">
+                                            <!-- Sensorer vil blive dynamisk tilføjet her -->
+                                        </div>
+                                        
+                                        <!-- Aktivér ændringer knap flyttet her -->
+                                        <div class="sim-actions">
+                                            <button class="btn btn-success" onclick="window.appManager.activateChanges()">Aktivér ændringer</button>
+                                            <div class="sim-status">Nyeste log nederst • Intet trigges før "Aktivér"</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Anden kolonne: Regler -->
+                                <div class="sim-column">
+                                    <div class="sim-section">
+                                        <h3>⚙️ Regler (blok-scener)</h3>
+                                        
+                                        <div class="rule-builder-sim">
+                                            <div class="rule-condition">
+                                                <span>IF</span>
+                                                <select id="rule-condition-1">
+                                                    <option value="always">Altid (ved aktivering)</option>
+                                                    <option value="time">Tidspunkt</option>
+                                                    <option value="sensor">Sensor værdi</option>
+                                                    <option value="global">Global variabel</option>
+                                                </select>
+                                                <input type="text" id="rule-value-1" placeholder="(ingen værdi)">
+                                            </div>
+                                            
+                                            <div class="rule-condition">
+                                                <span>AND</span>
+                                                <select id="rule-condition-2">
+                                                    <option value="">(valgfri)</option>
+                                                    <option value="time">Tidspunkt</option>
+                                                    <option value="sensor">Sensor værdi</option>
+                                                    <option value="global">Global variabel</option>
+                                                </select>
+                                                <input type="text" id="rule-value-2" placeholder="værdi">
+                                            </div>
+                                            
+                                            <div class="rule-condition">
+                                                <span>AND</span>
+                                                <select id="rule-condition-3">
+                                                    <option value="">(valgfri)</option>
+                                                    <option value="time">Tidspunkt</option>
+                                                    <option value="sensor">Sensor værdi</option>
+                                                    <option value="global">Global variabel</option>
+                                                </select>
+                                                <input type="text" id="rule-value-3" placeholder="værdi">
+                                            </div>
+                                            
+                                            <div class="rule-action">
+                                                <span>THEN</span>
+                                                <select id="rule-action">
+                                                    <option value="light_on">Lys → Tænd</option>
+                                                    <option value="light_off">Lys → Sluk</option>
+                                                    <option value="dimmer">Dæmper → Sæt værdi</option>
+                                                    <option value="fan_on">Ventilator → Tænd</option>
+                                                    <option value="fan_off">Ventilator → Sluk</option>
+                                                    <option value="notification">Send notifikation</option>
+                                                </select>
+                                                <input type="text" id="rule-action-value" placeholder="for push/global/delay">
+                                            </div>
+                                            
+                                            <input type="text" id="rule-name" placeholder="Navn på regel (valgfri)">
+                                            
+                                            <div class="rule-buttons">
+                                                <button class="btn btn-success" onclick="window.appManager.addSimRule()">Tilføj regel</button>
+                                                <button class="btn btn-danger" onclick="window.appManager.clearAllRules()">Slet alle</button>
+                                                <button class="btn btn-secondary" onclick="window.appManager.saveRules()">Gem</button>
+                                                <button class="btn btn-secondary" onclick="window.appManager.loadRules()">Hent</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Oprettede Regler -->
+                                        <div class="created-rules-section">
+                                            <h4>📋 Oprettede Regler</h4>
+                                            <div class="created-rules-list" id="created-rules-list">
+                                                <!-- Regler vil blive dynamisk tilføjet her -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tredje kolonne: Log & LUA -->
+                                <div class="sim-column">
+                                    <div class="sim-section">
+                                        <h3>📋 Log & LUA</h3>
+                                        
+                                        <div class="log-controls">
+                                            <button class="btn btn-primary" onclick="window.appManager.runRules()">Kør regler (RUN)</button>
+                                            <button class="btn btn-secondary" onclick="window.appManager.clearLog()">Slet log</button>
+                                            <button class="btn btn-secondary" onclick="window.appManager.exportCSV()">CSV</button>
+                                        </div>
+                                        
+                                        <div class="log-filters">
+                                            <button class="btn btn-small active" onclick="window.appManager.filterLog('all')">Alle</button>
+                                            <button class="btn btn-small" onclick="window.appManager.filterLog('matches')">Matches</button>
+                                            <button class="btn btn-small" onclick="window.appManager.filterLog('activation')">Aktivering</button>
+                                            <button class="btn btn-small" onclick="window.appManager.filterLog('system')">System</button>
+                                        </div>
+                                        
+                                        <div class="log-output" id="log-output">
+                                            <div class="log-entry system">17.12.02 SYS SmartHome Simulator v2.0 (WebView2 SPA) klar.</div>
+                                        </div>
+                                        
+                                        <div class="lua-panels">
+                                            <div class="lua-panel">
+                                                <h4>ERKLÆRINGER (Venstre panel i HC3)</h4>
+                                                <div class="lua-content" id="lua-conditions">
+                                                    Conditions og triggers kommer her...
+                                                </div>
+                                                <button class="btn btn-small" onclick="window.appManager.copyLuaConditions()">Kopier venstre panel</button>
+                                            </div>
+                                            
+                                            <div class="lua-panel">
+                                                <h4>HANDLINGER (Højre panel i HC3)</h4>
+                                                <div class="lua-content" id="lua-actions">
+                                                    Actions og regler kommer her...
+                                                </div>
+                                                <button class="btn btn-small" onclick="window.appManager.copyLuaActions()">Kopier højre panel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indstillinger Tab -->
+            <div id="settings-tab" class="tab-content">
+                <div class="settings-layout">
+                    <div class="settings-header">
+                        <h2>Indstillinger</h2>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <!-- Tema Sektion -->
+                        <div class="settings-column">
+                            <div class="settings-group">
+                                <h3>🎨 Tema</h3>
+                                <p>Vælg dit foretrukne tema for applikationen</p>
+                                
+                                <div class="theme-selector">
+                                    <div class="theme-option active" data-theme="default">
+                                        <div class="theme-preview theme-blue"></div>
+                                        <h4>Moderne Blå</h4>
+                                        <p>Elegant og futuristisk design</p>
+                                    </div>
+                                    
+                                    <div class="theme-option" data-theme="crimson-gold">
+                                        <div class="theme-preview theme-crimson-gold"></div>
+                                        <h4>Crimson & Guld</h4>
+                                        <p>Elegant sort og crimson med guld accent</p>
+                                    </div>
+                                    
+                                    <div class="theme-option" data-theme="warm-green">
+                                        <div class="theme-preview theme-warm-green"></div>
+                                        <h4>Varm Grøn</h4>
+                                        <p>Behageligt og varmt design</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brugergrænseflade Sektion -->
+                        <div class="settings-column">
+                            <div class="settings-group">
+                                <h3>🖥️ Brugergrænseflade</h3>
+                                <p>Tilpas applikationens udseende og adfærd</p>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Advanced Mode</h4>
+                                        <p>Aktiverer avancerede funktioner og en ekstra fane i headeren</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="advanced-mode" onchange="window.appManager.toggleAdvancedMode()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Kompakt Visning</h4>
+                                        <p>Reducerer mellemrum og gør indholdet mere kompakt</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="compact-view" onchange="window.appManager.toggleCompactView()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Høj Kontrast</h4>
+                                        <p>Øger kontrasten for bedre læsbarhed</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="high-contrast" onchange="window.appManager.toggleHighContrast()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Større Skrift</h4>
+                                        <p>Øger skriftstørrelsen for bedre læsbarhed</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="large-text" onchange="window.appManager.toggleLargeText()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notifikationer Sektion -->
+                        <div class="settings-column">
+                            <div class="settings-group">
+                                <h3>🔔 Notifikationer</h3>
+                                <p>Administrer notifikationer og beskeder</p>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Lydnotifikationer</h4>
+                                        <p>Afspil lyd når der kommer notifikationer</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="sound-notifications" onchange="window.appManager.toggleSoundNotifications()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Desktop Notifikationer</h4>
+                                        <p>Vis notifikationer uden for browseren</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="desktop-notifications" onchange="window.appManager.toggleDesktopNotifications()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data & Sikkerhed Sektion -->
+                        <div class="settings-column">
+                            <div class="settings-group">
+                                <h3>🛡️ Data & Sikkerhed</h3>
+                                <p>Administrer data og sikkerhedsindstillinger</p>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Auto-logout</h4>
+                                        <p>Log automatisk ud efter inaktivitet</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="auto-logout" onchange="window.appManager.toggleAutoLogout()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Gem Indstillinger Lokalt</h4>
+                                        <p>Gem indstillinger i browserens lokale lager</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="save-settings" checked onchange="window.appManager.toggleSaveSettings()">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="setting-actions">
+                                    <button class="btn btn-secondary" onclick="window.appManager.resetSettings()">Nulstil Indstillinger</button>
+                                    <button class="btn btn-danger" onclick="window.appManager.clearAllData()">Slet Alle Data</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- App Script -->
+    <!-- Weather Station Popup -->
+    <div id="weather-popup" class="weather-popup">
+        <div class="weather-popup-content">
+            <div class="weather-popup-header">
+                <h3>Udvendig Vejrstation</h3>
+                <button class="weather-popup-close">&times;</button>
+            </div>
+            <div class="weather-popup-body">
+                <div class="weather-setting">
+                    <label for="outdoor-temp-input">Udvendig Temperatur</label>
+                    <div class="weather-input-group">
+                        <input type="range" id="outdoor-temp-input" min="-10" max="40" value="15" class="weather-slider">
+                        <span class="weather-input-value" id="outdoor-temp-display">15°C</span>
+                    </div>
+                </div>
+                <div class="weather-setting">
+                    <label for="outdoor-light-input">Udvendig Lysstyrke</label>
+                    <div class="weather-input-group">
+                        <input type="range" id="outdoor-light-input" min="0" max="100" value="0" class="weather-slider">
+                        <span class="weather-input-value" id="outdoor-light-display">Mørkt</span>
+                    </div>
+                </div>
+            </div>
+            <div class="weather-popup-footer">
+                <button class="weather-save-btn">Gem Indstillinger</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fugtmåler Popup -->
+    <div id="humidity-popup" class="humidity-popup">
+        <div class="humidity-popup-content">
+            <div class="humidity-popup-header">
+                <h3>Badeværelse Fugtmåler</h3>
+                <button class="humidity-popup-close">&times;</button>
+            </div>
+            <div class="humidity-popup-body">
+                <div class="humidity-setting">
+                    <label for="humidity-slider">Fugtniveau: <span id="humidity-value">45</span>%</label>
+                    <div class="humidity-input-group">
+                        <input type="range" id="humidity-slider" class="humidity-slider" min="30" max="80" value="45">
+                    </div>
+                </div>
+            </div>
+            <div class="humidity-popup-footer">
+                <button class="humidity-save-btn">Gem Indstillinger</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    
+    <!-- Debug Console Helper -->
+    <script>
+        // Add helpful debug functions to console
+        window.debugFirebase = {
+            clearData: () => {
+                if (window.FirebaseConfig && window.FirebaseConfig.clearFirestoreData) {
+                    window.FirebaseConfig.clearFirestoreData().then(() => {
+                        console.log('🔄 Refresh the page to complete the cleanup');
+                        if (confirm('Data cleared! Refresh the page now to complete the setup?')) {
+                            window.location.reload();
+                        }
+                    });
+                } else {
+                    console.log('⚠️ Firebase not initialized yet');
+                }
+            },
+            status: () => {
+                if (window.FirebaseConfig && window.FirebaseConfig.isFirebaseReady) {
+                    const isReady = window.FirebaseConfig.isFirebaseReady();
+                    console.log('Firebase Status:', isReady ? '✅ Ready' : '❌ Not Ready');
+                    return isReady;
+                } else {
+                    console.log('⚠️ Firebase not initialized yet');
+                    return false;
+                }
+            },
+            refresh: () => {
+                console.log('🔄 Refreshing page...');
+                window.location.reload();
+            }
+        };
+        
+        console.log('🔧 Debug functions available:');
+        console.log('  - debugFirebase.clearData() - Clear Firestore data');
+        console.log('  - debugFirebase.status() - Check Firebase status');
+        console.log('  - debugFirebase.refresh() - Refresh the page');
+    </script>
+
+    <!-- Advanced Mode Password Popup -->
+    <div id="advanced-password-popup" class="password-popup">
+        <div class="password-popup-content">
+            <div class="password-popup-header">
+                <h3>🔐 Advanced Mode</h3>
+                <p>Indtast koden for at aktivere avancerede funktioner</p>
+            </div>
+            <div class="password-popup-body">
+                <div class="password-input-group">
+                    <input type="password" id="advanced-password-input" placeholder="Indtast kode..." maxlength="20">
+                    <button type="button" id="toggle-password-visibility" class="password-toggle">
+                        <span class="password-icon">👁️</span>
+                    </button>
+                </div>
+            </div>
+            <div class="password-popup-footer">
+                <button type="button" id="cancel-password" class="btn btn-secondary">Annuller</button>
+                <button type="button" id="submit-password" class="btn btn-primary">Aktiver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dæmper Dialog Popup -->
+    <div id="dimmer-dialog" class="dimmer-popup">
+        <div class="dimmer-popup-content">
+            <div class="dimmer-popup-header">
+                <h3>🔆 Dæmper Indstillinger</h3>
+                <button class="close-btn" onclick="window.appManager.closeDimmerDialog()">&times;</button>
+            </div>
+            <div class="dimmer-popup-body">
+                <div class="dimmer-control">
+                    <label>Værdi (%):</label>
+                    <input type="range" id="dimmer-slider" min="0" max="100" value="0" oninput="window.appManager.updateDimmerValue(this.value)">
+                    <div class="dimmer-value-display">
+                        <span id="dimmer-current-value">0</span>%
+                    </div>
+                </div>
+                <div class="dimmer-presets">
+                    <button class="btn btn-small" onclick="window.appManager.setDimmerValue(25)">25%</button>
+                    <button class="btn btn-small" onclick="window.appManager.setDimmerValue(50)">50%</button>
+                    <button class="btn btn-small" onclick="window.appManager.setDimmerValue(75)">75%</button>
+                    <button class="btn btn-small" onclick="window.appManager.setDimmerValue(100)">100%</button>
+                </div>
+            </div>
+            <div class="dimmer-popup-footer">
+                <button class="btn btn-secondary" onclick="window.appManager.closeDimmerDialog()">Annuller</button>
+                <button class="btn btn-primary" onclick="window.appManager.applyDimmerValue()">Anvend</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
