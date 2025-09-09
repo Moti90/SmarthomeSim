@@ -107,11 +107,13 @@ class AppManager {
                 if (user) {
                     // User is signed in
                     this.currentUser = user;
+                    this.hideLoading(); // Hide loading indicator
                     this.showApp();
                     this.updateUserInfo();
                 } else {
                     // User is signed out
                     this.currentUser = null;
+                    this.hideLoading(); // Hide loading indicator
                     this.showLogin();
                 }
             });
@@ -2701,7 +2703,7 @@ class AppManager {
                     icon: '👁️',
                     description: 'Lær om PIR-sensoere og bevægelsesdetektion',
                     difficulty: 'beginner',
-                    duration: '12 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'doer-vindueskontakt',
@@ -2709,7 +2711,7 @@ class AppManager {
                     icon: '🚪',
                     description: 'Forstå dør- og vindueskontakter til sikkerhed',
                     difficulty: 'beginner',
-                    duration: '10 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'fugtighedssensor',
@@ -2717,7 +2719,7 @@ class AppManager {
                     icon: '💧',
                     description: 'Lær om fugtmåling og skimmelforebyggelse',
                     difficulty: 'beginner',
-                    duration: '10 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'lysmåler-lux',
@@ -2725,7 +2727,7 @@ class AppManager {
                     icon: '☀️',
                     description: 'Forstå lysmåling og automatisk lysstyring',
                     difficulty: 'intermediate',
-                    duration: '14 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'udendørs-temperatur',
@@ -2733,7 +2735,7 @@ class AppManager {
                     icon: '🌡️',
                     description: 'Lær om udendørs temperatursensoere',
                     difficulty: 'beginner',
-                    duration: '8 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'vindmåler',
@@ -2741,7 +2743,7 @@ class AppManager {
                     icon: '💨',
                     description: 'Forstå vindmåling og vejrdata',
                     difficulty: 'intermediate',
-                    duration: '15 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'roegalarm',
@@ -2749,7 +2751,7 @@ class AppManager {
                     icon: '🔥',
                     description: 'Lær om røgalarmer og brandsikkerhed',
                     difficulty: 'beginner',
-                    duration: '12 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'vandlækage',
@@ -2757,7 +2759,7 @@ class AppManager {
                     icon: '💧',
                     description: 'Forstå vandlækage detektion og skadeforebyggelse',
                     difficulty: 'beginner',
-                    duration: '10 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'co2-måler',
@@ -2765,7 +2767,7 @@ class AppManager {
                     icon: '🌬️',
                     description: 'Lær om CO₂-måling og luftkvalitet',
                     difficulty: 'intermediate',
-                    duration: '16 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'tilstedeværelsessensor',
@@ -2773,7 +2775,7 @@ class AppManager {
                     icon: '👤',
                     description: 'Forstå avancerede tilstedeværelsesdetektorer',
                     difficulty: 'advanced',
-                    duration: '20 min'
+                    duration: '5 min'
                 }
             ]
         },
@@ -2787,7 +2789,7 @@ class AppManager {
                     icon: '📶',
                     description: 'Lær om WiFi protokollen og dens anvendelse',
                     difficulty: 'beginner',
-                    duration: '15 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'bluetooth',
@@ -2795,7 +2797,7 @@ class AppManager {
                     icon: '📱',
                     description: 'Forstå Bluetooth Low Energy og dens fordele',
                     difficulty: 'beginner',
-                    duration: '12 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'matter',
@@ -2803,7 +2805,7 @@ class AppManager {
                     icon: '🧵',
                     description: 'Lær om Matter standarden og interoperabilitet',
                     difficulty: 'advanced',
-                    duration: '20 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'thread',
@@ -2811,7 +2813,7 @@ class AppManager {
                     icon: '🕸️',
                     description: 'Forstå Thread mesh-netværk protokollen',
                     difficulty: 'intermediate',
-                    duration: '18 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'zwave',
@@ -2819,7 +2821,7 @@ class AppManager {
                     icon: '🌊',
                     description: 'Lær om Z-Wave protokollen og dens karakteristika',
                     difficulty: 'intermediate',
-                    duration: '16 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'zigbee',
@@ -2827,7 +2829,7 @@ class AppManager {
                     icon: '⚡',
                     description: 'Forstå Zigbee protokollen og mesh-netværk',
                     difficulty: 'intermediate',
-                    duration: '17 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'rf-433',
@@ -2835,7 +2837,7 @@ class AppManager {
                     icon: '📡',
                     description: 'Lær om 433 MHz radiofrekvens kommunikation',
                     difficulty: 'beginner',
-                    duration: '10 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'infrared',
@@ -2843,7 +2845,7 @@ class AppManager {
                     icon: '🔴',
                     description: 'Forstå infrarød kommunikation og dens anvendelser',
                     difficulty: 'beginner',
-                    duration: '8 min'
+                    duration: '5 min'
                 }
             ]
         },
@@ -2857,7 +2859,7 @@ class AppManager {
                     icon: '🎬',
                     description: 'Opret og administrer smarthome scenarier',
                     difficulty: 'beginner',
-                    duration: '15 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'tidsbaseret',
@@ -2865,7 +2867,7 @@ class AppManager {
                     icon: '⏰',
                     description: 'Automatisering baseret på tid og dato',
                     difficulty: 'beginner',
-                    duration: '12 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'sensor-trigger',
@@ -2873,7 +2875,7 @@ class AppManager {
                     icon: '🔔',
                     description: 'Automatisering baseret på sensorværdier',
                     difficulty: 'intermediate',
-                    duration: '18 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'geofencing',
@@ -2881,7 +2883,7 @@ class AppManager {
                     icon: '📍',
                     description: 'Automatisering baseret på lokation',
                     difficulty: 'intermediate',
-                    duration: '16 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'weather-automation',
@@ -2889,7 +2891,7 @@ class AppManager {
                     icon: '🌤️',
                     description: 'Automatisering baseret på vejrdata',
                     difficulty: 'advanced',
-                    duration: '20 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'energy-automation',
@@ -2897,7 +2899,7 @@ class AppManager {
                     icon: '⚡',
                     description: 'Automatisering til energibesparelse',
                     difficulty: 'advanced',
-                    duration: '22 min'
+                    duration: '5 min'
                 }
             ]
         },
@@ -2911,7 +2913,7 @@ class AppManager {
                     icon: '🔒',
                     description: 'Grundlæggende netværkssikkerhed for smarthome',
                     difficulty: 'beginner',
-                    duration: '14 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'enhedsikkerhed',
@@ -2919,7 +2921,7 @@ class AppManager {
                     icon: '🛡️',
                     description: 'Sikkerhed på enhedsniveau',
                     difficulty: 'intermediate',
-                    duration: '16 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'data-privatliv',
@@ -2927,7 +2929,7 @@ class AppManager {
                     icon: '🔐',
                     description: 'Beskyttelse af personlige data',
                     difficulty: 'intermediate',
-                    duration: '18 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'access-control',
@@ -2935,7 +2937,7 @@ class AppManager {
                     icon: '🎫',
                     description: 'Administration af brugeradgang',
                     difficulty: 'advanced',
-                    duration: '20 min'
+                    duration: '5 min'
                 }
             ]
         },
@@ -2949,7 +2951,7 @@ class AppManager {
                     icon: '📊',
                     description: 'Mål og overvåg energiforbrug',
                     difficulty: 'beginner',
-                    duration: '12 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'smart-lys',
@@ -2957,7 +2959,7 @@ class AppManager {
                     icon: '💡',
                     description: 'Energieffektiv belysning',
                     difficulty: 'beginner',
-                    duration: '10 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'varmestyring',
@@ -2965,7 +2967,7 @@ class AppManager {
                     icon: '🌡️',
                     description: 'Optimer varmeforbrug',
                     difficulty: 'intermediate',
-                    duration: '16 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'solceller',
@@ -2973,7 +2975,7 @@ class AppManager {
                     icon: '☀️',
                     description: 'Integration af vedvarende energikilder',
                     difficulty: 'advanced',
-                    duration: '22 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'energi-automation',
@@ -2981,7 +2983,7 @@ class AppManager {
                     icon: '⚡',
                     description: 'Automatisk energistyring',
                     difficulty: 'advanced',
-                    duration: '20 min'
+                    duration: '5 min'
                 }
             ]
         },
@@ -2995,7 +2997,7 @@ class AppManager {
                     icon: '🔧',
                     description: 'Basis fejlfindingsteknikker',
                     difficulty: 'beginner',
-                    duration: '14 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'netvaerks-problemer',
@@ -3003,7 +3005,7 @@ class AppManager {
                     icon: '📡',
                     description: 'Diagnosticer netværksproblemer',
                     difficulty: 'intermediate',
-                    duration: '18 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'enheds-problemer',
@@ -3011,7 +3013,7 @@ class AppManager {
                     icon: '🔌',
                     description: 'Fejlfinding af enheder',
                     difficulty: 'intermediate',
-                    duration: '16 min'
+                    duration: '5 min'
                 },
                 {
                     id: 'system-vedligeholdelse',
@@ -3019,7 +3021,7 @@ class AppManager {
                     icon: '🛠️',
                     description: 'Regelmæssig vedligeholdelse',
                     difficulty: 'advanced',
-                    duration: '20 min'
+                    duration: '5 min'
                 }
             ]
         }
