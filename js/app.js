@@ -2704,6 +2704,7 @@ class AppManager {
                     description: 'Lær om PIR-sensoere og bevægelsesdetektion',
                     difficulty: 'beginner',
                     duration: '5 min'
+                    
                 },
                 {
                     id: 'doer-vindueskontakt',

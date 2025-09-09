@@ -14,10 +14,9 @@ service cloud.firestore {
         request.auth.uid == request.resource.data.userId;
     }
     
-    // User progress - allow teachers to read all progress for their classes
+    // User progress - users can only access their own progress
     match /user_progress/{progressId} {
-      allow read: if true; // Allow teachers to read progress data (they use localStorage auth)
-      allow write: if request.auth != null && 
+      allow read, write: if request.auth != null && 
         request.auth.uid == resource.data.userId;
       allow create: if request.auth != null && 
         request.auth.uid == request.resource.data.userId;
@@ -52,15 +51,14 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Schools - public read access, write for authenticated users
+    // Schools - authenticated users only
     match /schools/{schoolId} {
-      allow read: if true; // Allow public read access
-      allow write: if request.auth != null;
+      allow read, write: if request.auth != null;
     }
     
-    // Classes - public read and write access for teachers
+    // Classes - authenticated users only
     match /classes/{classId} {
-      allow read, write: if true; // Allow public access for teachers
+      allow read, write: if request.auth != null;
     }
     
     // Default deny all
