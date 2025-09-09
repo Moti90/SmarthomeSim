@@ -117,10 +117,10 @@ function initializeFirebase() {
     console.log('🔥 Firebase app initialized:', app);
     
     // Initialize services
-    auth = firebase.auth();
-    db = firebase.firestore();
-    storage = firebase.storage();
-    functions = firebase.functions();
+    auth = firebase.auth(app);
+    db = firebase.firestore(app);
+    storage = firebase.storage(app);
+    functions = firebase.functions(app);
     
     console.log('🔥 Firebase services initialized:', { auth, db, storage, functions });
 
