@@ -23,17 +23,7 @@ if not exist ".git" (
     echo.
 )
 
-REM Add all files
-echo Tilføjer alle filer til Git...
-git add .
-
-REM Commit changes
-echo.
-echo Committer ændringer...
-git commit -m "Initial commit: Smarthome application with E-Learning, Advanced Mode, and multiple themes"
-
 REM Get repository URL from user
-echo.
 echo ========================================
 echo    GitHub Repository Setup
 echo ========================================
@@ -55,6 +45,26 @@ if %errorlevel% neq 0 (
     git remote set-url origin %REPO_URL%
 )
 
+REM Fetch existing content from remote
+echo.
+echo Henter eksisterende indhold fra GitHub...
+git fetch origin
+
+REM Add all files
+echo.
+echo Tilføjer alle filer til Git...
+git add .
+
+REM Commit changes
+echo.
+echo Committer ændringer...
+git commit -m "Add Smarthome application with E-Learning, Advanced Mode, and multiple themes"
+
+REM Try to merge with remote main branch
+echo.
+echo Prøver at merge med remote main branch...
+git pull origin main --allow-unrelated-histories
+
 REM Push to GitHub
 echo.
 echo Uploader til GitHub...
@@ -74,7 +84,8 @@ if %errorlevel% equ 0 (
     echo ========================================
     echo    FEJL!
     echo ========================================
-    echo Der opstod en fejl under upload. Prøv igen.
+    echo Der opstod en fejl under upload.
+    echo Prøv at køre scriptet igen.
     echo.
 )
 
