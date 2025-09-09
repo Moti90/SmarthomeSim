@@ -3,9 +3,12 @@
 .env.local
 .env.production
 
-# Firebase config with sensitive data
+# Firebase config with sensitive data (local development only)
 firebase-config.js
 firebase-config-secure.js
+
+# Keep GitHub Pages config in repository
+# firebase-config-github.js - This file is safe to commit
 
 # Node modules
 node_modules/
