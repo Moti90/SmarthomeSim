@@ -5,6 +5,7 @@
 
 # Firebase config with sensitive data
 firebase-config.js
+firebase-config-secure.js
 
 # Node modules
 node_modules/
