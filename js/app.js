@@ -496,6 +496,50 @@ class AppManager {
         this.saveSetting('disableAnimations', isEnabled);
     }
 
+    // Ultra Mode
+    toggleUltraMode() {
+        const checkbox = document.getElementById('ultra-mode');
+        const isEnabled = checkbox.checked;
+        
+        if (isEnabled) {
+            document.body.classList.add('ultra-mode');
+            this.enableUltraMode();
+            this.showNotification('Ultra Mode aktiveret', 'success');
+            console.log('✨ Ultra Mode aktiveret - fuld visuel oplevelse');
+        } else {
+            document.body.classList.remove('ultra-mode');
+            this.disableUltraMode();
+            this.showNotification('Ultra Mode deaktiveret', 'info');
+            console.log('🚀 Tilbage til standard performance mode');
+        }
+        
+        this.saveSetting('ultraMode', isEnabled);
+    }
+
+    enableUltraMode() {
+        // Enable full visual effects and faster updates
+        if (this.radiatorInterval) {
+            clearInterval(this.radiatorInterval);
+        }
+        
+        // Update radiator temperature more frequently in ultra mode
+        this.radiatorInterval = setInterval(() => {
+            this.updateRadiatorTemperature();
+        }, 2000); // Every 2 seconds for ultra mode
+    }
+
+    disableUltraMode() {
+        // Return to standard performance mode
+        if (this.radiatorInterval) {
+            clearInterval(this.radiatorInterval);
+        }
+        
+        // Standard performance mode - balanced updates
+        this.radiatorInterval = setInterval(() => {
+            this.updateRadiatorTemperature();
+        }, 5000); // Every 5 seconds for standard mode
+    }
+
     // Sound Notifications
     toggleSoundNotifications() {
         const checkbox = document.getElementById('sound-notifications');
@@ -581,7 +625,7 @@ class AppManager {
             document.getElementById('save-settings').checked = true;
             
             // Remove all setting classes
-            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'disable-animations', 'sound-notifications', 'desktop-notifications', 'auto-logout');
+            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'disable-animations', 'ultra-mode', 'sound-notifications', 'desktop-notifications', 'auto-logout');
             
             // Clear localStorage
             Object.keys(localStorage).forEach(key => {
@@ -633,6 +677,7 @@ class AppManager {
             'highContrast',
             'largeText',
             'disableAnimations',
+            'ultraMode',
             'soundNotifications',
             'desktopNotifications',
             'autoLogout',
@@ -646,6 +691,7 @@ class AppManager {
             'highContrast': { id: 'high-contrast', class: 'high-contrast' },
             'largeText': { id: 'large-text', class: 'large-text' },
             'disableAnimations': { id: 'disable-animations', class: 'disable-animations' },
+            'ultraMode': { id: 'ultra-mode', class: 'ultra-mode' },
             'soundNotifications': { id: 'sound-notifications', class: 'sound-notifications' },
             'desktopNotifications': { id: 'desktop-notifications', class: 'desktop-notifications' },
             'autoLogout': { id: 'auto-logout', class: 'auto-logout' },
