@@ -4919,3 +4919,106 @@ body.alarm-active::before {
 .advanced-tab {
     display: none;
 }
+
+/* ===== NOTIFICATION ANIMATIONS ===== */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* ===== PERFORMANCE MODE STYLES ===== */
+.performance-mode {
+    /* Reduce motion for better performance */
+    --animation-duration: 0.1s;
+    --transition-duration: 0.1s;
+}
+
+.performance-mode * {
+    animation-duration: var(--animation-duration) !important;
+    transition-duration: var(--transition-duration) !important;
+}
+
+/* Disable heavy animations */
+.performance-mode .floating-icon {
+    animation: none !important;
+}
+
+.performance-mode .header-glow {
+    animation: none !important;
+}
+
+.performance-mode .holographic {
+    animation: none !important;
+}
+
+.performance-mode .particles {
+    animation: none !important;
+}
+
+/* Disable hover transforms for better performance */
+.performance-mode .smart-icon {
+    transition: none !important;
+}
+
+.performance-mode .nav-btn:hover {
+    transform: none !important;
+}
+
+.performance-mode .btn:hover {
+    transform: none !important;
+}
+
+.performance-mode .topic-card:hover {
+    transform: none !important;
+}
+
+.performance-mode .setting-item:hover {
+    transform: none !important;
+}
+
+.performance-mode .theme-option:hover {
+    transform: none !important;
+}
+
+.performance-mode .scenario-btn:hover {
+    transform: none !important;
+}
+
+.performance-mode .control-item:hover {
+    transform: none !important;
+}
+
+/* Optimize background effects */
+.performance-mode body::before,
+.performance-mode body::after {
+    display: none !important;
+}
+
+/* Reduce box shadows for better performance */
+.performance-mode .card,
+.performance-mode .settings-group,
+.performance-mode .control-panel {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Simplify gradients */
+.performance-mode body {
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 50%, #0a0e1a 100%) !important;
+}
