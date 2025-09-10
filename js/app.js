@@ -17,6 +17,9 @@ class AppManager {
         this.outdoorTemp = 15;
         this.outdoorLight = 0;
         
+        // AI Assistant
+        this.aiAssistantActive = false;
+        
         this.init();
     }
 
@@ -269,7 +272,6 @@ class AppManager {
         
         // Load data for specific tabs
         if (tabName === 'advanced') {
-            this.loadSystemInfo();
             this.initRuleEditor();
             this.initSmarthomeSim();
         }
@@ -397,7 +399,6 @@ class AppManager {
             const advancedTab = document.querySelector('.advanced-tab');
             advancedTab.style.display = 'flex';
             this.showNotification('🔓 Advanced Mode aktiveret!', 'success');
-            this.loadSystemInfo();
             this.initRuleEditor();
             this.initSmarthomeSim();
             this.saveSetting('advancedMode', true);
@@ -496,49 +497,6 @@ class AppManager {
         this.saveSetting('disableAnimations', isEnabled);
     }
 
-    // Ultra Mode
-    toggleUltraMode() {
-        const checkbox = document.getElementById('ultra-mode');
-        const isEnabled = checkbox.checked;
-        
-        if (isEnabled) {
-            document.body.classList.add('ultra-mode');
-            this.enableUltraMode();
-            this.showNotification('Ultra Mode aktiveret', 'success');
-            console.log('✨ Ultra Mode aktiveret - fuld visuel oplevelse');
-        } else {
-            document.body.classList.remove('ultra-mode');
-            this.disableUltraMode();
-            this.showNotification('Ultra Mode deaktiveret', 'info');
-            console.log('🚀 Tilbage til standard performance mode');
-        }
-        
-        this.saveSetting('ultraMode', isEnabled);
-    }
-
-    enableUltraMode() {
-        // Enable full visual effects and faster updates
-        if (this.radiatorInterval) {
-            clearInterval(this.radiatorInterval);
-        }
-        
-        // Update radiator temperature more frequently in ultra mode
-        this.radiatorInterval = setInterval(() => {
-            this.updateRadiatorTemperature();
-        }, 2000); // Every 2 seconds for ultra mode
-    }
-
-    disableUltraMode() {
-        // Return to standard performance mode
-        if (this.radiatorInterval) {
-            clearInterval(this.radiatorInterval);
-        }
-        
-        // Standard performance mode - balanced updates
-        this.radiatorInterval = setInterval(() => {
-            this.updateRadiatorTemperature();
-        }, 5000); // Every 5 seconds for standard mode
-    }
 
     // Sound Notifications
     toggleSoundNotifications() {
@@ -625,7 +583,7 @@ class AppManager {
             document.getElementById('save-settings').checked = true;
             
             // Remove all setting classes
-            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'disable-animations', 'ultra-mode', 'sound-notifications', 'desktop-notifications', 'auto-logout');
+            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'disable-animations', 'sound-notifications', 'desktop-notifications', 'auto-logout');
             
             // Clear localStorage
             Object.keys(localStorage).forEach(key => {
@@ -677,7 +635,6 @@ class AppManager {
             'highContrast',
             'largeText',
             'disableAnimations',
-            'ultraMode',
             'soundNotifications',
             'desktopNotifications',
             'autoLogout',
@@ -691,7 +648,6 @@ class AppManager {
             'highContrast': { id: 'high-contrast', class: 'high-contrast' },
             'largeText': { id: 'large-text', class: 'large-text' },
             'disableAnimations': { id: 'disable-animations', class: 'disable-animations' },
-            'ultraMode': { id: 'ultra-mode', class: 'ultra-mode' },
             'soundNotifications': { id: 'sound-notifications', class: 'sound-notifications' },
             'desktopNotifications': { id: 'desktop-notifications', class: 'desktop-notifications' },
             'autoLogout': { id: 'auto-logout', class: 'auto-logout' },
@@ -740,47 +696,448 @@ class AppManager {
         }
     }
 
+    // ===== POPUP FUNCTIONS =====
+    
+    showPopup(title, content, popupId) {
+        // Fjern eksisterende popup hvis den findes
+        this.hidePopup(popupId);
+        
+        // Opret popup container
+        const popup = document.createElement('div');
+        popup.id = popupId;
+        popup.className = 'popup-overlay';
+        popup.innerHTML = `
+            <div class="popup-content">
+                <div class="popup-header">
+                    <h3>${title}</h3>
+                    <button class="popup-close" onclick="window.appManager.hidePopup('${popupId}')">&times;</button>
+                </div>
+                <div class="popup-body">
+                    ${content}
+                </div>
+            </div>
+        `;
+        
+        // Tilføj til body
+        document.body.appendChild(popup);
+        
+        // Vis popup med animation
+        setTimeout(() => {
+            popup.classList.add('active');
+        }, 10);
+        
+        // Luk popup ved klik udenfor
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) {
+                this.hidePopup(popupId);
+            }
+        });
+        
+        // Luk popup ved ESC
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.hidePopup(popupId);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+    
+    hidePopup(popupId) {
+        const popup = document.getElementById(popupId);
+        if (popup) {
+            popup.classList.remove('active');
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 300);
+        }
+    }
+
     // ===== ADVANCED MODE FUNCTIONS =====
     
-    // Load system information
-    loadSystemInfo() {
-        // Browser info
-        const browserInfo = `${navigator.userAgent.split(' ')[0]} ${navigator.userAgent.split(' ')[1] || ''}`;
-        document.getElementById('browser-info').textContent = browserInfo;
-        
-        // Screen resolution
-        const screenInfo = `${screen.width} x ${screen.height}`;
-        document.getElementById('screen-info').textContent = screenInfo;
-        
-        // Local storage
-        const storageUsed = JSON.stringify(localStorage).length;
-        const storageInfo = `${Math.round(storageUsed / 1024)} KB brugt`;
-        document.getElementById('storage-info').textContent = storageInfo;
-        
-        // Performance
-        const performanceInfo = `Memory: ${navigator.deviceMemory || 'Unknown'} GB`;
-        document.getElementById('performance-info').textContent = performanceInfo;
-    }
 
     // Advanced Mode functions
     toggleAIAssistant() {
-        this.showNotification('AI Assistant kommer snart...', 'info');
+        if (this.aiAssistantActive) {
+            this.hideAIAssistant();
+        } else {
+            this.showAIAssistant();
+        }
+    }
+    
+    showAIAssistant() {
+        this.aiAssistantActive = true;
+        const aiHtml = `
+            <div class="ai-assistant">
+                <div class="ai-header">
+                    <h3>🤖 AI Assistant</h3>
+                    <p>Din intelligente hjælper til smarthome udvikling</p>
+                </div>
+                <div class="ai-chat" id="ai-chat">
+                    <div class="ai-message">
+                        <div class="ai-avatar">🤖</div>
+                        <div class="ai-text">
+                            Hej! Jeg er din AI assistant til smarthome læring. Jeg kan hjælpe dig med:
+                            <ul>
+                                <li>🌡️ Sensorer og målinger (temperatur, fugtighed, lys)</li>
+                                <li>📡 Forbindelsestyper (WiFi, Bluetooth, Zigbee, Z-Wave)</li>
+                                <li>🏠 Smarthome enheder og automatisering</li>
+                                <li>🔌 Protokoller og kommunikation</li>
+                                <li>⚡ Energistyring og effektivitet</li>
+                            </ul>
+                            Spørg mig om alt relateret til smarthome teknologi!
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-input">
+                    <input type="text" id="ai-question" placeholder="Spørg om sensorer, forbindelser, eller smarthome enheder..." maxlength="200">
+                    <button onclick="window.appManager.askAI()">Send</button>
+                </div>
+                <div class="ai-quick-questions">
+                    <h4>Hurtige spørgsmål:</h4>
+                    <button class="quick-btn" onclick="window.appManager.askQuickQuestion('sensors')">Sensorer</button>
+                    <button class="quick-btn" onclick="window.appManager.askQuickQuestion('connections')">Forbindelser</button>
+                    <button class="quick-btn" onclick="window.appManager.askQuickQuestion('automation')">Automatisering</button>
+                    <button class="quick-btn" onclick="window.appManager.askQuickQuestion('energy')">Energistyring</button>
+                </div>
+            </div>
+        `;
+        
+        this.showPopup('AI Assistant', aiHtml, 'ai-assistant-popup');
+        
+        // Fokus på input felt og tilføj Enter key support
+        setTimeout(() => {
+            const input = document.getElementById('ai-question');
+            if (input) {
+                input.focus();
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.askAI();
+                    }
+                });
+            }
+        }, 100);
+    }
+    
+    hideAIAssistant() {
+        this.aiAssistantActive = false;
+        this.hidePopup('ai-assistant-popup');
+    }
+    
+    askAI() {
+        const input = document.getElementById('ai-question');
+        const question = input.value.trim();
+        
+        if (!question) {
+            this.showNotification('Skriv et spørgsmål først!', 'warning');
+            return;
+        }
+        
+        // Tilføj brugerens spørgsmål til chat
+        this.addAIMessage(question, 'user');
+        input.value = '';
+        
+        // Simuler AI svar
+        setTimeout(() => {
+            const answer = this.generateAIResponse(question);
+            this.addAIMessage(answer, 'ai');
+        }, 1000);
+    }
+    
+    askQuickQuestion(type) {
+        const questions = {
+            'sensors': 'Hvilke typer sensorer bruges i smarthome systemer og hvad måler de?',
+            'connections': 'Hvad er forskellen mellem WiFi, Bluetooth, Zigbee og Z-Wave forbindelser?',
+            'automation': 'Hvordan fungerer smarthome automatisering og hvilke regler kan man lave?',
+            'energy': 'Hvordan kan smarthome systemer hjælpe med energibesparelse?'
+        };
+        
+        const question = questions[type];
+        if (question) {
+            document.getElementById('ai-question').value = question;
+            this.askAI();
+        }
+    }
+    
+    addAIMessage(message, sender) {
+        const chat = document.getElementById('ai-chat');
+        if (!chat) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ai-message ${sender}`;
+        
+        if (sender === 'user') {
+            messageDiv.innerHTML = `
+                <div class="ai-text user-message">${message}</div>
+                <div class="ai-avatar user-avatar">👤</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="ai-avatar">🤖</div>
+                <div class="ai-text">${message}</div>
+            `;
+        }
+        
+        chat.appendChild(messageDiv);
+        chat.scrollTop = chat.scrollHeight;
+    }
+    
+    generateAIResponse(question) {
+        const lowerQuestion = question.toLowerCase();
+        
+        // Sensorer
+        if (lowerQuestion.includes('sensor') || lowerQuestion.includes('måling') || lowerQuestion.includes('temperatur') || lowerQuestion.includes('fugtighed') || lowerQuestion.includes('lys')) {
+            return `🌡️ **Smarthome Sensorer:**
+            
+**Temperatursensorer:**
+• Måler rumtemperatur (typisk -40°C til +125°C)
+• Bruges til klimastyring og energibesparelse
+• Eksempler: DHT22, DS18B20, BME280
+
+**Fugtighedssensorer:**
+• Måler luftfugtighed (0-100% RH)
+• Vigtig for komfort og skimmelforebyggelse
+• Kombineres ofte med temperaturmåling
+
+**Lysmålingssensorer:**
+• Måler omgivelseslys (lux)
+• Bruges til automatisk belysning
+• Kan spare energi ved at justere lysstyrke
+
+**Bevægelsessensorer (PIR):**
+• Registrerer bevægelse i rum
+• Aktiverer lys og sikkerhedssystemer
+• Sparer energi ved automatisk slukning`;
+        }
+        
+        // Forbindelsestyper
+        if (lowerQuestion.includes('forbindelse') || lowerQuestion.includes('wifi') || lowerQuestion.includes('bluetooth') || lowerQuestion.includes('zigbee') || lowerQuestion.includes('z-wave') || lowerQuestion.includes('protokol')) {
+            return `📡 **Smarthome Forbindelsestyper:**
+            
+**WiFi:**
+• Høj hastighed og lang rækkevidde
+• Bruger eksisterende netværk
+• Kræver mere strøm end andre protokoller
+• God til streaming og kameraer
+
+**Bluetooth:**
+• Lavt strømforbrug
+• Kort rækkevidde (10-100m)
+• God til personlige enheder
+• Bluetooth Low Energy (BLE) sparer strøm
+
+**Zigbee:**
+• Lavt strømforbrug
+• Mesh netværk (enheder forstærker signalet)
+• 2.4 GHz frekvens
+• God til sensorer og smarte låse
+
+**Z-Wave:**
+• Lavt strømforbrug
+• Mesh netværk
+• 868 MHz frekvens (mindre interferens)
+• Dyrere men mere pålidelig`;
+        }
+        
+        // Automatisering
+        if (lowerQuestion.includes('automatisering') || lowerQuestion.includes('regel') || lowerQuestion.includes('trigger') || lowerQuestion.includes('scenario')) {
+            return `🏠 **Smarthome Automatisering:**
+            
+**Simple Regler:**
+• "Hvis bevægelse → tænd lys"
+• "Hvis temperatur < 20°C → tænd varme"
+• "Hvis mørkt → tænd udendørs belysning"
+
+**Tidsbaserede Regler:**
+• "Kl. 22:00 → sluk alle lys"
+• "Hver morgen kl. 07:00 → tænd kaffe"
+• "Weekend → anderledes lysindstillinger"
+
+**Sensor-baserede Regler:**
+• "Hvis fugtighed > 60% → tænd ventilation"
+• "Hvis ingen bevægelse i 30 min → sluk lys"
+• "Hvis vinduer åbne → sluk varme"
+
+**Geofencing:**
+• "Når jeg kommer hjem → tænd lys og varme"
+• "Når jeg forlader huset → aktiver sikkerhed"`;
+        }
+        
+        // Energistyring
+        if (lowerQuestion.includes('energi') || lowerQuestion.includes('strøm') || lowerQuestion.includes('besparelse') || lowerQuestion.includes('effektivitet')) {
+            return `⚡ **Energistyring i Smarthome:**
+            
+**Automatisk Energibesparelse:**
+• Sluk lys når rum er tomme
+• Juster temperatur baseret på tilstedeværelse
+• Optimér varmepumpe indstillinger
+• Lad op om natten når strøm er billigst
+
+**Smart Måling:**
+• Overvåg strømforbrug per enhed
+• Identificer energislugere
+• Sammenlign forbrug over tid
+• Få notifikationer ved uventet forbrug
+
+**Tidsbaseret Styring:**
+• Brug billig strøm om natten
+• Undgå peak hours (17-20)
+• Automatisk ladning af elbiler
+• Smart vandvarmere
+
+**Energimål:**
+• Sæt månedlige energimål
+• Få rapporter om besparelser
+• Konkurrer med andre husholdninger
+• Belønninger for grøn adfærd`;
+        }
+        
+        // Smarthome enheder
+        if (lowerQuestion.includes('enhed') || lowerQuestion.includes('lampe') || lowerQuestion.includes('termostat') || lowerQuestion.includes('kamera') || lowerQuestion.includes('lås')) {
+            return `🏠 **Smarthome Enheder:**
+            
+**Belysning:**
+• Smart pærer (WiFi/Zigbee)
+• Dimmer switches
+• Motion sensorer
+• Farve-temperatur kontrol
+
+**Klimastyring:**
+• Smart termostater
+• Vinduesåbnere
+• Ventilationssystemer
+• Luftfugtighedsregulering
+
+**Sikkerhed:**
+• Smart låse og dørklokker
+• Overvågningskameraer
+• Røgalarmer
+• Vindues- og dørsensorer
+
+**Husholdning:**
+• Smart stikkontakter
+• Køleskabe med skærm
+• Vaskemaskiner med app
+• Robotstøvsugere`;
+        }
+        
+        // Generelt smarthome svar
+        return `🏠 **Smarthome Teknologi:**
+        
+Smarthome systemer gør dit hjem mere komfortabelt, sikkert og energieffektivt ved at:
+• Automatisere rutineopgaver
+• Overvåge og kontrollere enheder
+• Svare på ændringer i miljøet
+• Lære dine vaner og tilpasse sig
+
+**Vigtige overvejelser:**
+• Kompatibilitet mellem enheder
+• Sikkerhed og privatliv
+• Strømforbrug og pålidelighed
+• Brugervenlighed og automatisering
+
+Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljeret information!`;
     }
 
-    toggleAnalytics() {
-        this.showNotification('Advanced Analytics kommer snart...', 'info');
-    }
 
     runSecurityScan() {
-        this.showNotification('Sikkerhedsscanning startet...', 'info');
+        this.showNotification('🔍 Sikkerhedsscanning startet...', 'info');
+        
+        const securityIssues = [];
+        const securityTips = [];
+        
+        // 1. Tjek for svage passwords i localStorage
+        const savedPasswords = Object.keys(localStorage).filter(key => 
+            key.toLowerCase().includes('password') || 
+            key.toLowerCase().includes('pass') ||
+            key.toLowerCase().includes('pwd')
+        );
+        
+        if (savedPasswords.length > 0) {
+            securityIssues.push('🔐 Passwords gemt i browser - usikker praksis');
+            securityTips.push('Brug aldrig localStorage til at gemme passwords. Brug sikre authentication tokens i stedet.');
+        }
+        
+        // 2. Tjek for HTTPS
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            securityIssues.push('🌐 Ingen HTTPS - data sendes usikkert');
+            securityTips.push('Brug altid HTTPS i produktion for at beskytte brugerdata.');
+        }
+        
+        // 3. Tjek for følsomme data i localStorage
+        const sensitiveData = Object.keys(localStorage).filter(key => 
+            key.toLowerCase().includes('token') ||
+            key.toLowerCase().includes('key') ||
+            key.toLowerCase().includes('secret')
+        );
+        
+        if (sensitiveData.length > 0) {
+            securityIssues.push('🔑 Følsomme data i localStorage');
+            securityTips.push('Gem tokens og nøgler i httpOnly cookies eller sikre session storage.');
+        }
+        
+        // 4. Tjek for mixed content
+        const hasMixedContent = document.querySelectorAll('img[src^="http:"], script[src^="http:"], link[href^="http:"]').length > 0;
+        if (hasMixedContent && location.protocol === 'https:') {
+            securityIssues.push('⚠️ Mixed content - usikre ressourcer');
+            securityTips.push('Brug kun HTTPS ressourcer på HTTPS sider for at undgå mixed content advarsler.');
+        }
+        
+        // 5. Tjek for manglende Content Security Policy
+        const cspHeader = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+        if (!cspHeader) {
+            securityIssues.push('🛡️ Ingen Content Security Policy');
+            securityTips.push('Implementer CSP headers for at forhindre XSS angreb.');
+        }
+        
+        // 6. Tjek for usikre form handling
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            if (!form.action || form.action === '') {
+                securityIssues.push('📝 Form uden sikker action');
+                securityTips.push('Sørg for at alle forms har sikre action endpoints.');
+            }
+        });
+        
+        // Simuler scanning tid
         setTimeout(() => {
-            this.showNotification('Sikkerhedsscanning gennemført - ingen trusler fundet', 'success');
-        }, 2000);
+            if (securityIssues.length === 0) {
+                this.showNotification('✅ Sikkerhedsscanning gennemført - ingen problemer fundet!', 'success');
+            } else {
+                this.showSecurityReport(securityIssues, securityTips);
+            }
+        }, 3000);
+    }
+    
+    showSecurityReport(issues, tips) {
+        const reportHtml = `
+            <div class="security-report">
+                <h3>🔍 Sikkerhedsrapport</h3>
+                <div class="security-issues">
+                    <h4>⚠️ Fundne problemer (${issues.length}):</h4>
+                    <ul>
+                        ${issues.map(issue => `<li>${issue}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="security-tips">
+                    <h4>💡 Anbefalinger:</h4>
+                    <ul>
+                        ${tips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="security-score">
+                    <h4>📊 Sikkerhedsscore: ${Math.max(0, 100 - (issues.length * 15))}/100</h4>
+                    <p>${issues.length === 0 ? 'Perfekt sikkerhed!' : issues.length <= 2 ? 'God sikkerhed' : 'Bør forbedres'}</p>
+                </div>
+            </div>
+        `;
+        
+        // Vis rapport i en popup
+        this.showPopup('Sikkerhedsrapport', reportHtml, 'security-report-popup');
     }
 
-    togglePerformanceMonitor() {
-        this.showNotification('Performance Monitor kommer snart...', 'info');
-    }
 
     openConsole() {
         this.showNotification('Åbn Developer Tools (F12) for console adgang', 'info');
@@ -2323,7 +2680,7 @@ class AppManager {
         
         this.radiatorInterval = setInterval(() => {
             this.updateRadiatorTemperature();
-        }, 5000); // Update every 5 seconds
+        }, 10000); // Update every 10 seconds for better performance
     }
     
     stopRadiatorTemperatureControl() {
