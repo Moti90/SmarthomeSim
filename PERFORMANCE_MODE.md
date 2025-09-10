@@ -1,85 +1,80 @@
-# Performance Mode til Bærbare PC'er
+# Stop Alle Animationer Mode
 
 ## Oversigt
-Performance Mode er en automatisk optimering der aktiveres på bærbare PC'er for at forbedre applikationens ydeevne og reducere lag.
+"Stop Alle Animationer" er en aggressiv performance optimering der deaktiverer ALLE animationer og effekter for maksimal ydeevne på bærbare PC'er og andre enheder med performance problemer.
 
 ## Funktioner
 
-### Automatisk Aktivering
-- Performance Mode aktiveres automatisk når en bærbare PC detekteres
-- Brugeren får en notifikation når det sker første gang
-- Indstillingen gemmes lokalt og kan manuelt ændres
+### Manuel Kontrol
+- Brugeren kan aktivere/deaktivere funktionen manuelt
+- Ingen automatisk aktivering - fuld brugerkontrol
+- Indstillingen gemmes lokalt
 
-### Device Detection
-Systemet bruger flere faktorer til at identificere bærbare PC'er:
-- Skærmopløsning (≤1920x1080)
-- Touch capability
-- User agent strings
-- Battery API tilgængelighed
-- Hardware concurrency (CPU kerner)
-- Device memory
-- Netværksforbindelse type
+### Aggressiv Performance Optimering
 
-### Performance Optimeringer
+#### Hvad der deaktiveres:
+- **Header animationer**: Glow effekter, holographic effekter
+- **Navigation**: Alle hover effekter og transitions
+- **Background effects**: Alle pseudo-element animationer
+- **Smart icons**: Alle transitions og hover effekter
+- **Cards og panels**: Alle hover animationer
+- **Form elementer**: Input, button, slider animationer
+- **Popup animationer**: Alle modal og dialog effekter
+- **Loading animationer**: Spinner og loading effekter
+- **Notification animationer**: Slide-in/slide-out effekter
 
-#### Animationer
-- Alle animationer reduceres til 0.1s
-- Tunge animationer deaktiveres helt:
-  - Floating icons
-  - Header glow effects
-  - Holographic effects
-  - Particle animations
-
-#### Hover Effekter
-- Transform effekter deaktiveres på hover
-- Reducerer GPU belastning
-
-#### Background Effects
-- Komplekse gradienter simplificeres
-- Background patterns deaktiveres
-- Box shadows reduceres
-
-#### Rendering Optimeringer
-- Radiator temperature updates reduceres fra 1s til 2s interval
-- CSS transitions minimeres
+#### CSS Optimeringer:
+```css
+.disable-animations * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+}
+```
 
 ## Manuelt Kontrol
 
 ### UI Toggle
-Performance Mode kan aktiveres/deaktiveres manuelt i:
-- Indstillinger → Brugergrænseflade → Performance Mode
+Stop Alle Animationer kan aktiveres/deaktiveres manuelt i:
+- Indstillinger → Brugergrænseflade → "Stop Alle Animationer"
 
 ### Notifikationer
-- Automatisk aktivering: "Performance Mode aktiveret automatisk"
-- Manuel aktivering: "Performance Mode aktiveret"
-- Manuel deaktivering: "Performance Mode deaktiveret"
+- Aktivering: "Alle animationer deaktiveret"
+- Deaktivering: "Animationer aktiveret igen"
 
 ## Tekniske Detaljer
 
 ### CSS Classes
-- `.performance-mode` - Hovedklasse der anvendes på body elementet
-- Specifikke optimeringer via CSS selectors
+- `.disable-animations` - Hovedklasse der anvendes på body elementet
+- Aggressive CSS regler der deaktiverer alle animationer
 
 ### JavaScript Funktioner
-- `detectLaptop()` - Device detection med scoring system
-- `initializePerformanceMode()` - Auto-aktivering logik
-- `togglePerformanceMode()` - Manuel toggle funktionalitet
-- `applyPerformanceMode()` - Anvend optimeringer
-- `optimizeAnimations()` - Reducer animationer
-- `optimizeRendering()` - Reducer rendering belastning
+- `toggleAnimations()` - Manuel toggle funktionalitet
 
 ### Local Storage
-- `performanceMode` - Gemmer brugerens valg
-- `setting_performanceMode` - Gemmer indstillingen
+- `setting_disableAnimations` - Gemmer brugerens valg
 
 ## Kompatibilitet
 - Fungerer på alle moderne browsere
-- Fallback til normal mode hvis detection fejler
 - Ingen breaking changes til eksisterende funktionalitet
+- Kan aktiveres/deaktiveres når som helst
 
 ## Ydeevne Forbedringer
-- Reduceret CPU brug
-- Lavere GPU belastning
-- Hurtigere rendering
-- Bedre batterilevetid på bærbare enheder
-- Mindre lag og stuttering
+- Maksimal CPU besparelse
+- Minimal GPU belastning
+- Hurtigste mulige rendering
+- Optimal batterilevetid
+- Eliminerer alle lag og stuttering
+
+## Brug
+1. Gå til Indstillinger → Brugergrænseflade
+2. Aktiver "Stop Alle Animationer"
+3. Alle animationer deaktiveres øjeblikkeligt
+4. Maksimal performance opnås
+
+## Anbefaling
+Denne funktion er ideel til:
+- Bærbare PC'er med performance problemer
+- Gamle enheder
+- Når maksimal performance er vigtigere end visuelle effekter
+- Debugging og testing

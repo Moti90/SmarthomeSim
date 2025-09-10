@@ -17,10 +17,6 @@ class AppManager {
         this.outdoorTemp = 15;
         this.outdoorLight = 0;
         
-        // Performance mode for laptops
-        this.performanceMode = false;
-        this.isLaptop = this.detectLaptop();
-        
         this.init();
     }
 
@@ -30,7 +26,6 @@ class AppManager {
         this.loadAllSettings();
         this.initializeFirebase();
         this.initializeSmartIcons();
-        this.initializePerformanceMode();
     }
 
     initializeFirebase() {
@@ -483,6 +478,24 @@ class AppManager {
         this.saveSetting('largeText', isEnabled);
     }
 
+    // Disable Animations
+    toggleAnimations() {
+        const checkbox = document.getElementById('disable-animations');
+        const isEnabled = checkbox.checked;
+        
+        if (isEnabled) {
+            document.body.classList.add('disable-animations');
+            this.showNotification('Alle animationer deaktiveret', 'success');
+            console.log('🚫 Alle animationer deaktiveret for maksimal performance');
+        } else {
+            document.body.classList.remove('disable-animations');
+            this.showNotification('Animationer aktiveret igen', 'info');
+            console.log('✨ Animationer aktiveret igen');
+        }
+        
+        this.saveSetting('disableAnimations', isEnabled);
+    }
+
     // Sound Notifications
     toggleSoundNotifications() {
         const checkbox = document.getElementById('sound-notifications');
@@ -568,7 +581,7 @@ class AppManager {
             document.getElementById('save-settings').checked = true;
             
             // Remove all setting classes
-            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'sound-notifications', 'desktop-notifications', 'auto-logout');
+            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'disable-animations', 'sound-notifications', 'desktop-notifications', 'auto-logout');
             
             // Clear localStorage
             Object.keys(localStorage).forEach(key => {
@@ -619,7 +632,7 @@ class AppManager {
             'compactView',
             'highContrast',
             'largeText',
-            'performanceMode',
+            'disableAnimations',
             'soundNotifications',
             'desktopNotifications',
             'autoLogout',
@@ -632,7 +645,7 @@ class AppManager {
             'compactView': { id: 'compact-view', class: 'compact-view' },
             'highContrast': { id: 'high-contrast', class: 'high-contrast' },
             'largeText': { id: 'large-text', class: 'large-text' },
-            'performanceMode': { id: 'performance-mode', class: 'performance-mode' },
+            'disableAnimations': { id: 'disable-animations', class: 'disable-animations' },
             'soundNotifications': { id: 'sound-notifications', class: 'sound-notifications' },
             'desktopNotifications': { id: 'desktop-notifications', class: 'desktop-notifications' },
             'autoLogout': { id: 'auto-logout', class: 'auto-logout' },
@@ -664,199 +677,6 @@ class AppManager {
         }
     }
 
-    // ===== PERFORMANCE MODE FUNCTIONS =====
-    
-    detectLaptop() {
-        // Detect if device is likely a laptop based on multiple factors
-        const userAgent = navigator.userAgent.toLowerCase();
-        const screenWidth = window.screen.width;
-        const screenHeight = window.screen.height;
-        const pixelRatio = window.devicePixelRatio || 1;
-        
-        // Check for laptop indicators with weighted scoring
-        let laptopScore = 0;
-        
-        // Screen size indicators (laptops typically have smaller screens)
-        if (screenWidth <= 1920 && screenHeight <= 1080) laptopScore += 2;
-        if (screenWidth <= 1366 && screenHeight <= 768) laptopScore += 3; // Common laptop resolution
-        
-        // Touch capability (many laptops have touchscreens)
-        if ('ontouchstart' in window) laptopScore += 1;
-        
-        // User agent indicators
-        if (userAgent.includes('laptop') || userAgent.includes('notebook')) laptopScore += 3;
-        
-        // Battery API (laptops typically have batteries)
-        if ('getBattery' in navigator) laptopScore += 2;
-        
-        // Low-end device indicators
-        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) laptopScore += 2;
-        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) laptopScore += 1;
-        
-        // Memory constraints
-        if (navigator.deviceMemory && navigator.deviceMemory <= 4) laptopScore += 2;
-        if (navigator.deviceMemory && navigator.deviceMemory <= 2) laptopScore += 1;
-        
-        // Connection type (mobile connections often indicate laptops)
-        if (navigator.connection && navigator.connection.effectiveType) {
-            const connectionType = navigator.connection.effectiveType;
-            if (connectionType === 'slow-2g' || connectionType === '2g' || connectionType === '3g') {
-                laptopScore += 1;
-            }
-        }
-        
-        const isLaptop = laptopScore >= 3; // Threshold for laptop detection
-        
-        console.log('🔍 Device detection:', {
-            isLaptop,
-            laptopScore,
-            screenWidth,
-            screenHeight,
-            pixelRatio,
-            hardwareConcurrency: navigator.hardwareConcurrency,
-            deviceMemory: navigator.deviceMemory,
-            connectionType: navigator.connection?.effectiveType || 'unknown',
-            userAgent: userAgent.substring(0, 50) + '...'
-        });
-        
-        return isLaptop;
-    }
-
-    initializePerformanceMode() {
-        // Auto-enable performance mode for laptops
-        if (this.isLaptop) {
-            const storedPerformanceMode = localStorage.getItem('performanceMode');
-            if (storedPerformanceMode === null) {
-                // First time on laptop - auto-enable performance mode
-                this.performanceMode = true;
-                this.saveSetting('performanceMode', true);
-                console.log('🚀 Auto-enabled performance mode for laptop');
-                
-                // Show notification after a short delay to ensure UI is ready
-                setTimeout(() => {
-                    this.showNotification(
-                        'Performance Mode aktiveret automatisk', 
-                        'Bærbare PC detekteret - optimeret til bedre ydeevne'
-                    );
-                }, 1000);
-            } else {
-                this.performanceMode = storedPerformanceMode === 'true';
-            }
-        } else {
-            // Load performance mode setting for desktop
-            this.performanceMode = this.loadSetting('performanceMode');
-        }
-        
-        this.applyPerformanceMode();
-    }
-
-    togglePerformanceMode() {
-        this.performanceMode = !this.performanceMode;
-        this.saveSetting('performanceMode', this.performanceMode);
-        this.applyPerformanceMode();
-        
-        // Show notification
-        this.showNotification(
-            this.performanceMode ? 'Performance Mode aktiveret' : 'Performance Mode deaktiveret',
-            this.performanceMode ? 'Optimeret til bærbare enheder' : 'Fuld funktionalitet aktiveret'
-        );
-    }
-
-    applyPerformanceMode() {
-        const body = document.body;
-        
-        if (this.performanceMode) {
-            body.classList.add('performance-mode');
-            console.log('🚀 Performance mode aktiveret');
-            
-            // Reduce animation intervals
-            this.optimizeAnimations();
-            this.optimizeRendering();
-        } else {
-            body.classList.remove('performance-mode');
-            console.log('🎨 Performance mode deaktiveret');
-            
-            // Restore normal animations
-            this.restoreAnimations();
-        }
-    }
-
-    optimizeAnimations() {
-        // Reduce or disable heavy animations
-        const style = document.createElement('style');
-        style.id = 'performance-mode-styles';
-        style.textContent = `
-            .performance-mode * {
-                animation-duration: 0.1s !important;
-                transition-duration: 0.1s !important;
-            }
-            
-            .performance-mode .floating-icon {
-                animation: none !important;
-            }
-            
-            .performance-mode .header-glow {
-                animation: none !important;
-            }
-            
-            .performance-mode .holographic {
-                animation: none !important;
-            }
-            
-            .performance-mode .particles {
-                animation: none !important;
-            }
-            
-            .performance-mode .smart-icon {
-                transition: none !important;
-            }
-            
-            .performance-mode .nav-btn:hover {
-                transform: none !important;
-            }
-            
-            .performance-mode .btn:hover {
-                transform: none !important;
-            }
-        `;
-        
-        // Remove existing performance styles if any
-        const existingStyle = document.getElementById('performance-mode-styles');
-        if (existingStyle) {
-            existingStyle.remove();
-        }
-        
-        document.head.appendChild(style);
-    }
-
-    optimizeRendering() {
-        // Reduce radiator temperature update frequency
-        if (this.radiatorInterval) {
-            clearInterval(this.radiatorInterval);
-        }
-        
-        // Update radiator temperature less frequently in performance mode
-        this.radiatorInterval = setInterval(() => {
-            this.updateRadiatorTemperature();
-        }, 2000); // Every 2 seconds instead of 1 second
-    }
-
-    restoreAnimations() {
-        // Remove performance mode styles
-        const performanceStyle = document.getElementById('performance-mode-styles');
-        if (performanceStyle) {
-            performanceStyle.remove();
-        }
-        
-        // Restore normal radiator update frequency
-        if (this.radiatorInterval) {
-            clearInterval(this.radiatorInterval);
-        }
-        
-        this.radiatorInterval = setInterval(() => {
-            this.updateRadiatorTemperature();
-        }, 1000); // Back to 1 second
-    }
 
     startAutoLogoutTimer() {
         this.clearAutoLogoutTimer();
