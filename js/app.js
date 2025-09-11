@@ -8,6 +8,11 @@ class AppManager {
         this.currentTab = 'home';
         this.currentTheme = 'default';
         
+        // Initialize arrays
+        this.rules = [];
+        this.savedScenarios = [];
+        this.savedRules = [];
+        
         // Radiator temperature control
         this.radiatorTemp = 21.0;
         this.radiatorTarget = 21.0;
@@ -29,6 +34,9 @@ class AppManager {
         this.loadAllSettings();
         this.initializeFirebase();
         this.initializeSmartIcons();
+        this.updateSavedScenariosDisplay();
+        this.setupScenarioControls();
+        
     }
 
     initializeFirebase() {
@@ -100,6 +108,762 @@ class AppManager {
         if (searchInput) {
             searchInput.addEventListener('input', (e) => this.filterTopics(e.target.value));
         }
+
+        // Workflow Manager functionality
+        this.setupWorkflowManagerButton();
+        
+        // Sensor component click handlers
+        this.setupSensorComponentHandlers();
+        
+        // Setup drag and drop for workflow canvas
+        this.setupWorkflowDragAndDrop();
+    }
+
+    // ===== SENSOR COMPONENT HANDLERS =====
+    
+    setupSensorComponentHandlers() {
+        // Add click handlers for sensor components
+        document.addEventListener('click', (e) => {
+            const componentItem = e.target.closest('.component-item[data-type="sensor"]');
+            if (componentItem) {
+                e.preventDefault();
+                this.handleSensorComponentClick(componentItem);
+            }
+        });
+    }
+
+    handleSensorComponentClick(componentItem) {
+        const device = componentItem.getAttribute('data-device');
+        const sensorType = componentItem.getAttribute('data-sensor-type');
+        const value = componentItem.getAttribute('data-value');
+        const name = componentItem.querySelector('.component-name').textContent;
+        const icon = componentItem.querySelector('.component-icon').textContent;
+        
+        // Store current sensor device for later use
+        this.currentSensorDevice = device;
+        
+        // Prepare sensor data
+        const sensorData = {
+            device: device,
+            name: name,
+            icon: icon,
+            sensorType: sensorType,
+            value: value === 'true' ? true : value === 'false' ? false : parseFloat(value)
+        };
+        
+        // Open popup
+        this.openSensorStatusPopup(sensorData);
+    }
+
+    // ===== WORKFLOW DRAG AND DROP =====
+    
+    setupWorkflowDragAndDrop() {
+        // Setup drag for component items
+        const componentItems = document.querySelectorAll('.component-item');
+        
+        componentItems.forEach(item => {
+            // Make sure items are draggable
+            item.setAttribute('draggable', 'true');
+            
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: item.dataset.type,
+                    device: item.dataset.device,
+                    sensorType: item.dataset.sensorType,
+                    actuatorType: item.dataset.actuatorType,
+                    name: item.querySelector('.component-name').textContent,
+                    icon: item.querySelector('.component-icon').textContent,
+                    value: item.dataset.value
+                }));
+                
+                item.classList.add('dragging');
+            });
+            
+            item.addEventListener('dragend', (e) => {
+                item.classList.remove('dragging');
+            });
+        });
+        
+        // Setup drop for workflow canvas
+        const canvas = document.getElementById('workflow-canvas');
+        if (canvas) {
+            canvas.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                canvas.classList.add('drag-over');
+            });
+            
+            canvas.addEventListener('dragleave', (e) => {
+                canvas.classList.remove('drag-over');
+            });
+            
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                canvas.classList.remove('drag-over');
+                
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                this.addNodeToCanvas(canvas, data, e);
+            });
+        }
+    }
+    
+    addNodeToCanvas(canvas, data, event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Create node element
+        const nodeId = 'node_' + Date.now();
+        const nodeElement = document.createElement('div');
+        nodeElement.className = 'canvas-node';
+        nodeElement.id = nodeId;
+        nodeElement.style.left = x + 'px';
+        nodeElement.style.top = y + 'px';
+        
+        // Generate node content based on type
+        let nodeContent = '';
+        if (data.type === 'sensor') {
+            nodeContent = `
+                <div class="node-header">
+                    <span class="node-icon">${data.icon}</span>
+                    <span class="node-title">${data.name}</span>
+                    <button class="node-delete" onclick="window.appManager.deleteNode('${nodeId}')">×</button>
+                </div>
+                <div class="node-body">
+                    <div class="node-config">
+                        <label>Status:</label>
+                        <select class="node-select" onchange="window.appManager.updateNodeStatus('${nodeId}', this.value)">
+                            <option value="false" ${data.value === 'false' ? 'selected' : ''}>OFF</option>
+                            <option value="true" ${data.value === 'true' ? 'selected' : ''}>ON</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        } else if (data.type === 'actuator') {
+            nodeContent = `
+                <div class="node-header">
+                    <span class="node-icon">${data.icon}</span>
+                    <span class="node-title">${data.name}</span>
+                    <button class="node-delete" onclick="window.appManager.deleteNode('${nodeId}')">×</button>
+                </div>
+                <div class="node-body">
+                    <div class="node-config">
+                        <label>Handling:</label>
+                        <select class="node-select" onchange="window.appManager.updateNodeAction('${nodeId}', this.value)">
+                            <option value="on">Tænd</option>
+                            <option value="off">Sluk</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+        
+        nodeElement.innerHTML = nodeContent;
+        
+        // Add to canvas
+        const nodesContainer = canvas.querySelector('.canvas-nodes');
+        if (nodesContainer) {
+            nodesContainer.appendChild(nodeElement);
+        } else {
+            canvas.appendChild(nodeElement);
+        }
+        
+        // Make node draggable
+        this.makeNodeDraggable(nodeElement);
+        
+        this.addLogEntry('CANVAS', `Tilføjet ${data.name} til canvas`);
+    }
+    
+    makeNodeDraggable(nodeElement) {
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+        
+        const header = nodeElement.querySelector('.node-header');
+        if (!header) return;
+        
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('node-delete')) return;
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const rect = nodeElement.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+            
+            nodeElement.style.zIndex = '1000';
+            nodeElement.classList.add('dragging');
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            nodeElement.style.left = (initialX + deltaX) + 'px';
+            nodeElement.style.top = (initialY + deltaY) + 'px';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                nodeElement.style.zIndex = '10';
+                nodeElement.classList.remove('dragging');
+            }
+        });
+    }
+    
+    deleteNode(nodeId) {
+        const node = document.getElementById(nodeId);
+        if (node) {
+            node.remove();
+            this.addLogEntry('CANVAS', `Slettet node ${nodeId}`);
+        }
+    }
+    
+    updateNodeStatus(nodeId, status) {
+        const node = document.getElementById(nodeId);
+        if (node) {
+            this.addLogEntry('NODE', `Node ${nodeId} status ændret til ${status}`);
+        }
+    }
+    
+    updateNodeAction(nodeId, action) {
+        const node = document.getElementById(nodeId);
+        if (node) {
+            this.addLogEntry('NODE', `Node ${nodeId} handling ændret til ${action}`);
+        }
+    }
+
+    // ===== WORKFLOW MANAGER =====
+    
+    setupWorkflowManagerButton() {
+        const openBtn = document.getElementById('open-wiresheet');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => this.openWorkflowManager());
+        }
+
+        const backBtn = document.getElementById('back-to-smarthome');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => this.closeWorkflowManager());
+        }
+    }
+
+    setupRuleBuilder() {
+        // Setup rule builder controls
+        const createBtn = document.getElementById('create-rule');
+        const saveBtn = document.getElementById('save-rules');
+        const testBtn = document.getElementById('test-rules');
+
+        if (createBtn) {
+            createBtn.addEventListener('click', () => this.createNewRule());
+        }
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveRules());
+        }
+        if (testBtn) {
+            testBtn.addEventListener('click', () => this.testRules());
+        }
+
+        // Setup drag and drop for components
+        this.setupComponentDragAndDrop();
+        
+        // Create initial rule card
+        this.createNewRule();
+    }
+
+    setupComponentDragAndDrop() {
+        const componentItems = document.querySelectorAll('.component-item');
+        const dropZones = document.querySelectorAll('.drop-zone');
+
+        componentItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: item.dataset.type,
+                    subtype: item.dataset.subtype,
+                    name: item.querySelector('.component-name').textContent,
+                    icon: item.querySelector('.component-icon').textContent
+                }));
+                item.classList.add('dragging');
+            });
+
+            item.addEventListener('dragend', (e) => {
+                item.classList.remove('dragging');
+            });
+        });
+
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', (e) => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                this.addComponentToDropZone(zone, data);
+            });
+        });
+    }
+
+    createCanvasNode(data, x, y) {
+        const canvasNodes = document.querySelector('.canvas-nodes');
+        if (!canvasNodes) return;
+
+        const nodeId = 'node_' + Date.now();
+        const node = document.createElement('div');
+        node.className = `canvas-node ${data.type}-node`;
+        node.id = nodeId;
+        node.style.left = x + 'px';
+        node.style.top = y + 'px';
+        
+        // Generate appropriate dropdown based on node type and subtype
+        let dropdownOptions = '';
+        
+        if (data.type === 'trigger') {
+            if (data.subtype === 'sensor') {
+                dropdownOptions = `
+                    <option value="">Vælg sensor...</option>
+                    <option value="bevaegelsessensor-entre">Bevægelsessensor Entre</option>
+                    <option value="bevaegelsessensor-stue">Bevægelsessensor Stue</option>
+                    <option value="badevaerelse-fugtmaaler">Badeværelse Fugtmåler</option>
+                    <option value="udvendig-vejrstation">Udvendig Vejrstation</option>
+                `;
+            } else if (data.subtype === 'time') {
+                dropdownOptions = `
+                    <option value="">Vælg tid...</option>
+                    <option value="time_specific">Specifik tid</option>
+                    <option value="time_sunrise">Solopgang</option>
+                    <option value="time_sunset">Solnedgang</option>
+                    <option value="time_interval">Interval</option>
+                `;
+            }
+        } else {
+            // Default dropdown for other node types
+            dropdownOptions = `
+                <option value="">Vælg indstilling...</option>
+                <option value="option1">Indstilling 1</option>
+                <option value="option2">Indstilling 2</option>
+            `;
+        }
+
+        // Generate toggle dropdown based on sensor type
+        let toggleOptions = '';
+        if (data.type === 'trigger' && data.subtype === 'sensor') {
+            toggleOptions = `
+                <div class="node-config">
+                    <label class="config-label">Sensor:</label>
+                    <select class="node-select sensor-select">
+                        ${dropdownOptions}
+                    </select>
+                </div>
+                <div class="node-config">
+                    <label class="config-label">Tilstand:</label>
+                    <select class="node-select toggle-select" id="toggle-${nodeId}">
+                        <option value="">Vælg først sensor...</option>
+                    </select>
+                </div>
+            `;
+        } else if (data.type === 'trigger' && data.subtype === 'time') {
+            toggleOptions = `
+                <div class="node-config">
+                    <label class="config-label">Tid:</label>
+                    <select class="node-select time-select">
+                        ${dropdownOptions}
+                    </select>
+                </div>
+            `;
+        } else {
+            toggleOptions = `
+                <div class="node-config">
+                    <label class="config-label">Indstilling:</label>
+                    <select class="node-select">
+                        ${dropdownOptions}
+                    </select>
+                </div>
+            `;
+        }
+
+        node.innerHTML = `
+            <div class="node-header" data-draggable="true">
+                <span class="node-icon">${data.icon}</span>
+                <span class="node-title">${data.name}</span>
+                <button class="node-delete" onclick="window.appManager.deleteNode('${nodeId}')">×</button>
+            </div>
+            <div class="node-content">
+                ${toggleOptions}
+            </div>
+        `;
+
+        canvasNodes.appendChild(node);
+        this.makeNodeDraggable(node);
+        
+        // Add event listener for sensor selection if it's a sensor node
+        if (data.type === 'trigger' && data.subtype === 'sensor') {
+            const sensorSelect = node.querySelector('.sensor-select');
+            if (sensorSelect) {
+                sensorSelect.addEventListener('change', function() {
+                    console.log('Sensor select changed!');
+                    const node = this.closest('.canvas-node');
+                    const toggleSelect = node.querySelector('.toggle-select');
+                    const selectedSensor = this.value;
+                    
+                    console.log('Selected sensor:', selectedSensor);
+                    
+                    let states = '<option value="">Vælg tilstand...</option>';
+                    
+                    if (selectedSensor === 'bevaegelsessensor-entre' || selectedSensor === 'bevaegelsessensor-stue') {
+                        states += `
+                            <option value="motion_detected">Bevægelse detekteret</option>
+                            <option value="no_motion">Ingen bevægelse</option>
+                        `;
+                    } else if (selectedSensor === 'badevaerelse-fugtmaaler') {
+                        states += `
+                            <option value="high_humidity">Høj fugt (>70%)</option>
+                            <option value="normal_humidity">Normal fugt (40-70%)</option>
+                            <option value="low_humidity">Lav fugt (<40%)</option>
+                        `;
+                    } else if (selectedSensor === 'udvendig-vejrstation') {
+                        states += `
+                            <option value="rain">Regn</option>
+                            <option value="sunny">Solrigt</option>
+                            <option value="cloudy">Overskyet</option>
+                            <option value="cold">Koldt (<5°C)</option>
+                            <option value="hot">Varmt (>25°C)</option>
+                        `;
+                    }
+                    
+                    console.log('Setting states:', states);
+                    toggleSelect.innerHTML = states;
+                });
+            }
+        }
+        
+        this.showNotification(`${data.name} node tilføjet!`, 'success');
+    }
+
+    createNewRule() {
+        const rulesContainer = document.getElementById('rules-container');
+        if (!rulesContainer) return;
+
+        const ruleId = 'rule_' + Date.now();
+        const ruleCard = document.createElement('div');
+        ruleCard.className = 'rule-card';
+        ruleCard.id = ruleId;
+        
+        ruleCard.innerHTML = `
+            <div class="rule-card-header">
+                <h4 class="rule-card-title">Regel ${rulesContainer.children.length + 1}</h4>
+                <button class="rule-card-delete" onclick="window.appManager.deleteRule('${ruleId}')">×</button>
+            </div>
+            <div class="rule-drop-zones">
+                <div class="drop-zone" data-zone="trigger">
+                    <span class="drop-zone-label">Trigger (Hvornår)</span>
+                    <div class="drop-zone-content">
+                        <span class="drop-zone-icon">🚀</span>
+                        <span>Træk sensor her</span>
+                    </div>
+                </div>
+                <div class="drop-zone" data-zone="condition">
+                    <span class="drop-zone-label">Betingelse (AND)</span>
+                    <div class="drop-zone-content">
+                        <span class="drop-zone-icon">🔗</span>
+                        <span>Træk betingelse her (valgfrit)</span>
+                    </div>
+                </div>
+                <div class="drop-zone" data-zone="action">
+                    <span class="drop-zone-label">Action (Så)</span>
+                    <div class="drop-zone-content">
+                        <span class="drop-zone-icon">⚡</span>
+                        <span>Træk action her</span>
+                    </div>
+                </div>
+            </div>
+            <div class="rule-preview">
+                <div class="rule-preview-empty">
+                    Træk komponenter for at bygge reglen
+                </div>
+            </div>
+        `;
+
+        rulesContainer.appendChild(ruleCard);
+        
+        // Re-setup drag and drop for new card
+        this.setupComponentDragAndDrop();
+        
+        this.showNotification('Ny regel oprettet!', 'success');
+    }
+
+    addComponentToDropZone(zone, data) {
+        // Check if zone already has content
+        if (zone.classList.contains('occupied')) {
+            this.showNotification('Drop zone er allerede fyldt', 'warning');
+            return;
+        }
+
+        // Add component to zone
+        zone.classList.add('occupied');
+        zone.innerHTML = `
+            <div class="drop-zone-content">
+                <span class="drop-zone-icon">${data.icon}</span>
+                <span>${data.name}</span>
+                <button class="remove-component" onclick="window.appManager.removeComponent(this)">×</button>
+            </div>
+        `;
+
+        // Update rule preview
+        this.updateRulePreview(zone.closest('.rule-card'));
+        
+        this.showNotification(`${data.name} tilføjet til regel`, 'success');
+    }
+
+    removeComponent(button) {
+        const zone = button.closest('.drop-zone');
+        const zoneType = zone.dataset.zone;
+        
+        // Reset zone content
+        zone.classList.remove('occupied');
+        zone.innerHTML = `
+            <span class="drop-zone-label">${zoneType === 'trigger' ? 'Trigger (Hvornår)' : zoneType === 'condition' ? 'Betingelse (AND)' : 'Action (Så)'}</span>
+            <div class="drop-zone-content">
+                <span class="drop-zone-icon">${zoneType === 'trigger' ? '🚀' : zoneType === 'condition' ? '🔗' : '⚡'}</span>
+                <span>Træk ${zoneType === 'trigger' ? 'sensor' : zoneType === 'condition' ? 'betingelse' : 'action'} her${zoneType === 'condition' ? ' (valgfrit)' : ''}</span>
+            </div>
+        `;
+
+        // Update rule preview
+        this.updateRulePreview(zone.closest('.rule-card'));
+    }
+
+    updateRulePreview(ruleCard) {
+        const preview = ruleCard.querySelector('.rule-preview');
+        const trigger = ruleCard.querySelector('[data-zone="trigger"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
+        const condition = ruleCard.querySelector('[data-zone="condition"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
+        const action = ruleCard.querySelector('[data-zone="action"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
+
+        let ruleText = '';
+        
+        if (trigger && action) {
+            ruleText = `Når ${trigger.textContent} `;
+            if (condition) {
+                ruleText += `og ${condition.textContent} `;
+            }
+            ruleText += `så ${action.textContent}`;
+            
+            preview.innerHTML = `<div class="rule-preview-text">${ruleText}</div>`;
+        } else {
+            preview.innerHTML = `<div class="rule-preview-empty">Træk komponenter for at bygge reglen</div>`;
+        }
+    }
+
+    deleteRule(ruleId) {
+        const ruleCard = document.getElementById(ruleId);
+        if (ruleCard && confirm('Slet denne regel?')) {
+            ruleCard.remove();
+            this.showNotification('Regel slettet', 'info');
+        }
+    }
+
+    saveRules() {
+        const ruleCards = document.querySelectorAll('.rule-card');
+        const rules = Array.from(ruleCards).map(card => ({
+            id: card.id,
+            trigger: this.getZoneContent(card, 'trigger'),
+            condition: this.getZoneContent(card, 'condition'),
+            action: this.getZoneContent(card, 'action'),
+            timestamp: new Date().toISOString()
+        }));
+        
+        localStorage.setItem('smarthome-rules', JSON.stringify(rules));
+        this.showNotification(`${rules.length} regler gemt!`, 'success');
+    }
+
+    getZoneContent(ruleCard, zoneType) {
+        const zone = ruleCard.querySelector(`[data-zone="${zoneType}"]`);
+        if (zone && zone.classList.contains('occupied')) {
+            const content = zone.querySelector('.drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
+            return content ? content.textContent : null;
+        }
+        return null;
+    }
+
+    testRules() {
+        const ruleCards = document.querySelectorAll('.rule-card');
+        this.showNotification(`Test kører - ${ruleCards.length} regler fundet`, 'info');
+    }
+
+
+    makeNodeDraggable(node) {
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        const header = node.querySelector('.node-header');
+        
+        header.addEventListener('mousedown', (e) => {
+            // Don't start dragging if clicking on delete button or interactive elements
+            if (e.target.classList.contains('node-delete') || 
+                e.target.tagName === 'SELECT' ||
+                e.target.tagName === 'OPTION' ||
+                e.target.classList.contains('node-select')) {
+                return;
+            }
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = parseInt(node.style.left) || 0;
+            initialY = parseInt(node.style.top) || 0;
+            
+            node.style.zIndex = '1000';
+            node.classList.add('dragging');
+            
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            node.style.left = (initialX + deltaX) + 'px';
+            node.style.top = (initialY + deltaY) + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                node.style.zIndex = '10';
+                node.classList.remove('dragging');
+            }
+        });
+    }
+
+    deleteNode(nodeId) {
+        const node = document.getElementById(nodeId);
+        if (node && confirm('Slet denne node?')) {
+            node.remove();
+            this.showNotification('Node slettet', 'info');
+        }
+    }
+
+    clearCanvas() {
+        const canvasNodes = document.querySelector('.canvas-nodes');
+        if (canvasNodes && confirm('Ryd hele canvas?')) {
+            canvasNodes.innerHTML = '';
+            this.showNotification('Canvas ryddet', 'info');
+        }
+    }
+
+    saveWorkflow() {
+        const nodes = document.querySelectorAll('.canvas-node');
+        const workflow = {
+            nodes: Array.from(nodes).map(node => ({
+                id: node.id,
+                type: node.classList.contains('trigger-node') ? 'trigger' : 
+                      node.classList.contains('and-node') ? 'and' :
+                      node.classList.contains('action-node') ? 'action' : 'rule',
+                position: {
+                    x: parseInt(node.style.left) || 0,
+                    y: parseInt(node.style.top) || 0
+                }
+            })),
+            timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem('workflow', JSON.stringify(workflow));
+        this.showNotification('Workflow gemt!', 'success');
+    }
+
+    testWorkflow() {
+        const nodes = document.querySelectorAll('.canvas-node');
+        this.showNotification(`Workflow test - ${nodes.length} noder fundet`, 'info');
+    }
+
+    updateSensorStates(nodeId) {
+        console.log('updateSensorStates called with nodeId:', nodeId);
+        
+        const node = document.getElementById(nodeId);
+        console.log('Found node:', node);
+        if (!node) return;
+        
+        const sensorSelect = node.querySelector('.sensor-select');
+        const toggleSelect = node.querySelector('.toggle-select');
+        
+        console.log('Found sensorSelect:', sensorSelect);
+        console.log('Found toggleSelect:', toggleSelect);
+        
+        if (!sensorSelect || !toggleSelect) return;
+        
+        const selectedSensor = sensorSelect.value;
+        console.log('Selected sensor:', selectedSensor);
+        
+        let states = '<option value="">Vælg tilstand...</option>';
+        
+        switch(selectedSensor) {
+            case 'bevaegelsessensor-entre':
+            case 'bevaegelsessensor-stue':
+                states += `
+                    <option value="motion_detected">Bevægelse detekteret</option>
+                    <option value="no_motion">Ingen bevægelse</option>
+                `;
+                break;
+            case 'badevaerelse-fugtmaaler':
+                states += `
+                    <option value="high_humidity">Høj fugt (>70%)</option>
+                    <option value="normal_humidity">Normal fugt (40-70%)</option>
+                    <option value="low_humidity">Lav fugt (<40%)</option>
+                `;
+                break;
+            case 'udvendig-vejrstation':
+                states += `
+                    <option value="rain">Regn</option>
+                    <option value="sunny">Solrigt</option>
+                    <option value="cloudy">Overskyet</option>
+                    <option value="cold">Koldt (<5°C)</option>
+                    <option value="hot">Varmt (>25°C)</option>
+                `;
+                break;
+        }
+        
+        console.log('Setting states:', states);
+        toggleSelect.innerHTML = states;
+    }
+
+    openWorkflowManager() {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Show workflow manager tab
+        const workflowTab = document.getElementById('wiresheet-tab');
+        if (workflowTab) {
+            workflowTab.classList.add('active');
+            // Setup rule builder when opening
+            this.setupRuleBuilder();
+        }
+    }
+
+    closeWorkflowManager() {
+        // Hide workflow manager tab
+        const workflowTab = document.getElementById('wiresheet-tab');
+        if (workflowTab) {
+            workflowTab.classList.remove('active');
+        }
+        
+        // Switch back to smarthome tab
+        this.switchTab('smarthome');
     }
 
     // ===== AUTHENTICATION =====
@@ -755,6 +1519,1430 @@ class AppManager {
         }
     }
 
+    // ===== WIRESHEET FUNCTIONS =====
+    
+    setupWiresheetEventListeners() {
+        // Open Wiresheet button (from Smarthome Sim)
+        const openBtn = document.getElementById('open-wiresheet');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => this.openWiresheet());
+        }
+
+        // Back to Smarthome Sim button
+        const backBtn = document.getElementById('back-to-smarthome');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => this.closeWiresheet());
+        }
+
+        // Wiresheet control buttons are now set up in initWiresheet() -> setupWiresheetControlButtons()
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (this.selectedBlock && this.currentTab === 'wiresheet') {
+                    this.deleteBlock(this.selectedBlock.id);
+                }
+            }
+        });
+    }
+
+    // ===== WIRESHEET CORE FUNCTIONS =====
+    
+    openWiresheet() {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Show wiresheet tab
+        const wiresheetTab = document.getElementById('wiresheet-tab');
+        if (wiresheetTab) {
+            wiresheetTab.classList.add('active');
+            this.initWiresheet();
+        }
+    }
+
+    closeWiresheet() {
+        // Hide wiresheet tab
+        const wiresheetTab = document.getElementById('wiresheet-tab');
+        if (wiresheetTab) {
+            wiresheetTab.classList.remove('active');
+        }
+        
+        // Return to smarthome sim tab
+        this.switchTab('smarthome');
+    }
+
+    initWiresheet() {
+        // Initialize wiresheet state
+        this.wiresheetBlocks = [];
+        this.wiresheetConnections = [];
+        this.selectedBlock = null;
+        this.draggedBlock = null;
+        this.connectionStart = null;
+        this.isDragging = false;
+        
+        // Load saved scenarios from localStorage
+        this.savedScenarios = JSON.parse(localStorage.getItem('savedScenarios') || '[]');
+        this.savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        this.isConnecting = false;
+        
+        this.setupWiresheetDragAndDrop();
+        this.setupWiresheetCanvas();
+        this.setupWiresheetConnections();
+        this.renderWiresheetBlocks();
+        
+        // Setup wiresheet control buttons
+        this.setupWiresheetControlButtons();
+        
+        // Automatic rule checking is now handled in init()
+    }
+    
+    setupWiresheetControlButtons() {
+        console.log('Setting up wiresheet control buttons');
+        
+        // Canvas controls
+        const testBtn = document.getElementById('test-rule');
+        const saveBtn = document.getElementById('save-rule');
+        const runBtn = document.getElementById('run-rule');
+        
+        console.log('Setting up wiresheet buttons:');
+        console.log('testBtn found:', !!testBtn);
+        console.log('saveBtn found:', !!saveBtn);
+        console.log('runBtn found:', !!runBtn);
+        
+        // Remove existing event listeners to prevent duplication
+        if (testBtn) {
+            testBtn.removeEventListener('click', this.testRule);
+            testBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Test button clicked!');
+                this.testRule();
+            });
+        }
+        if (saveBtn) {
+            saveBtn.removeEventListener('click', this.saveRule);
+            saveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Save button clicked!');
+                this.saveRule();
+            });
+        }
+        if (runBtn) {
+            runBtn.removeEventListener('click', this.activateRule);
+            runBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Run button clicked!');
+                this.activateRule();
+            });
+        }
+    }
+
+    // ===== WIRESHEET BLOCK TYPES =====
+    
+    // Get available sensors from plantegning
+    getAvailableSensors() {
+        const sensors = [];
+        const smartIcons = document.querySelectorAll('.smart-icon');
+        
+        smartIcons.forEach(icon => {
+            const deviceId = icon.dataset.device;
+            const deviceName = icon.dataset.deviceName;
+            const deviceType = icon.dataset.type;
+            const iconSymbol = icon.querySelector('.icon-symbol').textContent;
+            
+            // Check if it's a sensor type (excluding motion sensors)
+            if (deviceId.includes('fugtmaaler') || 
+                deviceId.includes('vejrstation') ||
+                deviceId.includes('vindue') ||
+                deviceId.includes('doerlaas')) {
+                sensors.push({
+                    id: deviceId,
+                    name: deviceName,
+                    type: deviceType,
+                    icon: iconSymbol
+                });
+            }
+        });
+        
+        return sensors;
+    }
+    
+    // Get available motion sensors from plantegning
+    getAvailableMotionSensors() {
+        const sensors = [];
+        const smartIcons = document.querySelectorAll('.smart-icon');
+        
+        smartIcons.forEach(icon => {
+            const deviceId = icon.dataset.device;
+            const deviceName = icon.dataset.deviceName;
+            const deviceType = icon.dataset.type;
+            const iconSymbol = icon.querySelector('.icon-symbol').textContent;
+            
+            // Check if it's a motion sensor
+            if (deviceId.includes('bevaegelsessensor')) {
+                sensors.push({
+                    id: deviceId,
+                    name: deviceName,
+                    type: deviceType,
+                    icon: iconSymbol
+                });
+            }
+        });
+        
+        return sensors;
+    }
+    
+    // Get available devices from plantegning
+    getAvailableDevices() {
+        const devices = [];
+        const smartIcons = document.querySelectorAll('.smart-icon');
+        
+        smartIcons.forEach(icon => {
+            const deviceId = icon.dataset.device;
+            const deviceName = icon.dataset.deviceName;
+            const deviceType = icon.dataset.type;
+            const iconSymbol = icon.querySelector('.icon-symbol').textContent;
+            
+            // Check if it's an actionable device
+            if (deviceId.includes('lampe') || 
+                deviceId.includes('aktuator') || 
+                deviceId.includes('ventilator') ||
+                deviceId.includes('vindue') ||
+                deviceId.includes('doerlaas')) {
+                devices.push({
+                    id: deviceId,
+                    name: deviceName,
+                    type: deviceType,
+                    icon: iconSymbol
+                });
+            }
+        });
+        
+        return devices;
+    }
+    
+    // Update block configuration
+    updateBlockConfig(blockId, configKey, value) {
+        const block = this.wiresheetBlocks.find(b => b.id === blockId);
+        if (block) {
+            if (!block.config) block.config = {};
+            block.config[configKey] = value;
+            
+            // Update block name if it's a device selection
+            if (configKey === 'device' && value) {
+                const device = this.getAvailableDevices().find(d => d.id === value);
+                if (device) {
+                    block.name = device.name;
+                }
+            } else if (configKey === 'sensorId' && value) {
+                const sensor = this.getAvailableSensors().find(s => s.id === value);
+                if (sensor) {
+                    block.name = sensor.name;
+                    // Enable sensor state dropdown
+                    this.renderWiresheetBlocks();
+                }
+            } else if (configKey === 'sensorCondition' && value) {
+                // Update block name to include condition for humidity sensors
+                const sensor = this.getAvailableSensors().find(s => s.id === block.config.sensorId);
+                if (sensor && sensor.id.includes('fugtmaaler')) {
+                    const conditionLabels = {
+                        'above': 'Over',
+                        'below': 'Under',
+                        'equal': 'Lig med'
+                    };
+                    block.name = `${sensor.name} (${conditionLabels[value]})`;
+                }
+            } else if (configKey === 'sensorValue' && value) {
+                // Update block name to include value for humidity sensors
+                const sensor = this.getAvailableSensors().find(s => s.id === block.config.sensorId);
+                if (sensor && sensor.id.includes('fugtmaaler')) {
+                    const conditionLabels = {
+                        'above': 'Over',
+                        'below': 'Under',
+                        'equal': 'Lig med'
+                    };
+                    const condition = conditionLabels[block.config.sensorCondition] || '';
+                    block.name = `${sensor.name} (${condition} ${value}%)`;
+                }
+            } else if (configKey === 'sensorState' && value) {
+                // Update block name to include state
+                const sensor = this.getAvailableSensors().find(s => s.id === block.config.sensorId);
+                if (sensor) {
+                    const stateLabels = {
+                        'active': 'Aktiv',
+                        'inactive': 'Inaktiv', 
+                        'motion': 'Bevægelse',
+                        'no_motion': 'Ingen bevægelse',
+                        'open': 'Åben',
+                        'closed': 'Lukket',
+                        'locked': 'Låst',
+                        'unlocked': 'Ulåst'
+                    };
+                    const stateLabel = stateLabels[value] || value;
+                    block.name = `${sensor.name} (${stateLabel})`;
+                }
+            }
+            
+            // Re-render the block
+            this.renderWiresheetBlocks();
+        }
+    }
+    
+    // Trigger blocks (sensors, time, manual)
+    createTriggerBlock(type, data) {
+        return {
+            id: 'trigger_' + Date.now(),
+            type: 'trigger',
+            triggerType: type,
+            name: data.name,
+            icon: data.icon,
+            x: 0,
+            y: 0,
+            config: data.config || {}
+        };
+    }
+    
+    // AND blocks (logic conditions)
+    createAndBlock(type, data) {
+        return {
+            id: 'and_' + Date.now(),
+            type: 'and',
+            andType: type,
+            name: data.name,
+            icon: data.icon,
+            x: 0,
+            y: 0,
+            config: data.config || {}
+        };
+    }
+    
+    // Action blocks (actors, actions)
+    createActionBlock(type, data) {
+        return {
+            id: 'action_' + Date.now(),
+            type: 'action',
+            actionType: type,
+            name: data.name,
+            icon: data.icon,
+            x: 0,
+            y: 0,
+            config: data.config || {}
+        };
+    }
+    
+    // ===== WIRESHEET DRAG AND DROP =====
+    
+    setupWiresheetDragAndDrop() {
+        const blockItems = document.querySelectorAll('.wiresheet-block-item');
+        const canvasArea = document.getElementById('wiresheet-canvas');
+
+        blockItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                this.draggedBlock = {
+                    type: item.dataset.type,
+                    triggerType: item.dataset.triggerType,
+                    andType: item.dataset.andType,
+                    actionType: item.dataset.actionType,
+                    icon: item.querySelector('.block-icon').textContent,
+                    name: item.querySelector('.block-name').textContent
+                };
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+
+            item.addEventListener('dragend', (e) => {
+                item.classList.remove('dragging');
+            });
+        });
+
+        // Canvas drop handling
+        if (canvasArea) {
+            canvasArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            });
+
+            canvasArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (this.draggedBlock) {
+                    const rect = canvasArea.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    this.createWiresheetBlock(this.draggedBlock, x, y);
+                    this.draggedBlock = null;
+                }
+            });
+        }
+    }
+
+    // ===== WIRESHEET CANVAS =====
+    
+    setupWiresheetCanvas() {
+        const canvasArea = document.getElementById('wiresheet-canvas');
+        if (canvasArea) {
+            canvasArea.addEventListener('click', (e) => {
+                if (e.target === canvasArea) {
+                    this.deselectAllBlocks();
+                }
+            });
+        }
+    }
+
+    // ===== WIRESHEET CONNECTIONS =====
+    
+    setupWiresheetConnections() {
+        // Connection system will be implemented here
+        this.connectionMode = false;
+    }
+
+    // ===== WIRESHEET BLOCK CREATION =====
+    
+    createWiresheetBlock(blockData, x, y) {
+        let block;
+        
+        if (blockData.type === 'trigger') {
+            block = this.createTriggerBlock(blockData.triggerType, {
+                name: blockData.name,
+                icon: blockData.icon
+            });
+        } else if (blockData.type === 'and') {
+            block = this.createAndBlock(blockData.andType, {
+                name: blockData.name,
+                icon: blockData.icon
+            });
+        } else if (blockData.type === 'action') {
+            block = this.createActionBlock(blockData.actionType, {
+                name: blockData.name,
+                icon: blockData.icon
+            });
+        }
+        
+        if (block) {
+            // Check if block already exists to prevent duplication
+            const existingBlock = this.wiresheetBlocks.find(b => b.id === block.id);
+            if (existingBlock) {
+                console.log('Block already exists, not adding duplicate');
+                return;
+            }
+            
+            block.x = x;
+            block.y = y;
+            this.wiresheetBlocks.push(block);
+            this.renderWiresheetBlocks();
+        }
+    }
+
+    // ===== WIRESHEET RENDERING =====
+    
+    renderWiresheetBlocks() {
+        const canvasBlocks = document.getElementById('wiresheet-canvas').querySelector('.canvas-blocks');
+        if (!canvasBlocks) return;
+        
+        canvasBlocks.innerHTML = '';
+        
+        this.wiresheetBlocks.forEach(block => {
+            const blockElement = this.createBlockElement(block);
+            canvasBlocks.appendChild(blockElement);
+        });
+        
+        this.renderWiresheetConnections();
+    }
+
+    createBlockElement(block) {
+        const blockElement = document.createElement('div');
+        blockElement.className = 'wiresheet-block';
+        blockElement.id = block.id;
+        blockElement.style.left = block.x + 'px';
+        blockElement.style.top = block.y + 'px';
+        
+        // Block content
+        blockElement.innerHTML = `
+            <div class="block-header">
+                <span class="block-icon">${block.icon}</span>
+                <span class="block-name">${block.name}</span>
+                <button class="block-delete" onclick="window.appManager.deleteBlock('${block.id}')">×</button>
+            </div>
+            <div class="block-body">
+                <div class="block-config">
+                    ${this.getBlockConfigHTML(block)}
+                </div>
+            </div>
+            <div class="block-connections">
+                <div class="connection-point input" data-point="input" title="Input"></div>
+                <div class="connection-point output" data-point="output" title="Output"></div>
+            </div>
+        `;
+        
+        // Add event listeners
+        this.addBlockEventListeners(blockElement, block);
+        
+        return blockElement;
+    }
+
+    getBlockConfigHTML(block) {
+        if (block.type === 'trigger') {
+            return this.getTriggerConfigHTML(block);
+        } else if (block.type === 'and') {
+            return this.getAndConfigHTML(block);
+        } else if (block.type === 'action') {
+            return this.getActionConfigHTML(block);
+        }
+        return '';
+    }
+
+    getSensorStateOptions(block) {
+        const sensorId = block.config.sensorId;
+        
+        // Check if it's a humidity sensor
+        if (sensorId && sensorId.includes('fugtmaaler')) {
+            return `
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorCondition', this.value)" 
+                        style="margin-top: 5px;">
+                    <option value="">Vælg betingelse...</option>
+                    <option value="above" ${block.config.sensorCondition === 'above' ? 'selected' : ''}>Over</option>
+                    <option value="below" ${block.config.sensorCondition === 'below' ? 'selected' : ''}>Under</option>
+                    <option value="equal" ${block.config.sensorCondition === 'equal' ? 'selected' : ''}>Lig med</option>
+                </select>
+                <input type="number" class="block-input" placeholder="Værdi (%)" 
+                       value="${block.config.sensorValue || ''}" 
+                       onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorValue', this.value)"
+                       style="margin-top: 5px;">
+            `;
+        }
+        
+        // Default options for other sensors
+        return `
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorState', this.value)" 
+                        style="margin-top: 5px;" ${!block.config.sensorId ? 'disabled' : ''}>
+                    <option value="">Vælg tilstand...</option>
+                    <option value="active" ${block.config.sensorState === 'active' ? 'selected' : ''}>Aktiv (tændt/åben)</option>
+                    <option value="inactive" ${block.config.sensorState === 'inactive' ? 'selected' : ''}>Inaktiv (slukket/lukket)</option>
+                    <option value="open" ${block.config.sensorState === 'open' ? 'selected' : ''}>Åben</option>
+                    <option value="closed" ${block.config.sensorState === 'closed' ? 'selected' : ''}>Lukket</option>
+                    <option value="locked" ${block.config.sensorState === 'locked' ? 'selected' : ''}>Låst</option>
+                    <option value="unlocked" ${block.config.sensorState === 'unlocked' ? 'selected' : ''}>Ulåst</option>
+                </select>
+            `;
+    }
+
+    getTriggerConfigHTML(block) {
+        if (block.triggerType === 'sensor') {
+            // Get actual sensors from plantegning
+            const sensors = this.getAvailableSensors();
+            return `
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorId', this.value)">
+                    <option value="">Vælg sensor...</option>
+                    ${sensors.map(sensor => `
+                        <option value="${sensor.id}" ${block.config.sensorId === sensor.id ? 'selected' : ''}>
+                            ${sensor.name}
+                        </option>
+                    `).join('')}
+                </select>
+                ${this.getSensorStateOptions(block)}
+            `;
+        } else if (block.triggerType === 'motion') {
+            // Motion sensors only
+            const motionSensors = this.getAvailableMotionSensors();
+            return `
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorId', this.value)">
+                    <option value="">Vælg bevægelsessensor...</option>
+                    ${motionSensors.map(sensor => `
+                        <option value="${sensor.id}" ${block.config.sensorId === sensor.id ? 'selected' : ''}>
+                            ${sensor.name}
+                        </option>
+                    `).join('')}
+                </select>
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorState', this.value)" 
+                        style="margin-top: 5px;" ${!block.config.sensorId ? 'disabled' : ''}>
+                    <option value="">Vælg tilstand...</option>
+                    <option value="motion" ${block.config.sensorState === 'motion' ? 'selected' : ''}>Bevægelse detekteret</option>
+                    <option value="no_motion" ${block.config.sensorState === 'no_motion' ? 'selected' : ''}>Ingen bevægelse</option>
+                </select>
+            `;
+        } else if (block.triggerType === 'time') {
+            return `
+                <input type="time" class="block-input" placeholder="Tid" 
+                       value="${block.config.time || ''}" 
+                       onchange="window.appManager.updateBlockConfig('${block.id}', 'time', this.value)">
+            `;
+        }
+        return '';
+    }
+
+    getAndConfigHTML(block) {
+        if (block.andType === 'time') {
+            return `
+                <input type="time" class="block-input" placeholder="Fra tid" 
+                       value="${block.config.startTime || ''}" 
+                       onchange="window.appManager.updateBlockConfig('${block.id}', 'startTime', this.value)">
+                <input type="time" class="block-input" placeholder="Til tid" 
+                       value="${block.config.endTime || ''}" 
+                       onchange="window.appManager.updateBlockConfig('${block.id}', 'endTime', this.value)">
+            `;
+        } else if (block.andType === 'logic') {
+            return `
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'logic', this.value)">
+                    <option value="">Vælg logik...</option>
+                    <option value="and" ${block.config.logic === 'and' ? 'selected' : ''}>OG</option>
+                    <option value="or" ${block.config.logic === 'or' ? 'selected' : ''}>ELLER</option>
+                    <option value="not" ${block.config.logic === 'not' ? 'selected' : ''}>IKKE</option>
+                </select>
+            `;
+        }
+        return '';
+    }
+
+    getActionConfigHTML(block) {
+        if (block.actionType === 'device') {
+            // Get actual devices from plantegning
+            const devices = this.getAvailableDevices();
+            return `
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'device', this.value)">
+                    <option value="">Vælg enhed...</option>
+                    ${devices.map(device => `
+                        <option value="${device.id}" ${block.config.deviceId === device.id ? 'selected' : ''}>
+                            ${device.name}
+                        </option>
+                    `).join('')}
+                </select>
+                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'action', this.value)">
+                    <option value="">Vælg handling...</option>
+                    <option value="on" ${block.config.action === 'on' ? 'selected' : ''}>Tænd</option>
+                    <option value="off" ${block.config.action === 'off' ? 'selected' : ''}>Sluk</option>
+                    <option value="toggle" ${block.config.action === 'toggle' ? 'selected' : ''}>Skift</option>
+                </select>
+            `;
+        } else if (block.actionType === 'notification') {
+            return `
+                <input type="text" class="block-input" placeholder="Besked" 
+                       value="${block.config.message || ''}" 
+                       onchange="window.appManager.updateBlockConfig('${block.id}', 'message', this.value)">
+            `;
+        } else if (block.actionType === 'delay') {
+            return `
+                <input type="number" class="block-input" placeholder="Sekunder" 
+                       value="${block.config.delay || ''}" 
+                       onchange="window.appManager.updateBlockConfig('${block.id}', 'delay', this.value)">
+            `;
+        }
+        return '';
+    }
+
+    addBlockEventListeners(blockElement, block) {
+        let isDragging = false;
+        
+        // Simple drag handling - place block directly under mouse
+        const startDrag = (clientX, clientY) => {
+            if (isDragging) return;
+            
+            isDragging = true;
+            this.isDragging = true;
+            this.draggedBlock = block;
+            
+            // Add dragging class
+            blockElement.classList.add('dragging');
+        };
+        
+        const updateDrag = (clientX, clientY) => {
+            if (!isDragging) return;
+            
+            // Calculate new position relative to canvas, centered on mouse
+            const canvasRect = document.getElementById('wiresheet-canvas').getBoundingClientRect();
+            const blockRect = blockElement.getBoundingClientRect();
+            
+            // Center the block on the mouse cursor
+            const newX = clientX - canvasRect.left - (blockRect.width / 2);
+            const newY = clientY - canvasRect.top - (blockRect.height / 2);
+            
+            // Update block position immediately using left/top for instant response
+            block.x = newX;
+            block.y = newY;
+            blockElement.style.left = block.x + 'px';
+            blockElement.style.top = block.y + 'px';
+        };
+        
+        const endDrag = () => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            this.isDragging = false;
+            this.draggedBlock = null;
+            
+            // Remove dragging class
+            blockElement.classList.remove('dragging');
+        };
+        
+        // Mouse events
+        blockElement.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('block-delete')) return;
+            if (e.target.classList.contains('connection-point')) return;
+            if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            startDrag(e.clientX, e.clientY);
+            
+            const handleMouseMove = (e) => {
+                e.preventDefault();
+                updateDrag(e.clientX, e.clientY);
+            };
+            
+            const handleMouseUp = (e) => {
+                e.preventDefault();
+                endDrag();
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+        
+        // Touch events
+        blockElement.addEventListener('touchstart', (e) => {
+            if (e.target.classList.contains('block-delete')) return;
+            if (e.target.classList.contains('connection-point')) return;
+            if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+            
+            e.preventDefault();
+            const touch = e.touches[0];
+            startDrag(touch.clientX, touch.clientY);
+            
+            const handleTouchMove = (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                updateDrag(touch.clientX, touch.clientY);
+            };
+            
+            const handleTouchEnd = () => {
+                endDrag();
+                document.removeEventListener('touchmove', handleTouchMove);
+                document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd);
+        });
+        
+        // Click handling (only if not dragging)
+        blockElement.addEventListener('click', (e) => {
+            if (e.target.classList.contains('block-delete')) return;
+            if (isDragging) return; // Don't select if we were dragging
+            
+            this.selectBlock(block);
+        });
+        
+        // Connection point handling
+        const connectionPoints = blockElement.querySelectorAll('.connection-point');
+        connectionPoints.forEach(point => {
+            point.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handleConnectionPointClick(block, point.dataset.point);
+            });
+        });
+    }
+
+    // ===== WIRESHEET BLOCK MANAGEMENT =====
+    
+    selectBlock(block) {
+        this.deselectAllBlocks();
+        this.selectedBlock = block;
+        
+        const blockElement = document.getElementById(block.id);
+        if (blockElement) {
+            blockElement.classList.add('selected');
+        }
+    }
+
+    deselectAllBlocks() {
+        this.selectedBlock = null;
+        document.querySelectorAll('.wiresheet-block').forEach(block => {
+            block.classList.remove('selected');
+        });
+    }
+
+    deleteBlock(blockId) {
+        this.wiresheetBlocks = this.wiresheetBlocks.filter(block => block.id !== blockId);
+        this.renderWiresheetBlocks();
+        this.updateBlockConnectionLabels();
+        this.showNotification('Blok slettet', 'info');
+    }
+
+    // ===== WIRESHEET CONNECTIONS =====
+    
+    handleConnectionPointClick(block, pointType) {
+        if (!this.connectionStart) {
+            // Start connection
+            this.connectionStart = { block, pointType };
+            this.showNotification('Klik på en anden blok for at forbinde', 'info');
+        } else {
+            // Complete connection
+            if (this.connectionStart.block.id !== block.id) {
+                this.createConnection(this.connectionStart, { block, pointType });
+            }
+            this.connectionStart = null;
+        }
+    }
+
+    createConnection(start, end) {
+        const connection = {
+            id: 'conn_' + Date.now(),
+            start: start,
+            end: end
+        };
+        
+        this.wiresheetConnections.push(connection);
+        this.renderWiresheetConnections();
+        this.updateBlockConnectionLabels();
+        this.showNotification('Forbindelse oprettet', 'success');
+    }
+
+    renderWiresheetConnections() {
+        // No visual connections needed - just update block labels
+        this.updateBlockConnectionLabels();
+    }
+
+    createConnectionElement(connection) {
+        // Don't create visual connection lines - just update block labels
+        this.updateBlockConnectionLabels();
+        return null; // No visual element needed
+    }
+    
+    // Update block labels to show connections
+    updateBlockConnectionLabels() {
+        this.wiresheetBlocks.forEach(block => {
+            const blockElement = document.getElementById(block.id);
+            if (blockElement) {
+                // Find what this block is connected to
+                const outgoingConnections = this.wiresheetConnections.filter(conn => conn.start && conn.start.block && conn.start.block.id === block.id);
+                const incomingConnections = this.wiresheetConnections.filter(conn => conn.end && conn.end.block && conn.end.block.id === block.id);
+                
+                // Update connection info in block
+                let connectionInfo = '';
+                if (incomingConnections.length > 0) {
+                    const fromBlock = incomingConnections[0].start.block;
+                    if (fromBlock) {
+                        connectionInfo += `← ${fromBlock.name}`;
+                    }
+                }
+                if (outgoingConnections.length > 0) {
+                    const toBlock = outgoingConnections[0].end.block;
+                    if (toBlock) {
+                        if (connectionInfo) connectionInfo += ' | ';
+                        connectionInfo += `→ ${toBlock.name}`;
+                    }
+                }
+                
+                // Update or create connection label
+                let connectionLabel = blockElement.querySelector('.block-connection-info');
+                if (connectionLabel) {
+                    connectionLabel.textContent = connectionInfo;
+                } else {
+                    connectionLabel = document.createElement('div');
+                    connectionLabel.className = 'block-connection-info';
+                    connectionLabel.textContent = connectionInfo;
+                    blockElement.querySelector('.block-body').appendChild(connectionLabel);
+                }
+            }
+        });
+    }
+
+    // ===== WIRESHEET RULE FUNCTIONS =====
+    
+    testRule() {
+        this.showNotification('Test regel funktionalitet kommer snart', 'info');
+    }
+
+    saveRule() {
+        try {
+            console.log('saveRule() called');
+            console.log('wiresheetBlocks length:', this.wiresheetBlocks.length);
+            
+        if (this.wiresheetBlocks.length === 0) {
+                console.log('No blocks found, showing warning');
+            this.showNotification('Ingen blokke at gemme', 'warning');
+            return;
+        }
+        
+            // Simple rule saving - ask for name and save directly
+            const ruleName = prompt('Indtast navn på reglen:');
+            if (!ruleName) {
+                return; // User cancelled
+            }
+            
+            // Convert wiresheet blocks to simple rule format
+            const rule = this.convertWiresheetToRule(ruleName);
+            if (rule) {
+                // Save to localStorage like the old system
+                if (!this.savedRules) this.savedRules = [];
+                this.savedRules.push(rule);
+                localStorage.setItem('savedRules', JSON.stringify(this.savedRules));
+                
+                // Update display
+                this.updateSavedRulesDisplay();
+                
+                this.showNotification(`Regel "${ruleName}" gemt!`, 'success');
+            }
+        } catch (error) {
+            console.error('Error in saveRule():', error);
+            this.showNotification('Fejl ved gemning: ' + error.message, 'error');
+        }
+    }
+    
+    convertWiresheetToRule(ruleName) {
+        try {
+            console.log('Converting wiresheet blocks to rule:', this.wiresheetBlocks);
+            
+            // Find trigger and action blocks
+            const triggerBlock = this.wiresheetBlocks.find(block => block.type === 'trigger');
+            const actionBlock = this.wiresheetBlocks.find(block => block.type === 'action');
+            
+            if (!triggerBlock || !actionBlock) {
+                this.showNotification('Reglen skal have både trigger og action blokke', 'warning');
+                return null;
+            }
+            
+            // Create simple rule object like the old system
+            const rule = {
+                id: 'rule_' + Date.now(),
+                name: ruleName,
+                symbol: '⚡',
+                trigger: triggerBlock.triggerType,
+                triggerValue: triggerBlock.name,
+                action1: actionBlock.actionType,
+                action1Value: actionBlock.name,
+                cond1: '',
+                cond1Value: '',
+                cond2: '',
+                cond2Value: '',
+                created: new Date().toISOString(),
+                blocks: JSON.parse(JSON.stringify(this.wiresheetBlocks)),
+                connections: JSON.parse(JSON.stringify(this.wiresheetConnections))
+            };
+            
+            console.log('Converted rule:', rule);
+            return rule;
+        } catch (error) {
+            console.error('Error converting wiresheet to rule:', error);
+            this.showNotification('Fejl ved konvertering: ' + error.message, 'error');
+            return null;
+        }
+    }
+    
+    showScenarioSaveDialog() {
+        try {
+            console.log('showScenarioSaveDialog() called');
+            
+        // Find the wiresheet container
+        const wiresheetContainer = document.querySelector('.wiresheet-container');
+            console.log('wiresheetContainer found:', !!wiresheetContainer);
+            
+        if (!wiresheetContainer) {
+                console.error('Wiresheet container not found');
+            this.showNotification('Wiresheet container ikke fundet', 'error');
+            return;
+        }
+            
+            console.log('Creating modal...');
+        
+        const modal = document.createElement('div');
+        modal.className = 'wiresheet-modal-overlay';
+        modal.innerHTML = `
+            <div class="wiresheet-modal-content">
+                <div class="modal-header">
+                    <h3>💾 Gem Regel</h3>
+                    <button class="modal-close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label for="scenario-name">Regel Navn:</label>
+                        <input type="text" id="scenario-name" placeholder="fx 'Aften rutine'" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="scenario-symbol">Vælg Symbol:</label>
+                        <div class="symbol-grid">
+                            <div class="symbol-option" data-symbol="🌙">🌙</div>
+                            <div class="symbol-option" data-symbol="☀️">☀️</div>
+                            <div class="symbol-option" data-symbol="🏠">🏠</div>
+                            <div class="symbol-option" data-symbol="🔒">🔒</div>
+                            <div class="symbol-option" data-symbol="💡">💡</div>
+                            <div class="symbol-option" data-symbol="🎬">🎬</div>
+                            <div class="symbol-option" data-symbol="⚡">⚡</div>
+                            <div class="symbol-option" data-symbol="🎵">🎵</div>
+                            <div class="symbol-option" data-symbol="🍽️">🍽️</div>
+                            <div class="symbol-option" data-symbol="🛏️">🛏️</div>
+                            <div class="symbol-option" data-symbol="🚗">🚗</div>
+                            <div class="symbol-option" data-symbol="🎉">🎉</div>
+                        </div>
+                        <input type="hidden" id="selected-symbol" value="">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()">Annuller</button>
+                    <button class="btn btn-primary" onclick="window.appManager.saveScenarioWithDetails()">Gem Regel</button>
+                </div>
+            </div>
+        `;
+        
+            document.body.appendChild(modal);
+            
+            // Set default symbol
+            document.getElementById('selected-symbol').value = '⚡';
+            modal.querySelector('[data-symbol="⚡"]').classList.add('selected');
+        
+        // Add symbol selection handlers
+        modal.querySelectorAll('.symbol-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                modal.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
+                e.target.classList.add('selected');
+                document.getElementById('selected-symbol').value = e.target.dataset.symbol;
+            });
+        });
+            
+            console.log('Modal created and added to DOM');
+        } catch (error) {
+            console.error('Error in showScenarioSaveDialog():', error);
+            this.showNotification('Fejl ved oprettelse af gem dialog: ' + error.message, 'error');
+        }
+    }
+    
+    saveScenarioWithDetails() {
+        const name = document.getElementById('scenario-name').value.trim();
+        const symbol = document.getElementById('selected-symbol').value;
+        
+        if (!name) {
+            this.showNotification('Indtast et navn til scenariet', 'warning');
+            return;
+        }
+        
+        if (!symbol) {
+            this.showNotification('Vælg et symbol til scenariet', 'warning');
+            return;
+        }
+        
+        const scenario = {
+            id: 'scenario_' + Date.now(),
+            name: name,
+            symbol: symbol,
+            blocks: JSON.parse(JSON.stringify(this.wiresheetBlocks)),
+            connections: JSON.parse(JSON.stringify(this.wiresheetConnections)),
+            created: new Date().toISOString()
+        };
+        
+        // Save to storage
+        if (!this.savedRules) this.savedRules = [];
+        this.savedRules.push(scenario);
+        localStorage.setItem('savedRules', JSON.stringify(this.savedRules));
+        
+        // Update control panel
+        this.updateSavedRulesDisplay();
+        
+        // Close modal
+        const modalOverlay = document.querySelector('.wiresheet-modal-overlay');
+        if (modalOverlay) {
+            modalOverlay.remove();
+        }
+        
+        this.showNotification(`Regel "${name}" gemt! ${symbol}`, 'success');
+    }
+    
+    updateSavedScenariosDisplay() {
+        const scenarioGrid = document.querySelector('.scenario-grid');
+        if (!scenarioGrid) return;
+        
+        // Find existing scenario buttons (the 4 built-in ones)
+        const existingButtons = scenarioGrid.querySelectorAll('.scenario-btn[data-scenario]');
+        
+        // Remove any existing custom scenario buttons
+        const customButtons = scenarioGrid.querySelectorAll('.scenario-btn[data-custom-scenario]');
+        customButtons.forEach(btn => btn.remove());
+        
+        // Add custom scenarios if they exist
+        if (this.savedScenarios && this.savedScenarios.length > 0) {
+            this.savedScenarios.forEach(scenario => {
+                const scenarioBtn = document.createElement('button');
+                scenarioBtn.className = 'scenario-btn';
+                scenarioBtn.setAttribute('data-custom-scenario', scenario.id);
+                scenarioBtn.innerHTML = `
+                    <span class="scenario-icon">${scenario.symbol}</span>
+                    <span class="scenario-name">${scenario.name}</span>
+                    <span class="scenario-delete" onclick="event.stopPropagation(); window.appManager.deleteScenario('${scenario.id}')" title="Slet scenario">×</span>
+                `;
+                
+                // Add click event to run scenario
+                scenarioBtn.addEventListener('click', () => {
+                    this.runSavedScenario(scenario.id);
+                });
+                
+                scenarioGrid.appendChild(scenarioBtn);
+            });
+        }
+        
+        // Update rules display
+        this.updateSavedRulesDisplay();
+    }
+    
+    updateSavedRulesDisplay() {
+        const rulesGrid = document.getElementById('rules-grid');
+        if (!rulesGrid) return;
+
+        // Clear existing rule buttons
+        rulesGrid.innerHTML = '';
+
+        // Add saved rules if they exist
+        if (this.savedRules && this.savedRules.length > 0) {
+            this.savedRules.forEach(rule => {
+                const btn = document.createElement('button');
+                btn.className = 'rule-btn';
+                btn.innerHTML = `
+                    <span class="rule-icon">${rule.symbol}</span>
+                    <span class="rule-name">${rule.name}</span>
+                `;
+                
+                btn.addEventListener('click', () => {
+                    this.activateSavedRule(rule.id);
+                });
+                
+                rulesGrid.appendChild(btn);
+            });
+        }
+    }
+    
+    activateSavedRule(ruleId) {
+        const rule = this.savedRules.find(s => s.id === ruleId);
+        if (!rule) {
+            this.showNotification('Regel ikke fundet', 'error');
+            return;
+        }
+        
+        // Load the rule into wiresheet and activate it
+        this.loadScenario(ruleId);
+        this.activateRule();
+        
+        this.showNotification(`Regel "${rule.name}" aktiveret!`, 'success');
+    }
+    
+    runSavedScenario(scenarioId) {
+        const scenario = this.savedScenarios.find(s => s.id === scenarioId);
+        if (!scenario) {
+            this.showNotification('Scenario ikke fundet', 'error');
+            return;
+        }
+        
+        // Load scenario blocks temporarily
+        const originalBlocks = this.wiresheetBlocks;
+        const originalConnections = this.wiresheetConnections;
+        
+        this.wiresheetBlocks = scenario.blocks;
+        this.wiresheetConnections = scenario.connections;
+        
+        // Execute all action blocks directly (skip trigger conditions)
+        this.executeAllActionBlocks();
+        
+        // Restore original blocks
+        this.wiresheetBlocks = originalBlocks;
+        this.wiresheetConnections = originalConnections;
+        
+        this.showNotification(`Scenario "${scenario.name}" ${scenario.symbol} kørt!`, 'success');
+    }
+    
+    // Execute all action blocks in the current wiresheet
+    executeAllActionBlocks() {
+        if (!this.wiresheetBlocks || this.wiresheetBlocks.length === 0) {
+            this.showNotification('Ingen blokke at køre', 'warning');
+            return;
+        }
+        
+        // Find all action blocks and execute them
+        const actionBlocks = this.wiresheetBlocks.filter(block => block.type === 'action');
+        
+        if (actionBlocks.length === 0) {
+            this.showNotification('Ingen action blokke fundet', 'warning');
+            return;
+        }
+        
+        // Execute each action block
+        actionBlocks.forEach(actionBlock => {
+            this.executeBlock(actionBlock);
+        });
+    }
+    
+    editScenario(scenarioId) {
+        const scenario = this.savedScenarios.find(s => s.id === scenarioId);
+        if (!scenario) {
+            this.showNotification('Scenario ikke fundet', 'error');
+            return;
+        }
+        
+        // Load scenario into wiresheet
+        this.wiresheetBlocks = JSON.parse(JSON.stringify(scenario.blocks));
+        this.wiresheetConnections = JSON.parse(JSON.stringify(scenario.connections));
+        
+        // Switch to wiresheet tab
+        this.openWiresheet();
+        this.renderWiresheetBlocks();
+        this.renderWiresheetConnections();
+        
+        this.showNotification(`Scenario "${scenario.name}" indlæst til redigering`, 'info');
+    }
+    
+    deleteScenario(scenarioId) {
+        const scenario = this.savedScenarios.find(s => s.id === scenarioId);
+        if (!scenario) return;
+        
+        if (confirm(`Slet scenario "${scenario.name}" ${scenario.symbol}?`)) {
+            this.savedScenarios = this.savedScenarios.filter(s => s.id !== scenarioId);
+            localStorage.setItem('savedScenarios', JSON.stringify(this.savedScenarios));
+            this.updateSavedScenariosDisplay();
+            this.showNotification(`Scenario "${scenario.name}" slettet`, 'info');
+        }
+    }
+    
+    // createQuickRule funktion fjernet - regler er nu kun i wiresheet
+    
+    // updateRuleOptions funktion fjernet - regler er nu kun i wiresheet
+    
+    // saveQuickRule funktion fjernet - regler er nu kun i wiresheet
+    
+    
+    
+    
+    
+    
+    // updateQuickRulesDisplay funktion fjernet - regler er nu kun i wiresheet
+    
+
+    activateRule() {
+        // Execute the wiresheet rule against actual devices
+        this.executeWiresheetScenario();
+    }
+    
+    // Execute wiresheet scenario against actual devices
+    executeWiresheetScenario() {
+        if (this.wiresheetBlocks.length === 0) {
+            this.showNotification('Ingen blokke at køre', 'warning');
+            return;
+        }
+        
+        // Find trigger blocks and execute them
+        const triggerBlocks = this.wiresheetBlocks.filter(block => block.type === 'trigger');
+        
+        if (triggerBlocks.length === 0) {
+            this.showNotification('Ingen trigger blokke fundet', 'warning');
+            return;
+        }
+        
+        // Execute each trigger block
+        triggerBlocks.forEach(trigger => {
+            this.executeTriggerBlock(trigger);
+        });
+        
+        this.showNotification('Regel aktiveret!', 'success');
+    }
+    
+    // Execute a single trigger block
+    executeTriggerBlock(trigger) {
+        if (trigger.triggerType === 'sensor' && trigger.config.sensorId) {
+            const sensorElement = document.querySelector(`[data-device="${trigger.config.sensorId}"]`);
+            if (sensorElement) {
+                let shouldTrigger = false;
+                
+                // Check if it's a humidity sensor with numeric conditions
+                if (trigger.config.sensorId.includes('fugtmaaler') && 
+                    trigger.config.sensorCondition && 
+                    trigger.config.sensorValue) {
+                    const currentValue = parseFloat(sensorElement.dataset.value) || 0;
+                    const targetValue = parseFloat(trigger.config.sensorValue);
+                    
+                    switch (trigger.config.sensorCondition) {
+                        case 'above':
+                            shouldTrigger = currentValue > targetValue;
+                            break;
+                        case 'below':
+                            shouldTrigger = currentValue < targetValue;
+                            break;
+                        case 'equal':
+                            shouldTrigger = Math.abs(currentValue - targetValue) < 1; // Within 1%
+                            break;
+                    }
+                } 
+                // Check if it's a regular sensor with state conditions
+                else if (trigger.config.sensorState) {
+                const currentValue = sensorElement.dataset.value;
+                const requiredState = trigger.config.sensorState;
+                
+                // Check different sensor states
+                if (requiredState === 'active' && currentValue === 'true') {
+                    shouldTrigger = true;
+                } else if (requiredState === 'inactive' && currentValue === 'false') {
+                    shouldTrigger = true;
+                } else if (requiredState === 'motion' && currentValue === 'true') {
+                    shouldTrigger = true;
+                } else if (requiredState === 'no_motion' && currentValue === 'false') {
+                    shouldTrigger = true;
+                } else if (requiredState === 'open' && currentValue === 'true') {
+                    shouldTrigger = true;
+                } else if (requiredState === 'closed' && currentValue === 'false') {
+                    shouldTrigger = true;
+                } else if (requiredState === 'locked' && currentValue === 'true') {
+                    shouldTrigger = true;
+                } else if (requiredState === 'unlocked' && currentValue === 'false') {
+                    shouldTrigger = true;
+                    }
+                }
+                
+                if (shouldTrigger) {
+                    this.executeTriggerChain(trigger);
+                }
+            }
+        } else if (trigger.triggerType === 'time' && trigger.config.time) {
+            // Check if current time matches
+            const now = new Date();
+            const triggerTime = new Date();
+            const [hours, minutes] = trigger.config.time.split(':');
+            triggerTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+            
+            if (Math.abs(now - triggerTime) < 60000) { // Within 1 minute
+                this.executeTriggerChain(trigger);
+            }
+        }
+    }
+    
+    // Execute the chain of blocks starting from a trigger
+    executeTriggerChain(trigger) {
+        // Find connected blocks
+        const connections = this.wiresheetConnections.filter(conn => 
+            conn.from === trigger.id
+        );
+        
+        connections.forEach(connection => {
+            const nextBlock = this.wiresheetBlocks.find(block => block.id === connection.to);
+            if (nextBlock) {
+                this.executeBlock(nextBlock);
+            }
+        });
+    }
+    
+    // Execute a single block
+    executeBlock(block) {
+        if (block.type === 'action' && block.actionType === 'device') {
+            if (block.config.deviceId && block.config.action) {
+                this.executeDeviceAction(block.config.deviceId, block.config.action);
+            }
+        } else if (block.type === 'action' && block.actionType === 'notification') {
+            if (block.config.message) {
+                this.showNotification(block.config.message, 'info');
+            }
+        } else if (block.type === 'action' && block.actionType === 'delay') {
+            if (block.config.delay) {
+                setTimeout(() => {
+                    this.executeTriggerChain(block);
+                }, parseInt(block.config.delay) * 1000);
+            }
+        } else if (block.type === 'and') {
+            // Check AND conditions
+            if (this.checkAndConditions(block)) {
+                this.executeTriggerChain(block);
+            }
+        }
+    }
+    
+    // Execute device action
+    executeDeviceAction(deviceId, action) {
+        // Update the smart icon on the floor plan
+        const deviceElement = document.querySelector(`[data-device="${deviceId}"]`);
+        if (deviceElement) {
+            if (action === 'on') {
+                deviceElement.dataset.value = 'true';
+                deviceElement.classList.add('active');
+            } else if (action === 'off') {
+                deviceElement.dataset.value = 'false';
+                deviceElement.classList.remove('active');
+            } else if (action === 'toggle') {
+                const currentValue = deviceElement.dataset.value === 'true';
+                this.executeDeviceAction(deviceId, currentValue ? 'off' : 'on');
+                return; // Exit early to avoid double execution
+            }
+        }
+        
+        // Update the control panel switch
+        const controlSwitch = document.querySelector(`input[data-device="${deviceId}"]`);
+        if (controlSwitch && controlSwitch.type === 'checkbox') {
+            if (action === 'on') {
+                controlSwitch.checked = true;
+            } else if (action === 'off') {
+                controlSwitch.checked = false;
+            } else if (action === 'toggle') {
+                controlSwitch.checked = !controlSwitch.checked;
+            }
+        }
+        
+        // Update temperature display if it's a radiator
+        if (deviceId === 'aktuator-radiator') {
+            const tempDisplay = document.getElementById('radiator-temp-display');
+            if (tempDisplay) {
+                if (action === 'on') {
+                    this.radiatorTarget = 22;
+                    tempDisplay.textContent = '22.0°C';
+                } else if (action === 'off') {
+                    this.radiatorTarget = 18;
+                    tempDisplay.textContent = '18.0°C';
+                }
+            }
+        }
+    }
+    
+    // Check AND block conditions
+    checkAndConditions(andBlock) {
+        if (andBlock.andType === 'time') {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            const startTime = this.timeToMinutes(andBlock.config.startTime);
+            const endTime = this.timeToMinutes(andBlock.config.endTime);
+            
+            return currentTime >= startTime && currentTime <= endTime;
+        }
+        return false;
+    }
+    
+    // Convert time string to minutes
+    timeToMinutes(timeString) {
+        if (!timeString) return 0;
+        const [hours, minutes] = timeString.split(':');
+        return parseInt(hours) * 60 + parseInt(minutes);
+    }
+
+    // Hide connection controls
+    hideConnectionControls() {
+        const existing = document.getElementById('connection-controls');
+        if (existing) {
+            existing.remove();
+        }
+    }
+
+    // Cancel connection
+    cancelConnection() {
+        this.connectionStart = null;
+        this.isConnecting = false;
+        this.hideConnectionControls();
+        this.showNotification('Forbindelse annulleret', 'info');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
     // ===== ADVANCED MODE FUNCTIONS =====
     
 
@@ -1189,7 +3377,6 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     // ===== REGEL EDITOR FUNCTIONS =====
     
     initRuleEditor() {
-        this.rules = [];
         this.selectedRule = null;
         this.availableDevices = [
             { id: 'motion_sensor_1', name: 'Bevægelsessensor - Stue', type: 'motion' },
@@ -1423,6 +3610,139 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         document.getElementById('dimmer-status').textContent = `${value}%`;
         this.closeDimmerDialog();
         this.addLogEntry('ACTOR', `DÆMPER sat til ${value}%`);
+    }
+
+    // Sensor Status Popup Functions
+    openSensorStatusPopup(sensorData) {
+        const popup = document.getElementById('sensor-status-popup');
+        const title = document.getElementById('sensor-popup-title');
+        const icon = document.getElementById('sensor-popup-icon');
+        const name = document.getElementById('sensor-popup-name');
+        const type = document.getElementById('sensor-popup-type');
+        const controls = document.getElementById('sensor-status-controls');
+        
+        // Set sensor info
+        title.textContent = `📡 ${sensorData.name} Indstillinger`;
+        icon.textContent = sensorData.icon;
+        name.textContent = sensorData.name;
+        type.textContent = sensorData.sensorType;
+        
+        // Generate controls based on sensor type
+        controls.innerHTML = this.generateSensorControls(sensorData);
+        
+        popup.style.display = 'flex';
+    }
+
+    closeSensorStatusPopup() {
+        document.getElementById('sensor-status-popup').style.display = 'none';
+    }
+
+    generateSensorControls(sensorData) {
+        const sensorType = sensorData.sensorType;
+        let controls = '';
+        
+        switch(sensorType) {
+            case 'motion':
+                controls = `
+                    <div class="sensor-status-option">
+                        <input type="radio" id="motion-off" name="sensor-status" value="false" ${sensorData.value === false ? 'checked' : ''}>
+                        <label for="motion-off">Ingen bevægelse (OFF)</label>
+                    </div>
+                    <div class="sensor-status-option">
+                        <input type="radio" id="motion-on" name="sensor-status" value="true" ${sensorData.value === true ? 'checked' : ''}>
+                        <label for="motion-on">Bevægelse detekteret (ON)</label>
+                    </div>
+                `;
+                break;
+                
+            case 'humidity':
+                controls = `
+                    <div class="sensor-status-option">
+                        <input type="radio" id="humidity-low" name="sensor-status" value="low" ${sensorData.value < 50 ? 'checked' : ''}>
+                        <label for="humidity-low">Lav fugt (< 50%)</label>
+                    </div>
+                    <div class="sensor-status-option">
+                        <input type="radio" id="humidity-normal" name="sensor-status" value="normal" ${sensorData.value >= 50 && sensorData.value <= 70 ? 'checked' : ''}>
+                        <label for="humidity-normal">Normal fugt (50-70%)</label>
+                    </div>
+                    <div class="sensor-status-option">
+                        <input type="radio" id="humidity-high" name="sensor-status" value="high" ${sensorData.value > 70 ? 'checked' : ''}>
+                        <label for="humidity-high">Høj fugt (> 70%)</label>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <label for="humidity-value">Præcis værdi (%):</label>
+                        <input type="number" id="humidity-value" class="sensor-value-input" min="0" max="100" value="${sensorData.value}" placeholder="Indtast fugtniveau">
+                    </div>
+                `;
+                break;
+                
+            case 'weather':
+                controls = `
+                    <div class="sensor-status-option">
+                        <input type="radio" id="weather-cold" name="sensor-status" value="cold" ${sensorData.value < 10 ? 'checked' : ''}>
+                        <label for="weather-cold">Koldt (< 10°C)</label>
+                    </div>
+                    <div class="sensor-status-option">
+                        <input type="radio" id="weather-mild" name="sensor-status" value="mild" ${sensorData.value >= 10 && sensorData.value <= 25 ? 'checked' : ''}>
+                        <label for="weather-mild">Mildt (10-25°C)</label>
+                    </div>
+                    <div class="sensor-status-option">
+                        <input type="radio" id="weather-warm" name="sensor-status" value="warm" ${sensorData.value > 25 ? 'checked' : ''}>
+                        <label for="weather-warm">Varmt (> 25°C)</label>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <label for="weather-value">Præcis temperatur (°C):</label>
+                        <input type="number" id="weather-value" class="sensor-value-input" min="-20" max="50" value="${sensorData.value}" placeholder="Indtast temperatur">
+                    </div>
+                `;
+                break;
+                
+            default:
+                controls = `
+                    <div class="sensor-status-option">
+                        <input type="radio" id="sensor-off" name="sensor-status" value="false" ${sensorData.value === false ? 'checked' : ''}>
+                        <label for="sensor-off">Inaktiv (OFF)</label>
+                    </div>
+                    <div class="sensor-status-option">
+                        <input type="radio" id="sensor-on" name="sensor-status" value="true" ${sensorData.value === true ? 'checked' : ''}>
+                        <label for="sensor-on">Aktiv (ON)</label>
+                    </div>
+                `;
+        }
+        
+        return controls;
+    }
+
+    applySensorStatus() {
+        const selectedStatus = document.querySelector('input[name="sensor-status"]:checked');
+        const customValue = document.getElementById('humidity-value') || document.getElementById('weather-value');
+        
+        let newValue = selectedStatus ? selectedStatus.value : false;
+        
+        // Handle custom numeric values
+        if (customValue && customValue.value !== '') {
+            newValue = parseFloat(customValue.value);
+        }
+        
+        // Update the sensor status in the component palette
+        const sensorDevice = this.currentSensorDevice;
+        if (sensorDevice) {
+            const componentItem = document.querySelector(`[data-device="${sensorDevice}"]`);
+            if (componentItem) {
+                const statusElement = componentItem.querySelector('.component-status');
+                if (statusElement) {
+                    if (typeof newValue === 'number') {
+                        statusElement.textContent = `${newValue}${sensorDevice.includes('fugt') ? '%' : '°C'}`;
+                    } else {
+                        statusElement.textContent = newValue === 'true' || newValue === true ? 'ON' : 'OFF';
+                    }
+                }
+                componentItem.setAttribute('data-value', newValue);
+            }
+        }
+        
+        this.closeSensorStatusPopup();
+        this.addLogEntry('SENSOR', `Sensor ${sensorDevice} sat til ${newValue}`);
     }
 
     setGlobalVariables() {
@@ -1767,13 +4087,14 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const ruleId = 'rule_' + Date.now();
         const newRule = {
             id: ruleId,
-            name: 'Ny Regel ' + (this.rules.length + 1),
+            name: 'Ny Regel ' + ((this.rules?.length || 0) + 1),
             description: '',
             conditions: [],
             actions: [],
             enabled: true
         };
         
+        if (!this.rules) this.rules = [];
         this.rules.push(newRule);
         this.renderRules();
         this.showNotification('Ny regel oprettet', 'success');
@@ -1783,7 +4104,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const ruleList = document.getElementById('rule-list');
         if (!ruleList) return;
 
-        if (this.rules.length === 0) {
+        if (!this.rules || this.rules.length === 0) {
             ruleList.innerHTML = `
                 <div class="no-rules">
                     <p>Ingen regler oprettet endnu</p>
@@ -1799,7 +4120,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     <h4>${rule.name}</h4>
                     <div class="rule-item-actions">
                         <button class="btn-icon" onclick="event.stopPropagation(); window.appManager.editRule('${rule.id}')" title="Rediger">✏️</button>
-                        <button class="btn-icon" onclick="event.stopPropagation(); window.appManager.deleteRule('${rule.id}')" title="Slet">🗑️</button>
+                        <button class="btn-icon" onclick="event.stopPropagation(); window.appManager.deleteAdvancedRule('${rule.id}')" title="Slet">🗑️</button>
                     </div>
                 </div>
                 <div class="rule-item-content">
@@ -1814,12 +4135,14 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     selectRule(ruleId) {
+        if (!this.rules) return;
         this.selectedRule = this.rules.find(rule => rule.id === ruleId);
         this.renderRules();
         this.generateLuaCode();
     }
 
     editRule(ruleId) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1827,7 +4150,8 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         this.showRuleEditor(rule);
     }
 
-    deleteRule(ruleId) {
+    deleteAdvancedRule(ruleId) {
+        if (!this.rules) return;
         if (confirm('Er du sikker på, at du vil slette denne regel?')) {
             this.rules = this.rules.filter(rule => rule.id !== ruleId);
             if (this.selectedRule?.id === ruleId) {
@@ -1882,6 +4206,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     addCondition(ruleId) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1898,6 +4223,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     addAction(ruleId) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1916,6 +4242,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const conditionsList = document.getElementById('conditions-list');
         if (!conditionsList) return;
 
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1942,6 +4269,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const actionsList = document.getElementById('actions-list');
         if (!actionsList) return;
 
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1964,6 +4292,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     updateCondition(ruleId, conditionId, field, value) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1974,6 +4303,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     updateAction(ruleId, actionId, field, value) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1984,6 +4314,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     removeCondition(ruleId, conditionId) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -1992,6 +4323,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     removeAction(ruleId, actionId) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -2000,6 +4332,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     saveRule(ruleId) {
+        if (!this.rules) return;
         const rule = this.rules.find(rule => rule.id === ruleId);
         if (!rule) return;
 
@@ -2007,7 +4340,10 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         rule.description = document.getElementById('rule-description').value;
 
         this.renderRules();
-        document.querySelector('.rule-editor-popup').remove();
+        const ruleEditorPopup = document.querySelector('.rule-editor-popup');
+        if (ruleEditorPopup) {
+            ruleEditorPopup.remove();
+        }
         this.showNotification('Regel gemt', 'success');
     }
 
@@ -4763,32 +7099,6 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 }
 
-// ===== CSS ANIMATIONS =====
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
 
 // ===== INITIALIZE APP =====
 document.addEventListener('DOMContentLoaded', () => {

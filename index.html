@@ -490,6 +490,22 @@
                             </div>
                         </div>
                         
+                        <!-- Regler Kontrol -->
+                        <div class="rules-controls">
+                            <h4>Regler</h4>
+                            <div class="rules-grid" id="rules-grid">
+                                <!-- Dynamisk indhold for regler -->
+                            </div>
+                            
+                            <!-- Wiresheet Knap -->
+                            <div class="wiresheet-section">
+                                <button class="btn btn-primary wiresheet-btn" id="open-wiresheet">
+                                    <span class="btn-icon">🔧</span>
+                                    <span class="btn-text">Workflow Manager</span>
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div class="device-controls">
                                 <div class="control-group">
                                     <h4>Lys</h4>
@@ -601,6 +617,7 @@
                                     </div>
                                     
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -1189,5 +1206,198 @@
             </div>
         </div>
     </div>
+
+    <!-- Sensor Status Popup -->
+    <div id="sensor-status-popup" class="sensor-popup">
+        <div class="sensor-popup-content">
+            <div class="sensor-popup-header">
+                <h3 id="sensor-popup-title">📡 Sensor Indstillinger</h3>
+                <button class="close-btn" onclick="window.appManager.closeSensorStatusPopup()">&times;</button>
+            </div>
+            <div class="sensor-popup-body">
+                <div class="sensor-info">
+                    <div class="sensor-icon" id="sensor-popup-icon">📡</div>
+                    <div class="sensor-details">
+                        <h4 id="sensor-popup-name">Sensor Navn</h4>
+                        <p id="sensor-popup-type">Sensor Type</p>
+                    </div>
+                </div>
+                
+                <div class="sensor-status-controls" id="sensor-status-controls">
+                    <!-- Dynamisk indhold baseret på sensor type -->
+                </div>
+            </div>
+            <div class="sensor-popup-footer">
+                <button class="btn btn-secondary" onclick="window.appManager.closeSensorStatusPopup()">Annuller</button>
+                <button class="btn btn-primary" onclick="window.appManager.applySensorStatus()">Anvend</button>
+            </div>
+        </div>
+    </div>
+
+            <!-- Wiresheet Tab -->
+            <div id="wiresheet-tab" class="tab-content">
+                <div class="wiresheet-container">
+                    <div class="wiresheet-header">
+                        <h1>⚡ Regler</h1>
+                        <p>Opret smarthome regler med enkle formulare</p>
+                        <div class="wiresheet-nav">
+                            <button class="btn btn-secondary" id="back-to-smarthome">
+                                <span class="btn-icon">←</span>
+                                <span class="btn-text">Tilbage til Smarthome Sim</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-layout">
+                        <!-- Component Palette (Left) -->
+                        <div class="component-palette">
+                            <h3>Node Palette</h3>
+                            
+                            <!-- Sensorer fra Plantegning -->
+                            <div class="component-section">
+                                <h4 class="component-header trigger-header">
+                                    <span class="component-icon">📡</span>
+                                    Sensorer
+                                </h4>
+                                <div class="component-items">
+                                    <div class="component-item" draggable="true" data-type="sensor" data-device="bevaegelsessensor-entre" data-sensor-type="motion" data-value="false">
+                                        <span class="component-icon">📡</span>
+                                        <span class="component-name">Bevægelse Entre</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="sensor" data-device="bevaegelsessensor-stue" data-sensor-type="motion" data-value="false">
+                                        <span class="component-icon">📡</span>
+                                        <span class="component-name">Bevægelse Stue</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="sensor" data-device="badevaerelse-fugtmaaler" data-sensor-type="humidity" data-value="45">
+                                        <span class="component-icon">💧</span>
+                                        <span class="component-name">Fugt Badeværelse</span>
+                                        <span class="component-status">45%</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="sensor" data-device="udvendig-vejrstation" data-sensor-type="weather" data-value="15">
+                                        <span class="component-icon">🌤️</span>
+                                        <span class="component-name">Udvendig Vejr</span>
+                                        <span class="component-status">15°C</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- And Category -->
+                            <div class="component-section">
+                                <h4 class="component-header and-header">
+                                    <span class="component-icon">🔗</span>
+                                    And
+                                </h4>
+                                <div class="component-items">
+                                    <div class="component-item" draggable="true" data-type="and" data-subtype="time">
+                                        <span class="component-icon">⏰</span>
+                                        <span class="component-name">Tidsbetingelse</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="and" data-subtype="logic">
+                                        <span class="component-icon">🔀</span>
+                                        <span class="component-name">Logik</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="and" data-subtype="value">
+                                        <span class="component-icon">📊</span>
+                                        <span class="component-name">Værdi</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Aktuatorer fra Plantegning -->
+                            <div class="component-section">
+                                <h4 class="component-header action-header">
+                                    <span class="component-icon">⚡</span>
+                                    Aktuatorer
+                                </h4>
+                                <div class="component-items">
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="stue-lampe" data-actuator-type="light" data-value="false">
+                                        <span class="component-icon">💡</span>
+                                        <span class="component-name">Stue Lampe</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="badevaerelse-lampe" data-actuator-type="light" data-value="false">
+                                        <span class="component-icon">💡</span>
+                                        <span class="component-name">Badeværelse Lampe</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="sovevaerelse-lampe" data-actuator-type="light" data-value="false">
+                                        <span class="component-icon">💡</span>
+                                        <span class="component-name">Soveværelse Lampe</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="koekken-lampe" data-actuator-type="light" data-value="false">
+                                        <span class="component-icon">💡</span>
+                                        <span class="component-name">Køkken Lampe</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="spisestue-lampe" data-actuator-type="light" data-value="false">
+                                        <span class="component-icon">💡</span>
+                                        <span class="component-name">Spisestue Lampe</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="badevaerelse-ventilator" data-actuator-type="fan" data-value="false">
+                                        <span class="component-icon">🌀</span>
+                                        <span class="component-name">Badeværelse Ventilator</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="aktuator-radiator" data-actuator-type="heating" data-value="false">
+                                        <span class="component-icon">🌡️</span>
+                                        <span class="component-name">Aktuator/Radiator</span>
+                                        <span class="component-status">OFF</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="actuator" data-device="doerlaas" data-actuator-type="lock" data-value="false">
+                                        <span class="component-icon">🔒</span>
+                                        <span class="component-name">Dørlås</span>
+                                        <span class="component-status">LÅST</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rule Category -->
+                            <div class="component-section">
+                                <h4 class="component-header rule-header">
+                                    <span class="component-icon">📋</span>
+                                    Rule
+                                </h4>
+                                <div class="component-items">
+                                    <div class="component-item" draggable="true" data-type="rule" data-subtype="simple">
+                                        <span class="component-icon">📝</span>
+                                        <span class="component-name">Simpel Regel</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="rule" data-subtype="complex">
+                                        <span class="component-icon">🔧</span>
+                                        <span class="component-name">Kompleks Regel</span>
+                                    </div>
+                                    <div class="component-item" draggable="true" data-type="rule" data-subtype="schedule">
+                                        <span class="component-icon">📅</span>
+                                        <span class="component-name">Tidsplan</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Workflow Canvas (Right) -->
+                        <div class="canvas-container">
+                            <div class="canvas-header">
+                                <h3>Workflow Canvas</h3>
+                                <div class="canvas-controls">
+                                    <button class="btn btn-secondary" id="clear-canvas">🗑️ Ryd</button>
+                                    <button class="btn btn-primary" id="save-workflow">💾 Gem</button>
+                                    <button class="btn btn-success" id="test-workflow">▶️ Test</button>
+                                </div>
+                            </div>
+                            <div class="canvas" id="workflow-canvas">
+                                <div class="canvas-grid"></div>
+                                <div class="canvas-nodes"></div>
+                                <div class="canvas-connections"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    <script src="js/app.js"></script>
 </body>
 </html>
