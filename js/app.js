@@ -4,6 +4,7 @@
 // ===== APP MANAGER =====
 class AppManager {
     constructor() {
+        console.log('AppManager constructor called...');
         this.currentUser = null;
         this.currentTab = 'home';
         this.currentTheme = 'default';
@@ -12,11 +13,22 @@ class AppManager {
         this.rules = [];
         this.savedScenarios = [];
         this.savedRules = [];
+        this.simLog = [];
+        this.simSensors = [];
+        this.simRules = [];
         
         // Radiator temperature control
         this.radiatorTemp = 21.0;
         this.radiatorTarget = 21.0;
         this.radiatorInterval = null;
+        
+        // Smart stikkontakter sinuskurve simulation
+        this.socketIntervals = {};
+        this.socketPowerData = {
+            'stue-stikkontakt': { base: 200, amplitude: 50, frequency: 0.02 },
+            'koekken-stikkontakt': { base: 800, amplitude: 200, frequency: 0.03 },
+            'sovevaerelse-stikkontakt': { base: 100, amplitude: 30, frequency: 0.015 }
+        };
         
         // Weather station data
         this.outdoorTemp = 15;
@@ -24,6 +36,7 @@ class AppManager {
         
         // AI Assistant
         this.aiAssistantActive = false;
+        
         
         this.init();
     }
@@ -92,6 +105,8 @@ class AppManager {
             btn.addEventListener('click', (e) => this.toggleDevice(e.target));
         });
 
+        // Smart icon clicks are handled by the existing switch functionality
+
         // E-Learning topic cards
         document.querySelectorAll('.topic-card').forEach(card => {
             card.addEventListener('click', (e) => this.handleTopicClick(e.currentTarget));
@@ -109,14 +124,15 @@ class AppManager {
             searchInput.addEventListener('input', (e) => this.filterTopics(e.target.value));
         }
 
-        // Workflow Manager functionality
-        this.setupWorkflowManagerButton();
         
         // Sensor component click handlers
         this.setupSensorComponentHandlers();
         
-        // Setup drag and drop for workflow canvas
-        this.setupWorkflowDragAndDrop();
+        
+        // Setup regel formular - delay to ensure DOM is ready
+        setTimeout(() => {
+            this.setupRuleForm();
+        }, 100);
     }
 
     // ===== SENSOR COMPONENT HANDLERS =====
@@ -155,203 +171,379 @@ class AppManager {
         this.openSensorStatusPopup(sensorData);
     }
 
-    // ===== WORKFLOW DRAG AND DROP =====
-    
-    setupWorkflowDragAndDrop() {
-        // Setup drag for component items
-        const componentItems = document.querySelectorAll('.component-item');
         
-        componentItems.forEach(item => {
-            // Make sure items are draggable
-            item.setAttribute('draggable', 'true');
-            
-            item.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', JSON.stringify({
-                    type: item.dataset.type,
-                    device: item.dataset.device,
-                    sensorType: item.dataset.sensorType,
-                    actuatorType: item.dataset.actuatorType,
-                    name: item.querySelector('.component-name').textContent,
-                    icon: item.querySelector('.component-icon').textContent,
-                    value: item.dataset.value
-                }));
-                
-                item.classList.add('dragging');
-            });
-            
-            item.addEventListener('dragend', (e) => {
-                item.classList.remove('dragging');
+    
+    
+    
+    
+    
+
+    
+    // ===== REGEL FORMULAR =====
+    
+    setupRuleForm() {
+        console.log('Setting up step form...');
+        
+        // Wiresheet tab removed - no longer needed
+        
+        this.currentStep = 1;
+        this.totalSteps = 5;
+        this.ruleData = {};
+        
+        this.setupStepNavigation();
+        this.setupStepInteractions();
+        this.updateProgress();
+    }
+    
+    setupStepNavigation() {
+        const nextBtn = document.getElementById('next-step');
+        const prevBtn = document.getElementById('prev-step');
+        const saveBtn = document.getElementById('save-rule');
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => this.nextStep());
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => this.prevStep());
+        }
+        
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveRule());
+        }
+    }
+    
+    setupStepInteractions() {
+        // Sensor selection
+        const sensorInputs = document.querySelectorAll('input[name="sensor"]');
+        sensorInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                this.ruleData.sensor = input.value;
+                this.showConditionSettings();
             });
         });
         
-        // Setup drop for workflow canvas
-        const canvas = document.getElementById('workflow-canvas');
-        if (canvas) {
-            canvas.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'copy';
-                canvas.classList.add('drag-over');
+        // Actuator selection
+        const actuatorInputs = document.querySelectorAll('input[name="actuator"]');
+        actuatorInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                this.ruleData.actuator = input.value;
+                this.showActionSettings();
             });
-            
-            canvas.addEventListener('dragleave', (e) => {
-                canvas.classList.remove('drag-over');
+        });
+        
+        // Time option selection
+        const timeInputs = document.querySelectorAll('input[name="time-option"]');
+        timeInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                if (input.value === 'time-range') {
+                    document.getElementById('time-settings').style.display = 'block';
+                } else {
+                    document.getElementById('time-settings').style.display = 'none';
+                }
             });
-            
-            canvas.addEventListener('drop', (e) => {
-                e.preventDefault();
-                canvas.classList.remove('drag-over');
-                
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-                this.addNodeToCanvas(canvas, data, e);
+        });
+        
+        // Condition operator
+        const conditionOperator = document.getElementById('condition-operator');
+        if (conditionOperator) {
+            conditionOperator.addEventListener('change', () => {
+                const valueGroup = document.getElementById('value-group');
+                if (['greater', 'less', 'equals'].includes(conditionOperator.value)) {
+                    valueGroup.style.display = 'block';
+                } else {
+                    valueGroup.style.display = 'none';
+                }
             });
         }
     }
     
-    addNodeToCanvas(canvas, data, event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        
-        // Create node element
-        const nodeId = 'node_' + Date.now();
-        const nodeElement = document.createElement('div');
-        nodeElement.className = 'canvas-node';
-        nodeElement.id = nodeId;
-        nodeElement.style.left = x + 'px';
-        nodeElement.style.top = y + 'px';
-        
-        // Generate node content based on type
-        let nodeContent = '';
-        if (data.type === 'sensor') {
-            nodeContent = `
-                <div class="node-header">
-                    <span class="node-icon">${data.icon}</span>
-                    <span class="node-title">${data.name}</span>
-                    <button class="node-delete" onclick="window.appManager.deleteNode('${nodeId}')">×</button>
-                </div>
-                <div class="node-body">
-                    <div class="node-config">
-                        <label>Status:</label>
-                        <select class="node-select" onchange="window.appManager.updateNodeStatus('${nodeId}', this.value)">
-                            <option value="false" ${data.value === 'false' ? 'selected' : ''}>OFF</option>
-                            <option value="true" ${data.value === 'true' ? 'selected' : ''}>ON</option>
-                        </select>
-                    </div>
-                </div>
-            `;
-        } else if (data.type === 'actuator') {
-            nodeContent = `
-                <div class="node-header">
-                    <span class="node-icon">${data.icon}</span>
-                    <span class="node-title">${data.name}</span>
-                    <button class="node-delete" onclick="window.appManager.deleteNode('${nodeId}')">×</button>
-                </div>
-                <div class="node-body">
-                    <div class="node-config">
-                        <label>Handling:</label>
-                        <select class="node-select" onchange="window.appManager.updateNodeAction('${nodeId}', this.value)">
-                            <option value="on">Tænd</option>
-                            <option value="off">Sluk</option>
-                        </select>
-                    </div>
-                </div>
-            `;
+    nextStep() {
+        if (this.validateCurrentStep()) {
+            this.saveCurrentStepData();
+            
+            if (this.currentStep < this.totalSteps) {
+                this.currentStep++;
+                this.showStep(this.currentStep);
+                this.updateProgress();
+                this.updateNavigation();
+            }
         }
-        
-        nodeElement.innerHTML = nodeContent;
-        
-        // Add to canvas
-        const nodesContainer = canvas.querySelector('.canvas-nodes');
-        if (nodesContainer) {
-            nodesContainer.appendChild(nodeElement);
-        } else {
-            canvas.appendChild(nodeElement);
-        }
-        
-        // Make node draggable
-        this.makeNodeDraggable(nodeElement);
-        
-        this.addLogEntry('CANVAS', `Tilføjet ${data.name} til canvas`);
     }
     
-    makeNodeDraggable(nodeElement) {
-        let isDragging = false;
-        let startX, startY, initialX, initialY;
+    prevStep() {
+        if (this.currentStep > 1) {
+            this.currentStep--;
+            this.showStep(this.currentStep);
+            this.updateProgress();
+            this.updateNavigation();
+        }
+    }
+    
+    showStep(stepNumber) {
+        // Hide all steps
+        const steps = document.querySelectorAll('.step-panel');
+        steps.forEach(step => step.classList.remove('active'));
         
-        const header = nodeElement.querySelector('.node-header');
-        if (!header) return;
+        // Show current step
+        const currentStep = document.getElementById(`step-${stepNumber}`);
+        if (currentStep) {
+            currentStep.classList.add('active');
+        }
         
-        header.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('node-delete')) return;
-            
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            const rect = nodeElement.getBoundingClientRect();
-            initialX = rect.left;
-            initialY = rect.top;
-            
-            nodeElement.style.zIndex = '1000';
-            nodeElement.classList.add('dragging');
-            
-            e.preventDefault();
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            
-            nodeElement.style.left = (initialX + deltaX) + 'px';
-            nodeElement.style.top = (initialY + deltaY) + 'px';
-        });
-        
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                nodeElement.style.zIndex = '10';
-                nodeElement.classList.remove('dragging');
+        // Update step indicators
+        const stepIndicators = document.querySelectorAll('.step');
+        stepIndicators.forEach((indicator, index) => {
+            indicator.classList.remove('active', 'completed');
+            if (index + 1 === stepNumber) {
+                indicator.classList.add('active');
+            } else if (index + 1 < stepNumber) {
+                indicator.classList.add('completed');
             }
         });
-    }
-    
-    deleteNode(nodeId) {
-        const node = document.getElementById(nodeId);
-        if (node) {
-            node.remove();
-            this.addLogEntry('CANVAS', `Slettet node ${nodeId}`);
+        
+        // Special handling for step 5 (summary)
+        if (stepNumber === 5) {
+            this.generateRuleSummary();
         }
     }
     
-    updateNodeStatus(nodeId, status) {
-        const node = document.getElementById(nodeId);
-        if (node) {
-            this.addLogEntry('NODE', `Node ${nodeId} status ændret til ${status}`);
+    updateProgress() {
+        const progressFill = document.getElementById('progress-fill');
+        if (progressFill) {
+            const progress = (this.currentStep / this.totalSteps) * 100;
+            progressFill.style.width = progress + '%';
         }
     }
     
-    updateNodeAction(nodeId, action) {
-        const node = document.getElementById(nodeId);
-        if (node) {
-            this.addLogEntry('NODE', `Node ${nodeId} handling ændret til ${action}`);
+    updateNavigation() {
+        const prevBtn = document.getElementById('prev-step');
+        const nextBtn = document.getElementById('next-step');
+        const saveBtn = document.getElementById('save-rule');
+        
+        if (prevBtn) {
+            prevBtn.style.display = this.currentStep > 1 ? 'block' : 'none';
+        }
+        
+        if (nextBtn) {
+            nextBtn.style.display = this.currentStep < this.totalSteps ? 'block' : 'none';
+        }
+        
+        if (saveBtn) {
+            saveBtn.style.display = this.currentStep === this.totalSteps ? 'block' : 'none';
         }
     }
-
-    // ===== WORKFLOW MANAGER =====
     
-    setupWorkflowManagerButton() {
-        const openBtn = document.getElementById('open-wiresheet');
-        if (openBtn) {
-            openBtn.addEventListener('click', () => this.openWorkflowManager());
-        }
-
-        const backBtn = document.getElementById('back-to-smarthome');
-        if (backBtn) {
-            backBtn.addEventListener('click', () => this.closeWorkflowManager());
+    validateCurrentStep() {
+        switch (this.currentStep) {
+            case 1:
+                const ruleName = document.getElementById('rule-name');
+                if (!ruleName || !ruleName.value.trim()) {
+                    this.showNotification('Indtast et regel navn', 'warning');
+                    return false;
+                }
+                return true;
+                
+            case 2:
+                const selectedSensor = document.querySelector('input[name="sensor"]:checked');
+                if (!selectedSensor) {
+                    this.showNotification('Vælg en sensor', 'warning');
+                    return false;
+                }
+                return true;
+                
+            case 3:
+                const selectedActuator = document.querySelector('input[name="actuator"]:checked');
+                if (!selectedActuator) {
+                    this.showNotification('Vælg en aktuator', 'warning');
+                    return false;
+                }
+                return true;
+                
+            case 4:
+                return true; // Time step is optional
+                
+            case 5:
+                return true; // Summary step
+                
+            default:
+                return true;
         }
     }
+    
+    saveCurrentStepData() {
+        switch (this.currentStep) {
+            case 1:
+                this.ruleData.name = document.getElementById('rule-name').value;
+                this.ruleData.description = document.getElementById('rule-description').value;
+                break;
+                
+            case 2:
+                const sensor = document.querySelector('input[name="sensor"]:checked');
+                if (sensor) {
+                    this.ruleData.sensor = sensor.value;
+                    this.ruleData.conditionOperator = document.getElementById('condition-operator').value;
+                    this.ruleData.conditionValue = document.getElementById('condition-value').value;
+                }
+                break;
+                
+            case 3:
+                const actuator = document.querySelector('input[name="actuator"]:checked');
+                if (actuator) {
+                    this.ruleData.actuator = actuator.value;
+                    this.ruleData.action = document.getElementById('action').value;
+                }
+                break;
+                
+            case 4:
+                const timeOption = document.querySelector('input[name="time-option"]:checked');
+                if (timeOption) {
+                    this.ruleData.timeOption = timeOption.value;
+                    if (timeOption.value === 'time-range') {
+                        this.ruleData.startTime = document.getElementById('start-time').value;
+                        this.ruleData.endTime = document.getElementById('end-time').value;
+                        this.ruleData.weekdaysOnly = document.getElementById('weekdays-only').checked;
+                    }
+                }
+                break;
+        }
+    }
+    
+    showConditionSettings() {
+        const conditionSettings = document.getElementById('condition-settings');
+        if (conditionSettings) {
+            conditionSettings.style.display = 'block';
+        }
+    }
+    
+    showActionSettings() {
+        const actionSettings = document.getElementById('action-settings');
+        if (actionSettings) {
+            actionSettings.style.display = 'block';
+        }
+    }
+    
+    generateRuleSummary() {
+        const summary = document.getElementById('rule-summary');
+        if (!summary) return;
+        
+        const deviceNames = {
+            'bevaegelsessensor-entre': 'Bevægelsessensor Entre',
+            'bevaegelsessensor-stue': 'Bevægelsessensor Stue',
+            'badevaerelse-fugtmaaler': 'Badeværelse Fugtmåler',
+            'udvendig-vejrstation': 'Udvendig Vejrstation',
+            'time': 'Tidsbetingelse',
+            'stue-lampe': 'Stue Lampe',
+            'badevaerelse-lampe': 'Badeværelse Lampe',
+            'sovevaerelse-lampe': 'Soveværelse Lampe',
+            'koekken-lampe': 'Køkken Lampe',
+            'spisestue-lampe': 'Spisestue Lampe',
+            'doerlaas': 'Dørlås',
+            'aktuator-radiator': 'Aktuator/Radiator',
+            'badevaerelse-ventilator': 'Badeværelse Ventilator'
+        };
+        
+        const actionNames = {
+            'turn-on': 'Tænd',
+            'turn-off': 'Sluk',
+            'toggle': 'Skift tilstand',
+            'lock': 'Lås',
+            'unlock': 'Lås op'
+        };
+        
+        const operatorNames = {
+            'detected': 'opdager',
+            'not-detected': 'ikke opdager',
+            'greater': 'er større end',
+            'less': 'er mindre end',
+            'equals': 'er lig med'
+        };
+        
+        let html = `
+            <div class="summary-item">
+                <h4>📝 Regel Information</h4>
+                <p><strong>Navn:</strong> ${this.ruleData.name || 'Ikke angivet'}</p>
+                <p><strong>Beskrivelse:</strong> ${this.ruleData.description || 'Ingen beskrivelse'}</p>
+            </div>
+            
+            <div class="summary-item">
+                <h4 class="condition">🔍 Betingelse</h4>
+                <p><strong>Sensor:</strong> ${deviceNames[this.ruleData.sensor] || this.ruleData.sensor}</p>
+                <p><strong>Betingelse:</strong> ${operatorNames[this.ruleData.conditionOperator] || this.ruleData.conditionOperator}</p>
+                ${this.ruleData.conditionValue ? `<p><strong>Værdi:</strong> ${this.ruleData.conditionValue}</p>` : ''}
+            </div>
+            
+            <div class="summary-item">
+                <h4 class="action">⚡ Handling</h4>
+                <p><strong>Aktuator:</strong> ${deviceNames[this.ruleData.actuator] || this.ruleData.actuator}</p>
+                <p><strong>Handling:</strong> ${actionNames[this.ruleData.action] || this.ruleData.action}</p>
+            </div>
+        `;
+        
+        if (this.ruleData.timeOption === 'time-range') {
+            html += `
+                <div class="summary-item">
+                    <h4 class="time">⏰ Tidsindstillinger</h4>
+                    <p><strong>Fra kl:</strong> ${this.ruleData.startTime || 'Ikke angivet'}</p>
+                    <p><strong>Til kl:</strong> ${this.ruleData.endTime || 'Ikke angivet'}</p>
+                    ${this.ruleData.weekdaysOnly ? '<p><strong>Kun hverdage:</strong> Ja</p>' : ''}
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="summary-item">
+                    <h4 class="time">⏰ Tidsindstillinger</h4>
+                    <p><strong>Status:</strong> Altid aktiv</p>
+                </div>
+            `;
+        }
+        
+        summary.innerHTML = html;
+    }
+    
+    saveRule() {
+        if (!this.validateCurrentStep()) return;
+        
+        const rule = {
+            id: 'rule_' + Date.now(),
+            name: this.ruleData.name,
+            description: this.ruleData.description,
+            sensor: this.ruleData.sensor,
+            conditionOperator: this.ruleData.conditionOperator,
+            conditionValue: this.ruleData.conditionValue,
+            actuator: this.ruleData.actuator,
+            action: this.ruleData.action,
+            timeOption: this.ruleData.timeOption,
+            startTime: this.ruleData.startTime,
+            endTime: this.ruleData.endTime,
+            weekdaysOnly: this.ruleData.weekdaysOnly,
+            created: new Date().toISOString(),
+            active: true
+        };
+        
+        // Save to localStorage
+        const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        savedRules.push(rule);
+        localStorage.setItem('savedRules', JSON.stringify(savedRules));
+        
+        this.showNotification('Regel gemt!', 'success');
+        
+        // Reset form
+        this.currentStep = 1;
+        this.ruleData = {};
+        this.showStep(1);
+        this.updateProgress();
+        this.updateNavigation();
+        
+        // Clear form
+        document.getElementById('rule-name').value = '';
+        document.getElementById('rule-description').value = '';
+        document.querySelectorAll('input[type="radio"]').forEach(input => input.checked = false);
+        document.getElementById('condition-settings').style.display = 'none';
+        document.getElementById('action-settings').style.display = 'none';
+        document.getElementById('time-settings').style.display = 'none';
+    }
+    
 
     setupRuleBuilder() {
         // Setup rule builder controls
@@ -416,141 +608,8 @@ class AppManager {
         });
     }
 
-    createCanvasNode(data, x, y) {
-        const canvasNodes = document.querySelector('.canvas-nodes');
-        if (!canvasNodes) return;
 
-        const nodeId = 'node_' + Date.now();
-        const node = document.createElement('div');
-        node.className = `canvas-node ${data.type}-node`;
-        node.id = nodeId;
-        node.style.left = x + 'px';
-        node.style.top = y + 'px';
-        
-        // Generate appropriate dropdown based on node type and subtype
-        let dropdownOptions = '';
-        
-        if (data.type === 'trigger') {
-            if (data.subtype === 'sensor') {
-                dropdownOptions = `
-                    <option value="">Vælg sensor...</option>
-                    <option value="bevaegelsessensor-entre">Bevægelsessensor Entre</option>
-                    <option value="bevaegelsessensor-stue">Bevægelsessensor Stue</option>
-                    <option value="badevaerelse-fugtmaaler">Badeværelse Fugtmåler</option>
-                    <option value="udvendig-vejrstation">Udvendig Vejrstation</option>
-                `;
-            } else if (data.subtype === 'time') {
-                dropdownOptions = `
-                    <option value="">Vælg tid...</option>
-                    <option value="time_specific">Specifik tid</option>
-                    <option value="time_sunrise">Solopgang</option>
-                    <option value="time_sunset">Solnedgang</option>
-                    <option value="time_interval">Interval</option>
-                `;
-            }
-        } else {
-            // Default dropdown for other node types
-            dropdownOptions = `
-                <option value="">Vælg indstilling...</option>
-                <option value="option1">Indstilling 1</option>
-                <option value="option2">Indstilling 2</option>
-            `;
-        }
 
-        // Generate toggle dropdown based on sensor type
-        let toggleOptions = '';
-        if (data.type === 'trigger' && data.subtype === 'sensor') {
-            toggleOptions = `
-                <div class="node-config">
-                    <label class="config-label">Sensor:</label>
-                    <select class="node-select sensor-select">
-                        ${dropdownOptions}
-                    </select>
-                </div>
-                <div class="node-config">
-                    <label class="config-label">Tilstand:</label>
-                    <select class="node-select toggle-select" id="toggle-${nodeId}">
-                        <option value="">Vælg først sensor...</option>
-                    </select>
-                </div>
-            `;
-        } else if (data.type === 'trigger' && data.subtype === 'time') {
-            toggleOptions = `
-                <div class="node-config">
-                    <label class="config-label">Tid:</label>
-                    <select class="node-select time-select">
-                        ${dropdownOptions}
-                    </select>
-                </div>
-            `;
-        } else {
-            toggleOptions = `
-                <div class="node-config">
-                    <label class="config-label">Indstilling:</label>
-                    <select class="node-select">
-                        ${dropdownOptions}
-                    </select>
-                </div>
-            `;
-        }
-
-        node.innerHTML = `
-            <div class="node-header" data-draggable="true">
-                <span class="node-icon">${data.icon}</span>
-                <span class="node-title">${data.name}</span>
-                <button class="node-delete" onclick="window.appManager.deleteNode('${nodeId}')">×</button>
-            </div>
-            <div class="node-content">
-                ${toggleOptions}
-            </div>
-        `;
-
-        canvasNodes.appendChild(node);
-        this.makeNodeDraggable(node);
-        
-        // Add event listener for sensor selection if it's a sensor node
-        if (data.type === 'trigger' && data.subtype === 'sensor') {
-            const sensorSelect = node.querySelector('.sensor-select');
-            if (sensorSelect) {
-                sensorSelect.addEventListener('change', function() {
-                    console.log('Sensor select changed!');
-                    const node = this.closest('.canvas-node');
-                    const toggleSelect = node.querySelector('.toggle-select');
-                    const selectedSensor = this.value;
-                    
-                    console.log('Selected sensor:', selectedSensor);
-                    
-                    let states = '<option value="">Vælg tilstand...</option>';
-                    
-                    if (selectedSensor === 'bevaegelsessensor-entre' || selectedSensor === 'bevaegelsessensor-stue') {
-                        states += `
-                            <option value="motion_detected">Bevægelse detekteret</option>
-                            <option value="no_motion">Ingen bevægelse</option>
-                        `;
-                    } else if (selectedSensor === 'badevaerelse-fugtmaaler') {
-                        states += `
-                            <option value="high_humidity">Høj fugt (>70%)</option>
-                            <option value="normal_humidity">Normal fugt (40-70%)</option>
-                            <option value="low_humidity">Lav fugt (<40%)</option>
-                        `;
-                    } else if (selectedSensor === 'udvendig-vejrstation') {
-                        states += `
-                            <option value="rain">Regn</option>
-                            <option value="sunny">Solrigt</option>
-                            <option value="cloudy">Overskyet</option>
-                            <option value="cold">Koldt (<5°C)</option>
-                            <option value="hot">Varmt (>25°C)</option>
-                        `;
-                    }
-                    
-                    console.log('Setting states:', states);
-                    toggleSelect.innerHTML = states;
-                });
-            }
-        }
-        
-        this.showNotification(`${data.name} node tilføjet!`, 'success');
-    }
 
     createNewRule() {
         const rulesContainer = document.getElementById('rules-container');
@@ -702,53 +761,6 @@ class AppManager {
         this.showNotification(`Test kører - ${ruleCards.length} regler fundet`, 'info');
     }
 
-
-    makeNodeDraggable(node) {
-        let isDragging = false;
-        let startX, startY, initialX, initialY;
-
-        const header = node.querySelector('.node-header');
-        
-        header.addEventListener('mousedown', (e) => {
-            // Don't start dragging if clicking on delete button or interactive elements
-            if (e.target.classList.contains('node-delete') || 
-                e.target.tagName === 'SELECT' ||
-                e.target.tagName === 'OPTION' ||
-                e.target.classList.contains('node-select')) {
-                return;
-            }
-            
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            initialX = parseInt(node.style.left) || 0;
-            initialY = parseInt(node.style.top) || 0;
-            
-            node.style.zIndex = '1000';
-            node.classList.add('dragging');
-            
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            
-            node.style.left = (initialX + deltaX) + 'px';
-            node.style.top = (initialY + deltaY) + 'px';
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                node.style.zIndex = '10';
-                node.classList.remove('dragging');
-            }
-        });
-    }
-
     deleteNode(nodeId) {
         const node = document.getElementById(nodeId);
         if (node && confirm('Slet denne node?')) {
@@ -757,38 +769,8 @@ class AppManager {
         }
     }
 
-    clearCanvas() {
-        const canvasNodes = document.querySelector('.canvas-nodes');
-        if (canvasNodes && confirm('Ryd hele canvas?')) {
-            canvasNodes.innerHTML = '';
-            this.showNotification('Canvas ryddet', 'info');
-        }
-    }
 
-    saveWorkflow() {
-        const nodes = document.querySelectorAll('.canvas-node');
-        const workflow = {
-            nodes: Array.from(nodes).map(node => ({
-                id: node.id,
-                type: node.classList.contains('trigger-node') ? 'trigger' : 
-                      node.classList.contains('and-node') ? 'and' :
-                      node.classList.contains('action-node') ? 'action' : 'rule',
-                position: {
-                    x: parseInt(node.style.left) || 0,
-                    y: parseInt(node.style.top) || 0
-                }
-            })),
-            timestamp: new Date().toISOString()
-        };
-        
-        localStorage.setItem('workflow', JSON.stringify(workflow));
-        this.showNotification('Workflow gemt!', 'success');
-    }
 
-    testWorkflow() {
-        const nodes = document.querySelectorAll('.canvas-node');
-        this.showNotification(`Workflow test - ${nodes.length} noder fundet`, 'info');
-    }
 
     updateSensorStates(nodeId) {
         console.log('updateSensorStates called with nodeId:', nodeId);
@@ -840,31 +822,7 @@ class AppManager {
         toggleSelect.innerHTML = states;
     }
 
-    openWorkflowManager() {
-        // Hide all tab contents
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        
-        // Show workflow manager tab
-        const workflowTab = document.getElementById('wiresheet-tab');
-        if (workflowTab) {
-            workflowTab.classList.add('active');
-            // Setup rule builder when opening
-            this.setupRuleBuilder();
-        }
-    }
 
-    closeWorkflowManager() {
-        // Hide workflow manager tab
-        const workflowTab = document.getElementById('wiresheet-tab');
-        if (workflowTab) {
-            workflowTab.classList.remove('active');
-        }
-        
-        // Switch back to smarthome tab
-        this.switchTab('smarthome');
-    }
 
     // ===== AUTHENTICATION =====
     setupAuthStateListener() {
@@ -1037,7 +995,6 @@ class AppManager {
         // Load data for specific tabs
         if (tabName === 'advanced') {
             this.initRuleEditor();
-            this.initSmarthomeSim();
         }
         
         this.currentTab = tabName;
@@ -1164,7 +1121,6 @@ class AppManager {
             advancedTab.style.display = 'flex';
             this.showNotification('🔓 Advanced Mode aktiveret!', 'success');
             this.initRuleEditor();
-            this.initSmarthomeSim();
             this.saveSetting('advancedMode', true);
             this.hideAdvancedPasswordPopup();
         } else {
@@ -1519,275 +1475,9 @@ class AppManager {
         }
     }
 
-    // ===== WIRESHEET FUNCTIONS =====
-    
-    setupWiresheetEventListeners() {
-        // Open Wiresheet button (from Smarthome Sim)
-        const openBtn = document.getElementById('open-wiresheet');
-        if (openBtn) {
-            openBtn.addEventListener('click', () => this.openWiresheet());
-        }
 
-        // Back to Smarthome Sim button
-        const backBtn = document.getElementById('back-to-smarthome');
-        if (backBtn) {
-            backBtn.addEventListener('click', () => this.closeWiresheet());
-        }
 
-        // Wiresheet control buttons are now set up in initWiresheet() -> setupWiresheetControlButtons()
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                if (this.selectedBlock && this.currentTab === 'wiresheet') {
-                    this.deleteBlock(this.selectedBlock.id);
-                }
-            }
-        });
-    }
-
-    // ===== WIRESHEET CORE FUNCTIONS =====
     
-    openWiresheet() {
-        // Hide all tab contents
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        
-        // Show wiresheet tab
-        const wiresheetTab = document.getElementById('wiresheet-tab');
-        if (wiresheetTab) {
-            wiresheetTab.classList.add('active');
-            this.initWiresheet();
-        }
-    }
-
-    closeWiresheet() {
-        // Hide wiresheet tab
-        const wiresheetTab = document.getElementById('wiresheet-tab');
-        if (wiresheetTab) {
-            wiresheetTab.classList.remove('active');
-        }
-        
-        // Return to smarthome sim tab
-        this.switchTab('smarthome');
-    }
-
-    initWiresheet() {
-        // Initialize wiresheet state
-        this.wiresheetBlocks = [];
-        this.wiresheetConnections = [];
-        this.selectedBlock = null;
-        this.draggedBlock = null;
-        this.connectionStart = null;
-        this.isDragging = false;
-        
-        // Load saved scenarios from localStorage
-        this.savedScenarios = JSON.parse(localStorage.getItem('savedScenarios') || '[]');
-        this.savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
-        this.isConnecting = false;
-        
-        this.setupWiresheetDragAndDrop();
-        this.setupWiresheetCanvas();
-        this.setupWiresheetConnections();
-        this.renderWiresheetBlocks();
-        
-        // Setup wiresheet control buttons
-        this.setupWiresheetControlButtons();
-        
-        // Automatic rule checking is now handled in init()
-    }
-    
-    setupWiresheetControlButtons() {
-        console.log('Setting up wiresheet control buttons');
-        
-        // Canvas controls
-        const testBtn = document.getElementById('test-rule');
-        const saveBtn = document.getElementById('save-rule');
-        const runBtn = document.getElementById('run-rule');
-        
-        console.log('Setting up wiresheet buttons:');
-        console.log('testBtn found:', !!testBtn);
-        console.log('saveBtn found:', !!saveBtn);
-        console.log('runBtn found:', !!runBtn);
-        
-        // Remove existing event listeners to prevent duplication
-        if (testBtn) {
-            testBtn.removeEventListener('click', this.testRule);
-            testBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Test button clicked!');
-                this.testRule();
-            });
-        }
-        if (saveBtn) {
-            saveBtn.removeEventListener('click', this.saveRule);
-            saveBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Save button clicked!');
-                this.saveRule();
-            });
-        }
-        if (runBtn) {
-            runBtn.removeEventListener('click', this.activateRule);
-            runBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Run button clicked!');
-                this.activateRule();
-            });
-        }
-    }
-
-    // ===== WIRESHEET BLOCK TYPES =====
-    
-    // Get available sensors from plantegning
-    getAvailableSensors() {
-        const sensors = [];
-        const smartIcons = document.querySelectorAll('.smart-icon');
-        
-        smartIcons.forEach(icon => {
-            const deviceId = icon.dataset.device;
-            const deviceName = icon.dataset.deviceName;
-            const deviceType = icon.dataset.type;
-            const iconSymbol = icon.querySelector('.icon-symbol').textContent;
-            
-            // Check if it's a sensor type (excluding motion sensors)
-            if (deviceId.includes('fugtmaaler') || 
-                deviceId.includes('vejrstation') ||
-                deviceId.includes('vindue') ||
-                deviceId.includes('doerlaas')) {
-                sensors.push({
-                    id: deviceId,
-                    name: deviceName,
-                    type: deviceType,
-                    icon: iconSymbol
-                });
-            }
-        });
-        
-        return sensors;
-    }
-    
-    // Get available motion sensors from plantegning
-    getAvailableMotionSensors() {
-        const sensors = [];
-        const smartIcons = document.querySelectorAll('.smart-icon');
-        
-        smartIcons.forEach(icon => {
-            const deviceId = icon.dataset.device;
-            const deviceName = icon.dataset.deviceName;
-            const deviceType = icon.dataset.type;
-            const iconSymbol = icon.querySelector('.icon-symbol').textContent;
-            
-            // Check if it's a motion sensor
-            if (deviceId.includes('bevaegelsessensor')) {
-                sensors.push({
-                    id: deviceId,
-                    name: deviceName,
-                    type: deviceType,
-                    icon: iconSymbol
-                });
-            }
-        });
-        
-        return sensors;
-    }
-    
-    // Get available devices from plantegning
-    getAvailableDevices() {
-        const devices = [];
-        const smartIcons = document.querySelectorAll('.smart-icon');
-        
-        smartIcons.forEach(icon => {
-            const deviceId = icon.dataset.device;
-            const deviceName = icon.dataset.deviceName;
-            const deviceType = icon.dataset.type;
-            const iconSymbol = icon.querySelector('.icon-symbol').textContent;
-            
-            // Check if it's an actionable device
-            if (deviceId.includes('lampe') || 
-                deviceId.includes('aktuator') || 
-                deviceId.includes('ventilator') ||
-                deviceId.includes('vindue') ||
-                deviceId.includes('doerlaas')) {
-                devices.push({
-                    id: deviceId,
-                    name: deviceName,
-                    type: deviceType,
-                    icon: iconSymbol
-                });
-            }
-        });
-        
-        return devices;
-    }
-    
-    // Update block configuration
-    updateBlockConfig(blockId, configKey, value) {
-        const block = this.wiresheetBlocks.find(b => b.id === blockId);
-        if (block) {
-            if (!block.config) block.config = {};
-            block.config[configKey] = value;
-            
-            // Update block name if it's a device selection
-            if (configKey === 'device' && value) {
-                const device = this.getAvailableDevices().find(d => d.id === value);
-                if (device) {
-                    block.name = device.name;
-                }
-            } else if (configKey === 'sensorId' && value) {
-                const sensor = this.getAvailableSensors().find(s => s.id === value);
-                if (sensor) {
-                    block.name = sensor.name;
-                    // Enable sensor state dropdown
-                    this.renderWiresheetBlocks();
-                }
-            } else if (configKey === 'sensorCondition' && value) {
-                // Update block name to include condition for humidity sensors
-                const sensor = this.getAvailableSensors().find(s => s.id === block.config.sensorId);
-                if (sensor && sensor.id.includes('fugtmaaler')) {
-                    const conditionLabels = {
-                        'above': 'Over',
-                        'below': 'Under',
-                        'equal': 'Lig med'
-                    };
-                    block.name = `${sensor.name} (${conditionLabels[value]})`;
-                }
-            } else if (configKey === 'sensorValue' && value) {
-                // Update block name to include value for humidity sensors
-                const sensor = this.getAvailableSensors().find(s => s.id === block.config.sensorId);
-                if (sensor && sensor.id.includes('fugtmaaler')) {
-                    const conditionLabels = {
-                        'above': 'Over',
-                        'below': 'Under',
-                        'equal': 'Lig med'
-                    };
-                    const condition = conditionLabels[block.config.sensorCondition] || '';
-                    block.name = `${sensor.name} (${condition} ${value}%)`;
-                }
-            } else if (configKey === 'sensorState' && value) {
-                // Update block name to include state
-                const sensor = this.getAvailableSensors().find(s => s.id === block.config.sensorId);
-                if (sensor) {
-                    const stateLabels = {
-                        'active': 'Aktiv',
-                        'inactive': 'Inaktiv', 
-                        'motion': 'Bevægelse',
-                        'no_motion': 'Ingen bevægelse',
-                        'open': 'Åben',
-                        'closed': 'Lukket',
-                        'locked': 'Låst',
-                        'unlocked': 'Ulåst'
-                    };
-                    const stateLabel = stateLabels[value] || value;
-                    block.name = `${sensor.name} (${stateLabel})`;
-                }
-            }
-            
-            // Re-render the block
-            this.renderWiresheetBlocks();
-        }
-    }
     
     // Trigger blocks (sensors, time, manual)
     createTriggerBlock(type, data) {
@@ -1835,7 +1525,7 @@ class AppManager {
     
     setupWiresheetDragAndDrop() {
         const blockItems = document.querySelectorAll('.wiresheet-block-item');
-        const canvasArea = document.getElementById('wiresheet-canvas');
+        const canvasArea = document.getElementById('workflow-canvas');
 
         blockItems.forEach(item => {
             item.addEventListener('dragstart', (e) => {
@@ -1880,7 +1570,7 @@ class AppManager {
     // ===== WIRESHEET CANVAS =====
     
     setupWiresheetCanvas() {
-        const canvasArea = document.getElementById('wiresheet-canvas');
+        const canvasArea = document.getElementById('workflow-canvas');
         if (canvasArea) {
             canvasArea.addEventListener('click', (e) => {
                 if (e.target === canvasArea) {
@@ -1923,12 +1613,13 @@ class AppManager {
             // Check if block already exists to prevent duplication
             const existingBlock = this.wiresheetBlocks.find(b => b.id === block.id);
             if (existingBlock) {
-                console.log('Block already exists, not adding duplicate');
                 return;
             }
             
+            // Set position directly with raw mouse coordinates
             block.x = x;
             block.y = y;
+            
             this.wiresheetBlocks.push(block);
             this.renderWiresheetBlocks();
         }
@@ -1937,7 +1628,7 @@ class AppManager {
     // ===== WIRESHEET RENDERING =====
     
     renderWiresheetBlocks() {
-        const canvasBlocks = document.getElementById('wiresheet-canvas').querySelector('.canvas-blocks');
+        const canvasBlocks = document.getElementById('workflow-canvas').querySelector('.canvas-nodes');
         if (!canvasBlocks) return;
         
         canvasBlocks.innerHTML = '';
@@ -2148,19 +1839,21 @@ class AppManager {
         const updateDrag = (clientX, clientY) => {
             if (!isDragging) return;
             
-            // Calculate new position relative to canvas, centered on mouse
-            const canvasRect = document.getElementById('wiresheet-canvas').getBoundingClientRect();
-            const blockRect = blockElement.getBoundingClientRect();
+            // Get canvas position
+            const canvas = document.getElementById('workflow-canvas');
+            const canvasRect = canvas.getBoundingClientRect();
             
-            // Center the block on the mouse cursor
-            const newX = clientX - canvasRect.left - (blockRect.width / 2);
-            const newY = clientY - canvasRect.top - (blockRect.height / 2);
+            // Calculate position relative to canvas
+            const newX = clientX - canvasRect.left;
+            const newY = clientY - canvasRect.top;
             
-            // Update block position immediately using left/top for instant response
+            // Set position directly without any calculations
+            blockElement.style.left = newX + 'px';
+            blockElement.style.top = newY + 'px';
+            
+            // Update block data
             block.x = newX;
             block.y = newY;
-            blockElement.style.left = block.x + 'px';
-            blockElement.style.top = block.y + 'px';
         };
         
         const endDrag = () => {
@@ -2356,12 +2049,12 @@ class AppManager {
         this.showNotification('Test regel funktionalitet kommer snart', 'info');
     }
 
-    saveRule() {
+    saveWiresheetRule() {
         try {
-            console.log('saveRule() called');
-            console.log('wiresheetBlocks length:', this.wiresheetBlocks.length);
+            console.log('saveWiresheetRule() called');
+            console.log('wiresheetBlocks length:', this.wiresheetBlocks ? this.wiresheetBlocks.length : 'undefined');
             
-        if (this.wiresheetBlocks.length === 0) {
+        if (!this.wiresheetBlocks || this.wiresheetBlocks.length === 0) {
                 console.log('No blocks found, showing warning');
             this.showNotification('Ingen blokke at gemme', 'warning');
             return;
@@ -2943,6 +2636,1352 @@ class AppManager {
 
 
 
+    // ===== BLOCK EDITOR FUNCTIONS =====
+    
+    // Smart Home Setup - alle sensorer fra plantegningen
+    getSmartHomeSetup() {
+        return {
+            sensors: {
+                // Bevægelsessensorer
+                'bevaegelsessensor-entre': {
+                    type: 'motion',
+                    name: 'Bevægelsessensor Entre',
+                    room: 'Entre',
+                    icon: '📡',
+                    properties: ['status', 'sensitivity', 'timeout']
+                },
+                'bevaegelsessensor-stue': {
+                    type: 'motion',
+                    name: 'Bevægelsessensor Stue',
+                    room: 'Stue',
+                    icon: '📡',
+                    properties: ['status', 'sensitivity', 'timeout']
+                },
+                
+                // Dør/Vindue sensorer
+                'vindue-sovevaerelse': {
+                    type: 'door',
+                    name: 'Vindue Soveværelse',
+                    room: 'Soveværelse',
+                    icon: '🪟',
+                    properties: ['status', 'sensor_type']
+                },
+                'vindue-stue': {
+                    type: 'door',
+                    name: 'Vindue Stue',
+                    room: 'Stue',
+                    icon: '🪟',
+                    properties: ['status', 'sensor_type']
+                },
+                'doerlaas': {
+                    type: 'door',
+                    name: 'Dørlås',
+                    room: 'Entre',
+                    icon: '🔒',
+                    properties: ['status', 'lock_type']
+                },
+                
+                // Temperatur og fugtighed
+                'badevaerelse-fugtmaaler': {
+                    type: 'humidity',
+                    name: 'Badeværelse Fugtmåler',
+                    room: 'Badeværelse',
+                    icon: '💧',
+                    properties: ['humidity_level', 'comparison', 'tolerance']
+                },
+                'sovevaerelse-temperatur': {
+                    type: 'temperature',
+                    name: 'Soveværelse Temperatur',
+                    room: 'Soveværelse',
+                    icon: '🌡️',
+                    properties: ['temperature', 'target_temp', 'mode']
+                },
+                'koekken-roegalarm': {
+                    type: 'motion',
+                    name: 'Køkken Røgalarm',
+                    room: 'Køkken',
+                    icon: '🚨',
+                    properties: ['status', 'sensitivity', 'test_mode']
+                },
+                'koekken-vandlaekage': {
+                    type: 'humidity',
+                    name: 'Køkken Vandlækage',
+                    room: 'Køkken',
+                    icon: '💧',
+                    properties: ['status', 'sensitivity', 'location']
+                },
+                'aktuator-radiator': {
+                    type: 'temperature',
+                    name: 'Aktuator/Radiator',
+                    room: 'Stue',
+                    icon: '🌡️',
+                    properties: ['temperature', 'target_temp', 'mode']
+                },
+                
+                // Vejrstation
+                'udvendig-vejrstation': {
+                    type: 'weather',
+                    name: 'Udvendig Vejrstation',
+                    room: 'Udvendig',
+                    icon: '🌤️',
+                    properties: ['weather_condition', 'temperature', 'humidity', 'wind']
+                },
+                
+                // Ventilator
+                'badevaerelse-ventilator': {
+                    type: 'fan',
+                    name: 'Badeværelse Ventilator',
+                    room: 'Badeværelse',
+                    icon: '🌀',
+                    properties: ['status', 'speed', 'auto_mode']
+                },
+                'altan-lys': {
+                    type: 'dimmer',
+                    name: 'Altanlys',
+                    room: 'Altan',
+                    icon: '💡',
+                    properties: ['brightness', 'mode', 'timer']
+                },
+                'stue-stikkontakt': {
+                    type: 'light',
+                    name: 'Stue Stikkontakt',
+                    room: 'Stue',
+                    icon: '⚡',
+                    properties: ['power_consumption', 'status', 'timer']
+                },
+                'koekken-stikkontakt': {
+                    type: 'light',
+                    name: 'Køkken Stikkontakt',
+                    room: 'Køkken',
+                    icon: '⚡',
+                    properties: ['power_consumption', 'status', 'timer']
+                },
+                'sovevaerelse-stikkontakt': {
+                    type: 'light',
+                    name: 'Soveværelse Stikkontakt',
+                    room: 'Soveværelse',
+                    icon: '⚡',
+                    properties: ['power_consumption', 'status', 'timer']
+                }
+            },
+            
+            // Aktuatorer (lamper)
+            actuators: {
+                'stue-lampe': {
+                    type: 'light',
+                    name: 'Stue Lampe',
+                    room: 'Stue',
+                    icon: '💡',
+                    properties: ['status', 'brightness', 'color']
+                },
+                'badevaerelse-lampe': {
+                    type: 'light',
+                    name: 'Badeværelses Lampe',
+                    room: 'Badeværelse',
+                    icon: '💡',
+                    properties: ['status', 'brightness', 'motion_sensor']
+                },
+                'sovevaerelse-lampe': {
+                    type: 'light',
+                    name: 'Soveværelse Lampe',
+                    room: 'Soveværelse',
+                    icon: '💡',
+                    properties: ['status', 'brightness', 'dimmer']
+                },
+                'koekken-lampe': {
+                    type: 'light',
+                    name: 'Køkken Lampe',
+                    room: 'Køkken',
+                    icon: '💡',
+                    properties: ['status', 'brightness', 'motion_sensor']
+                },
+                'spisestue-lampe': {
+                    type: 'light',
+                    name: 'Spisestue Lampe',
+                    room: 'Spisestue',
+                    icon: '💡',
+                    properties: ['status', 'brightness', 'dimmer']
+                }
+            }
+        };
+    }
+    
+    openBlockEditor() {
+        console.log('Opening Block Editor...');
+        const blockEditorSide = document.getElementById('block-editor-side');
+        const smarthomeTab = document.getElementById('smarthome-tab');
+        
+        console.log('blockEditorSide:', blockEditorSide);
+        console.log('smarthomeTab:', smarthomeTab);
+        
+        if (blockEditorSide && smarthomeTab) {
+            console.log('Elements found, opening block editor...');
+            smarthomeTab.style.display = 'none';
+            blockEditorSide.classList.remove('hidden');
+            this.initializeBlockEditor();
+        } else {
+            console.error('Could not find required elements for block editor');
+            console.error('blockEditorSide exists:', !!blockEditorSide);
+            console.error('smarthomeTab exists:', !!smarthomeTab);
+        }
+    }
+    
+    closeBlockEditor() {
+        console.log('Closing Block Editor...');
+        const blockEditorSide = document.getElementById('block-editor-side');
+        const smarthomeTab = document.getElementById('smarthome-tab');
+        
+        if (blockEditorSide && smarthomeTab) {
+            blockEditorSide.classList.add('hidden');
+            smarthomeTab.style.display = 'block';
+        }
+    }
+    
+    initializeBlockEditor() {
+        console.log('Initializing Block Editor...');
+        try {
+            this.setupBlockEditorDragAndDrop();
+            this.setupBlockEditorProperties();
+            console.log('Block Editor initialized successfully');
+        } catch (error) {
+            console.error('Error initializing Block Editor:', error);
+        }
+    }
+    
+    setupBlockEditorDragAndDrop() {
+        console.log('Setting up Block Editor drag and drop...');
+        const blockItems = document.querySelectorAll('.block-item');
+        const canvas = document.getElementById('scene-canvas');
+        
+        console.log('Found block items:', blockItems.length);
+        console.log('Found canvas:', canvas);
+        
+        blockItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                const blockData = {
+                    type: e.target.dataset.blockType,
+                    subtype: e.target.dataset.blockSubtype,
+                    name: e.target.querySelector('.block-name').textContent,
+                    description: e.target.querySelector('.block-description').textContent,
+                    icon: e.target.querySelector('.block-icon').textContent
+                };
+                
+                // Add sensor/actuator specific data
+                if (e.target.dataset.sensorId) {
+                    blockData.sensorId = e.target.dataset.sensorId;
+                }
+                if (e.target.dataset.actuatorId) {
+                    blockData.actuatorId = e.target.dataset.actuatorId;
+                }
+                
+                e.dataTransfer.setData('text/plain', JSON.stringify(blockData));
+                e.target.style.opacity = '0.5';
+            });
+            
+            item.addEventListener('dragend', (e) => {
+                e.target.style.opacity = '1';
+            });
+        });
+        
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            canvas.classList.add('drag-over');
+        });
+        
+        canvas.addEventListener('dragleave', (e) => {
+            canvas.classList.remove('drag-over');
+        });
+        
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvas.classList.remove('drag-over');
+            
+            const blockData = JSON.parse(e.dataTransfer.getData('text/plain'));
+            this.addBlockToCanvas(blockData, e.offsetX, e.offsetY);
+        });
+    }
+    
+    addBlockToCanvas(blockData, x, y) {
+        console.log('Adding block to canvas:', blockData);
+        
+        const canvas = document.getElementById('scene-canvas');
+        const blockElement = document.createElement('div');
+        blockElement.className = 'canvas-block';
+        
+        // Set data attributes for rule conversion
+        blockElement.dataset.blockType = blockData.type;
+        blockElement.dataset.blockSubtype = blockData.subtype;
+        if (blockData.sensorId) {
+            blockElement.dataset.sensorId = blockData.sensorId;
+        }
+        if (blockData.actuatorId) {
+            blockElement.dataset.actuatorId = blockData.actuatorId;
+        }
+        
+        blockElement.style.position = 'absolute';
+        blockElement.style.left = x + 'px';
+        blockElement.style.top = y + 'px';
+        blockElement.style.background = this.getBlockColor(blockData.type);
+        blockElement.style.border = '2px solid ' + this.getBlockBorderColor(blockData.type);
+        blockElement.style.borderRadius = '12px';
+        blockElement.style.padding = '20px';
+        blockElement.style.minWidth = '140px';
+        blockElement.style.cursor = 'move';
+        blockElement.style.transition = 'all 0.3s ease';
+        blockElement.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.3)';
+        blockElement.style.zIndex = '10';
+        
+        blockElement.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <span style="font-size: 1.4rem; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));">${blockData.icon}</span>
+                <span style="font-size: 0.9rem; font-weight: 700; text-transform: uppercase; opacity: 0.9; letter-spacing: 1px;">${blockData.type.toUpperCase()}</span>
+            </div>
+            <div style="font-size: 1rem; font-weight: 600; line-height: 1.4;">${blockData.name}</div>
+            <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">${blockData.description}</div>
+        `;
+        
+        // Make block draggable within canvas
+        this.makeBlockDraggable(blockElement);
+        
+        // Add click handler for properties
+        blockElement.addEventListener('click', () => {
+            this.selectBlock(blockElement, blockData);
+        });
+        
+        canvas.appendChild(blockElement);
+        
+        // Hide drop zone text if this is the first block
+        const dropZoneText = canvas.querySelector('div[style*="text-align: center"]');
+        if (dropZoneText) {
+            dropZoneText.style.display = 'none';
+        }
+    }
+    
+    makeBlockDraggable(blockElement) {
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+        let mouseMoveHandler, mouseUpHandler;
+        let lastMoveTime = 0;
+        const MOVE_THROTTLE = 16; // ~60fps
+        
+        blockElement.addEventListener('mousedown', (e) => {
+            // Only allow dragging on the block itself, not child elements
+            if (e.target !== blockElement && !blockElement.contains(e.target)) return;
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = parseInt(blockElement.style.left) || 0;
+            initialY = parseInt(blockElement.style.top) || 0;
+            blockElement.style.zIndex = '20';
+            blockElement.style.cursor = 'grabbing';
+            blockElement.style.userSelect = 'none';
+            blockElement.classList.add('dragging');
+            e.preventDefault();
+            
+            // Create throttled mouse move handler
+            mouseMoveHandler = (e) => {
+                if (!isDragging) return;
+                
+                const now = performance.now();
+                if (now - lastMoveTime < MOVE_THROTTLE) return;
+                lastMoveTime = now;
+                
+                // Direct calculation and update for maximum responsiveness
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                blockElement.style.left = (initialX + deltaX) + 'px';
+                blockElement.style.top = (initialY + deltaY) + 'px';
+            };
+            
+            // Create mouse up handler
+            mouseUpHandler = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    blockElement.style.zIndex = '10';
+                    blockElement.style.cursor = 'grab';
+                    blockElement.style.userSelect = 'auto';
+                    blockElement.classList.remove('dragging');
+                    
+                    // Remove event listeners
+                    document.removeEventListener('mousemove', mouseMoveHandler);
+                    document.removeEventListener('mouseup', mouseUpHandler);
+                }
+            };
+            
+            // Add event listeners
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        });
+        
+        // Set initial cursor
+        blockElement.style.cursor = 'grab';
+    }
+    
+    selectBlock(blockElement, blockData) {
+        // Remove previous selection
+        document.querySelectorAll('.canvas-block').forEach(block => {
+            block.style.border = block.style.border.replace('3px solid #00d4ff', '2px solid ' + this.getBlockBorderColor(blockData.type));
+        });
+        
+        // Select current block
+        blockElement.style.border = '3px solid #00d4ff';
+        
+        // Update properties panel
+        this.updateBlockProperties(blockData);
+    }
+    
+    updateBlockProperties(blockData) {
+        const selectedBlockInfo = document.getElementById('selected-block-info');
+        const blockPropertiesContent = document.getElementById('block-properties-content');
+        
+        if (selectedBlockInfo) {
+            selectedBlockInfo.innerHTML = `
+                <div class="selected-block-name">${blockData.icon} ${blockData.name}</div>
+                <div class="selected-block-type">${blockData.type} blok</div>
+            `;
+        }
+        
+        if (blockPropertiesContent) {
+            let propertiesHTML = `<div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">`;
+            propertiesHTML += `<h4 style="color: #00d4ff; margin-bottom: 15px; font-size: 1.1rem;">${blockData.name} Indstillinger</h4>`;
+            
+            // Add specific properties based on block type
+            if (blockData.type === 'trigger') {
+                if (blockData.subtype === 'motion') {
+                    propertiesHTML += this.getMotionProperties(blockData);
+                } else if (blockData.subtype === 'time') {
+                    propertiesHTML += this.getTimeProperties();
+                } else if (blockData.subtype === 'door') {
+                    propertiesHTML += this.getDoorProperties(blockData);
+                } else if (blockData.subtype === 'humidity') {
+                    propertiesHTML += this.getHumidityProperties(blockData);
+                } else if (blockData.subtype === 'temperature') {
+                    propertiesHTML += this.getTemperatureProperties(blockData);
+                } else if (blockData.subtype === 'weather') {
+                    propertiesHTML += this.getWeatherProperties(blockData);
+                }
+            } else if (blockData.type === 'condition') {
+                if (blockData.subtype === 'time') {
+                    propertiesHTML += this.getTimeIntervalProperties();
+                } else if (blockData.subtype === 'compare') {
+                    propertiesHTML += this.getCompareProperties();
+                }
+            } else if (blockData.type === 'action') {
+                if (blockData.subtype === 'light') {
+                    propertiesHTML += this.getLightActionProperties(blockData);
+                } else if (blockData.subtype === 'socket') {
+                    propertiesHTML += this.getSocketActionProperties(blockData);
+                } else if (blockData.subtype === 'dimmer') {
+                    propertiesHTML += this.getDimmerActionProperties();
+                } else if (blockData.subtype === 'fan') {
+                    propertiesHTML += this.getFanActionProperties(blockData);
+                } else if (blockData.subtype === 'notification') {
+                    propertiesHTML += this.getNotificationActionProperties();
+                }
+            }
+            
+            propertiesHTML += `</div>`;
+            blockPropertiesContent.innerHTML = propertiesHTML;
+        }
+    }
+    
+    getPIRProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Aktiveret</option>
+                    <option>Deaktiveret</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Følsomhed</label>
+                <input type="range" class="property-slider" min="1" max="10" value="5" oninput="this.nextElementSibling.textContent = this.value">
+                <div style="text-align: center; color: #00d4ff; margin-top: 5px;">5</div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Timeout</label>
+                <input type="range" class="property-slider" min="5" max="300" value="30" oninput="this.nextElementSibling.textContent = this.value + ' sek'">
+                <div style="text-align: center; color: #00d4ff; margin-top: 5px;">30 sek</div>
+            </div>
+        `;
+    }
+    
+    getTimeProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Tid</label>
+                <input type="time" class="property-input" value="18:00">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Dage</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Hver dag</option>
+                    <option>Hverdage</option>
+                    <option>Weekend</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getDoorProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Åben</option>
+                    <option>Lukket</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Åbningsvinkel</label>
+                <input type="range" class="property-slider" min="0" max="180" value="90" oninput="this.nextElementSibling.textContent = this.value + '°'">
+                <div style="text-align: center; color: #00d4ff; margin-top: 5px;">90°</div>
+            </div>
+        `;
+    }
+    
+    getTimeIntervalProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Start Tid</label>
+                <input type="time" class="property-input" value="18:00">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Slut Tid</label>
+                <input type="time" class="property-input" value="22:00">
+            </div>
+        `;
+    }
+    
+    getCompareProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Sammenligning</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Større end</option>
+                    <option>Mindre end</option>
+                    <option>Lig med</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Værdi</label>
+                <input type="number" class="property-input" placeholder="Indtast værdi...">
+            </div>
+        `;
+    }
+    
+    getLightActionProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Handling</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Tænd</option>
+                    <option>Sluk</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Stue Lampe</option>
+                    <option>Køkken Lampe</option>
+                    <option>Soveværelse Lampe</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getDimmerActionProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lysstyrke</label>
+                <input type="range" class="property-slider" min="0" max="100" value="75" oninput="this.nextElementSibling.textContent = this.value + '%'">
+                <div style="text-align: center; color: #00d4ff; margin-top: 5px;">75%</div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Stue Dæmper</option>
+                    <option>Køkken Dæmper</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getNotificationActionProperties() {
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Besked</label>
+                <input type="text" class="property-input" placeholder="Indtast besked..." value="Scene aktiveret">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Type</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Info</option>
+                    <option>Advarsel</option>
+                    <option>Fejl</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getMotionProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const sensorId = blockData.sensorId;
+        const sensor = setup.sensors[sensorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${sensor ? sensor.room : 'Ukendt'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Bevægelse detekteret</option>
+                    <option>Ingen bevægelse</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Følsomhed</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Høj</option>
+                    <option>Medium</option>
+                    <option>Lav</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Timeout (sekunder)</label>
+                <input type="number" class="property-input" placeholder="30" value="30" style="width: 100%;">
+            </div>
+        `;
+    }
+    
+    getHumidityProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const sensorId = blockData.sensorId;
+        const sensor = setup.sensors[sensorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${sensor ? sensor.room : 'Ukendt'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Fugtniveau (%)</label>
+                <input type="number" class="property-input" placeholder="70" value="70" min="0" max="100" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Sammenligning</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Over</option>
+                    <option>Under</option>
+                    <option>Lig med</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Tolerance (%)</label>
+                <input type="number" class="property-input" placeholder="5" value="5" min="0" max="20" style="width: 100%;">
+            </div>
+        `;
+    }
+    
+    getTemperatureProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const sensorId = blockData.sensorId;
+        const sensor = setup.sensors[sensorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${sensor ? sensor.room : 'Ukendt'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Temperatur (°C)</label>
+                <input type="number" class="property-input" placeholder="21" value="21" min="15" max="30" step="0.1" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Sammenligning</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Over</option>
+                    <option>Under</option>
+                    <option>Lig med</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Mode</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Opvarmning</option>
+                    <option>Køling</option>
+                    <option>Auto</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getWeatherProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const sensorId = blockData.sensorId;
+        const sensor = setup.sensors[sensorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${sensor ? sensor.room : 'Udvendig'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Vejrforhold</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Regn</option>
+                    <option>Solrigt</option>
+                    <option>Overskyet</option>
+                    <option>Koldt (<5°C)</option>
+                    <option>Varmt (>25°C)</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Temperatur (°C)</label>
+                <input type="number" class="property-input" placeholder="15" value="15" min="-20" max="40" step="0.1" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Vindstyrke</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Stille</option>
+                    <option>Let vind</option>
+                    <option>Moderat vind</option>
+                    <option>Stærk vind</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getFanActionProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const actuatorId = blockData.actuatorId;
+        const actuator = setup.actuators[actuatorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${actuator ? actuator.room : 'Ukendt'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Tænd</option>
+                    <option>Sluk</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Hastighed</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Lav</option>
+                    <option>Medium</option>
+                    <option>Høj</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Auto Mode</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Manuel</option>
+                    <option>Auto (fugtighed)</option>
+                    <option>Auto (tid)</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getLightActionProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const actuatorId = blockData.actuatorId;
+        const actuator = setup.actuators[actuatorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${actuator ? actuator.room : 'Ukendt'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Tænd</option>
+                    <option>Sluk</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lysstyrke (%)</label>
+                <input type="range" class="property-input" min="0" max="100" value="100" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Farve</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Hvid (2700K)</option>
+                    <option>Varm hvid (3000K)</option>
+                    <option>Kølig hvid (4000K)</option>
+                    <option>Dagslys (6500K)</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    getSocketActionProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const actuatorId = blockData.actuatorId;
+        const actuator = setup.actuators[actuatorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${actuator ? actuator.room : 'Ukendt'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Tænd</option>
+                    <option>Sluk</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Strømforbrug (W)</label>
+                <input type="range" class="property-input" min="0" max="1500" value="200" style="width: 100%;">
+                <div style="text-align: center; color: #00d4ff; font-size: 0.8rem; margin-top: 5px;">200W</div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Timer (min)</label>
+                <input type="number" class="property-input" min="0" max="1440" value="0" style="width: 100%;" placeholder="0 = ingen timer">
+            </div>
+        `;
+    }
+    
+    getBlockColor(type) {
+        const colors = {
+            trigger: 'linear-gradient(135deg, #667eea, #764ba2)',
+            condition: 'linear-gradient(135deg, #f093fb, #f5576c)',
+            action: 'linear-gradient(135deg, #4facfe, #00f2fe)'
+        };
+        return colors[type] || 'linear-gradient(135deg, #2d3748, #4a5568)';
+    }
+    
+    getBlockBorderColor(type) {
+        const colors = {
+            trigger: '#8b5cf6',
+            condition: '#ff6b9d',
+            action: '#00d4ff'
+        };
+        return colors[type] || '#4a5568';
+    }
+    
+    setupBlockEditorProperties() {
+        // Setup property input handlers
+        const sceneName = document.getElementById('scene-name');
+        const sceneDescription = document.getElementById('scene-description');
+        const sceneEnabled = document.getElementById('scene-enabled');
+        
+        if (sceneName) {
+            sceneName.addEventListener('input', (e) => {
+                console.log('Scene name changed:', e.target.value);
+            });
+        }
+        
+        if (sceneDescription) {
+            sceneDescription.addEventListener('input', (e) => {
+                console.log('Scene description changed:', e.target.value);
+            });
+        }
+        
+        if (sceneEnabled) {
+            sceneEnabled.addEventListener('change', (e) => {
+                console.log('Scene enabled changed:', e.target.value);
+            });
+        }
+    }
+    
+    saveScene() {
+        console.log('Saving scene...');
+        
+        // Get all blocks from canvas
+        const canvas = document.getElementById('scene-canvas');
+        const blocks = Array.from(canvas.querySelectorAll('.canvas-block'));
+        
+        if (blocks.length === 0) {
+            this.showNotification('Ingen blokke at gemme', 'warning');
+            return;
+        }
+        
+        // Convert canvas blocks to rule format
+        const sceneData = this.convertCanvasToRule(blocks);
+        
+        if (!sceneData) {
+            this.showNotification('Kunne ikke konvertere scene til regel', 'error');
+            return;
+        }
+        
+        // Add timestamp and set as active by default
+        sceneData.createdAt = Date.now();
+        sceneData.active = true;
+        
+        // Save to localStorage
+        const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        savedRules.push(sceneData);
+        localStorage.setItem('savedRules', JSON.stringify(savedRules));
+        
+        this.showNotification('Scene gemt som regel!', 'success');
+    }
+    
+    testScene() {
+        console.log('Testing scene...');
+        
+        // Get all blocks from canvas
+        const canvas = document.getElementById('scene-canvas');
+        const blocks = Array.from(canvas.querySelectorAll('.canvas-block'));
+        
+        if (blocks.length === 0) {
+            this.showNotification('Ingen blokke at teste', 'warning');
+            return;
+        }
+        
+        // Convert and execute the scene
+        const sceneData = this.convertCanvasToRule(blocks);
+        
+        if (!sceneData) {
+            this.showNotification('Kunne ikke konvertere scene til regel', 'error');
+            return;
+        }
+        
+        // Execute the rule
+        this.executeBlockScene(sceneData);
+        
+        this.showNotification('Scene testet!', 'info');
+    }
+    
+    clearScene() {
+        console.log('Clearing scene...');
+        const canvas = document.getElementById('scene-canvas');
+        const blocks = canvas.querySelectorAll('.canvas-block');
+        blocks.forEach(block => block.remove());
+        
+        // Show drop zone text again
+        const dropZoneText = canvas.querySelector('div[style*="text-align: center"]');
+        if (dropZoneText) {
+            dropZoneText.style.display = 'block';
+        }
+        
+        this.showNotification('Scene ryddet!', 'info');
+    }
+    
+    convertCanvasToRule(blocks) {
+        console.log('Converting blocks to rule:', blocks);
+        
+        // Find trigger and action blocks
+        const triggerBlocks = blocks.filter(block => {
+            console.log('Block type:', block.dataset.blockType, 'Block:', block);
+            return block.dataset.blockType === 'trigger';
+        });
+        const actionBlocks = blocks.filter(block => {
+            console.log('Block type:', block.dataset.blockType, 'Block:', block);
+            return block.dataset.blockType === 'action';
+        });
+        
+        console.log('Trigger blocks found:', triggerBlocks.length);
+        console.log('Action blocks found:', actionBlocks.length);
+        
+        if (triggerBlocks.length === 0 || actionBlocks.length === 0) {
+            this.showNotification(`Scene skal have mindst én trigger og én action. Fundet: ${triggerBlocks.length} triggers, ${actionBlocks.length} actions`, 'warning');
+            return null;
+        }
+        
+        // Get scene name
+        const sceneName = document.getElementById('scene-name')?.value || 'Block Scene ' + Date.now();
+        
+        // Create rule object
+        const rule = {
+            id: 'block_scene_' + Date.now(),
+            name: sceneName,
+            description: 'Bygget med Block Editor',
+            type: 'block_scene',
+            triggers: triggerBlocks.map(block => ({
+                type: block.dataset.blockSubtype,
+                sensorId: block.dataset.sensorId,
+                config: this.getBlockConfig(block)
+            })),
+            actions: actionBlocks.map(block => ({
+                type: block.dataset.blockSubtype,
+                actuatorId: block.dataset.actuatorId,
+                config: this.getBlockConfig(block)
+            })),
+            created: new Date().toISOString(),
+            active: true
+        };
+        
+        return rule;
+    }
+    
+    getBlockConfig(blockElement) {
+        // Extract configuration from block element
+        const config = {};
+        
+        // Get all input values from the block
+        const inputs = blockElement.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            if (input.name) {
+                config[input.name] = input.value;
+            }
+        });
+        
+        return config;
+    }
+    
+    executeBlockScene(sceneData) {
+        console.log('Executing block scene:', sceneData);
+        
+        // Show rule execution popup
+        this.showRuleExecutionPopup(sceneData.name);
+        
+        // Execute all triggers first
+        sceneData.triggers.forEach(trigger => {
+            this.executeBlockTrigger(trigger);
+        });
+        
+        // Execute all actions
+        sceneData.actions.forEach(action => {
+            this.executeBlockAction(action);
+        });
+    }
+    
+    showRuleExecutionPopup(ruleName) {
+        // Create popup element
+        const popup = document.createElement('div');
+        popup.className = 'rule-execution-popup';
+        popup.innerHTML = `
+            <div class="rule-execution-content">
+                <div class="rule-execution-icon">⚡</div>
+                <div class="rule-execution-text">Regel kørt!</div>
+                <div class="rule-execution-name">${ruleName}</div>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(popup);
+        
+        // Show popup with animation
+        setTimeout(() => {
+            popup.classList.add('show');
+        }, 10);
+        
+        // Hide and remove popup after 2 seconds
+        setTimeout(() => {
+            popup.classList.remove('show');
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 300);
+        }, 2000);
+    }
+    
+    executeBlockTrigger(trigger) {
+        console.log('Executing trigger:', trigger);
+        
+        if (trigger.sensorId) {
+            const sensorElement = document.querySelector(`[data-device="${trigger.sensorId}"]`);
+            if (sensorElement) {
+                if (trigger.type === 'motion' || trigger.type === 'door') {
+                    // Toggle sensor state for motion and door sensors
+                    const currentState = sensorElement.dataset.value === 'true';
+                    sensorElement.dataset.value = (!currentState).toString();
+                    
+                    // Update visual state using existing system
+                    this.updateSmartIconAppearance(sensorElement);
+                    
+                    const deviceName = this.getDeviceName(trigger.sensorId);
+                    this.showNotification(`${deviceName} ${currentState ? 'deaktiveret' : 'aktiveret'}`, 'info');
+                } else if (trigger.type === 'humidity' || trigger.type === 'temperature' || trigger.type === 'weather') {
+                    // For value-based sensors, just update the visual state
+                    this.updateSmartIconAppearance(sensorElement);
+                    
+                    const deviceName = this.getDeviceName(trigger.sensorId);
+                    this.showNotification(`${deviceName} trigger aktiveret`, 'info');
+                } else if (trigger.type === 'time') {
+                    // Time triggers don't need visual updates
+                    this.showNotification(`Tid trigger aktiveret`, 'info');
+                }
+            }
+        }
+    }
+    
+    executeBlockAction(action) {
+        console.log('Executing action:', action);
+        if (action.type === 'light' && action.actuatorId) {
+            // Execute light action
+            const deviceElement = document.querySelector(`[data-device="${action.actuatorId}"]`);
+            console.log('Looking for device:', action.actuatorId);
+            console.log('Found device element:', deviceElement);
+            if (deviceElement) {
+                // Toggle light state
+                const currentState = deviceElement.dataset.value === 'true';
+                deviceElement.dataset.value = (!currentState).toString();
+                
+                // Update visual state using existing system
+                this.updateSmartIconAppearance(deviceElement);
+                
+                this.showNotification(`${action.actuatorId} ${currentState ? 'slukket' : 'tændt'}`, 'success');
+            }
+        } else if (action.type === 'fan' && action.actuatorId) {
+            // Execute fan action
+            const deviceElement = document.querySelector(`[data-device="${action.actuatorId}"]`);
+            if (deviceElement) {
+                const currentState = deviceElement.dataset.value === 'true';
+                deviceElement.dataset.value = (!currentState).toString();
+                
+                // Update visual state using existing system
+                this.updateSmartIconAppearance(deviceElement);
+                
+                this.showNotification(`${action.actuatorId} ${currentState ? 'stoppet' : 'startet'}`, 'success');
+            }
+        } else if (action.type === 'socket' && action.actuatorId) {
+            // Execute socket action (for smart stikkontakter)
+            const deviceElement = document.querySelector(`[data-device="${action.actuatorId}"]`);
+            if (deviceElement) {
+                const currentState = deviceElement.dataset.value === 'true';
+                deviceElement.dataset.value = (!currentState).toString();
+                
+                // Update visual state using existing system
+                this.updateSmartIconAppearance(deviceElement);
+                
+                this.showNotification(`${action.actuatorId} ${currentState ? 'slukket' : 'tændt'}`, 'success');
+            }
+        } else if (action.type === 'dimmer' && action.actuatorId) {
+            // Execute dimmer action (for altanlys)
+            const deviceElement = document.querySelector(`[data-device="${action.actuatorId}"]`);
+            if (deviceElement) {
+                // Set dimmer to 50% for demo
+                deviceElement.dataset.value = '50';
+                
+                // Update visual state using existing system
+                this.updateSmartIconAppearance(deviceElement);
+                
+                this.showNotification(`${action.actuatorId} sat til 50%`, 'success');
+            }
+        } else {
+            console.log('Unknown action type:', action.type, 'or missing actuatorId:', action.actuatorId);
+        }
+        // Add more action types as needed
+    }
+
+    // ===== SMART ICON CLICK HANDLING =====
+    // Smart icon clicks are now handled by the existing switch functionality
+    
+    
+    getDeviceName(deviceId) {
+        // Get the device name from the smart-icon element
+        const deviceElement = document.querySelector(`[data-device="${deviceId}"]`);
+        if (deviceElement && deviceElement.dataset.deviceName) {
+            return deviceElement.dataset.deviceName;
+        }
+        
+        // Fallback to deviceId if not found
+        return deviceId;
+    }
+    
+    checkActiveRules(deviceId, isActive) {
+        // Get all saved rules from localStorage
+        const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        
+        // Filter for block scene rules
+        const blockSceneRules = savedRules.filter(rule => rule.type === 'block_scene');
+        
+        console.log('=== CHECKING ACTIVE RULES ===');
+        console.log('Device ID:', deviceId);
+        console.log('Is Active:', isActive);
+        console.log('Found block scene rules:', blockSceneRules);
+        
+        // Check each rule
+        blockSceneRules.forEach(rule => {
+            console.log('Checking rule:', rule.name);
+            console.log('Rule active:', rule.active);
+            
+            if (rule.active === false) {
+                console.log('Rule is deactivated, skipping');
+                return;
+            }
+            
+            // Check if this device is a trigger in any rule
+            const matchingTriggers = rule.triggers.filter(trigger => 
+                trigger.sensorId === deviceId && (
+                    trigger.type === 'motion' || 
+                    trigger.type === 'door' || 
+                    trigger.type === 'humidity' || 
+                    trigger.type === 'temperature' || 
+                    trigger.type === 'weather' || 
+                    trigger.type === 'time'
+                )
+            );
+            
+            console.log('Matching triggers for', deviceId, ':', matchingTriggers);
+            
+            if (matchingTriggers.length > 0 && isActive) {
+                console.log('✅ Triggering rule:', rule.name);
+                this.executeBlockScene(rule);
+            } else {
+                console.log('❌ No matching triggers or not active');
+            }
+        });
+    }
+
+    // ===== SAVED RULES MANAGEMENT =====
+    
+    showSavedRules() {
+        console.log('showSavedRules function called!');
+        console.log('Showing saved rules...');
+        
+        const modal = document.getElementById('saved-rules-modal');
+        const rulesList = document.getElementById('saved-rules-list');
+        
+        console.log('Modal element:', modal);
+        console.log('Rules list element:', rulesList);
+        
+        console.log('Checking if modal exists...');
+        if (!modal) {
+            console.error('Modal element not found!');
+            this.showNotification('Fejl: Modal element ikke fundet', 'error');
+            return;
+        }
+        console.log('Modal exists, checking rules list...');
+        
+        if (!rulesList) {
+            console.error('Rules list element not found!');
+            this.showNotification('Fejl: Rules list element ikke fundet', 'error');
+            return;
+        }
+        console.log('Both elements found, proceeding...');
+        
+        // Get saved rules from localStorage
+        console.log('Getting saved rules from localStorage...');
+        const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        console.log('Saved rules:', savedRules);
+        
+        if (savedRules.length === 0) {
+            console.log('No saved rules found, showing empty state...');
+            rulesList.innerHTML = `
+                <div class="empty-rules">
+                    <div class="icon">📋</div>
+                    <h3>Ingen gemte regler</h3>
+                    <p>Byg og gem nogle regler i Block Editor for at se dem her</p>
+                </div>
+            `;
+        } else {
+            console.log('Found saved rules, generating HTML...');
+            try {
+                rulesList.innerHTML = savedRules.map(rule => {
+                    console.log('Processing rule:', rule);
+                    return `
+                <div class="rule-item">
+                    <div class="rule-header">
+                        <h3 class="rule-name">${rule.name}</h3>
+                        <div class="rule-actions">
+                            <button class="rule-btn test" onclick="window.appManager.testSavedRule('${rule.id}')">▶️ Test</button>
+                            <button class="rule-btn delete" onclick="window.appManager.deleteSavedRule('${rule.id}')">🗑️ Slet</button>
+                        </div>
+                    </div>
+                    <div class="rule-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" ${rule.active !== false ? 'checked' : ''} onchange="window.appManager.toggleRuleActive('${rule.id}', this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">${rule.active !== false ? 'Aktiveret' : 'Deaktiveret'}</span>
+                    </div>
+                    <div class="rule-details">
+                        <div class="rule-triggers">
+                            <strong>Triggers:</strong> ${rule.triggers ? rule.triggers.map(t => t.name).join(', ') : 'Ingen'}
+                        </div>
+                        <div class="rule-actions">
+                            <strong>Actions:</strong> ${rule.actions ? rule.actions.map(a => a.name).join(', ') : 'Ingen'}
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.8rem; color: #718096;">
+                            Oprettet: ${new Date(rule.createdAt || Date.now()).toLocaleString('da-DK')}
+                        </div>
+                    </div>
+                </div>
+            `;
+                }).join('');
+            } catch (error) {
+                console.error('Error generating HTML:', error);
+                this.showNotification('Fejl ved generering af HTML', 'error');
+                return;
+            }
+        }
+        
+        console.log('HTML generated, showing modal...');
+        console.log('Removing hidden class from modal...');
+        modal.classList.remove('hidden');
+        console.log('Modal classes after removal:', modal.className);
+        console.log('Modal display style:', window.getComputedStyle(modal).display);
+        
+        // Force show modal
+        modal.style.display = 'flex';
+        console.log('Forced modal display to flex');
+        console.log('Modal should now be visible!');
+    }
+    
+    closeSavedRulesModal() {
+        const modal = document.getElementById('saved-rules-modal');
+        modal.classList.add('hidden');
+    }
+    
+    testSavedRule(ruleId) {
+        const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        const rule = savedRules.find(r => r.id === ruleId);
+        
+        if (rule) {
+            console.log('Testing saved rule:', rule.name);
+            this.executeBlockScene(rule);
+            this.showNotification(`Regel "${rule.name}" testet!`, 'success');
+        }
+    }
+    
+    deleteSavedRule(ruleId) {
+        if (confirm('Er du sikker på at du vil slette denne regel?')) {
+            const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+            const updatedRules = savedRules.filter(r => r.id !== ruleId);
+            localStorage.setItem('savedRules', JSON.stringify(updatedRules));
+            
+            this.showNotification('Regel slettet!', 'info');
+            this.showSavedRules(); // Refresh the list
+        }
+    }
+    
+    toggleRuleActive(ruleId, isActive) {
+        console.log('Toggling rule active:', ruleId, isActive);
+        const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        const ruleIndex = savedRules.findIndex(r => r.id === ruleId);
+        
+        if (ruleIndex !== -1) {
+            savedRules[ruleIndex].active = isActive;
+            localStorage.setItem('savedRules', JSON.stringify(savedRules));
+            
+            this.showNotification(`Regel ${isActive ? 'aktiveret' : 'deaktiveret'}!`, 'success');
+            
+            // Update the toggle label in the UI
+            const toggleLabel = document.querySelector(`input[onchange*="${ruleId}"]`).parentElement.nextElementSibling;
+            toggleLabel.textContent = isActive ? 'Aktiveret' : 'Deaktiveret';
+        }
+    }
+
     // ===== ADVANCED MODE FUNCTIONS =====
     
 
@@ -3408,209 +4447,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
     // ===== SMARTHOME SIMULATOR FUNCTIONS =====
     
-    initSmarthomeSim() {
-        this.simActors = {
-            light: { status: 'OFF', value: 0 },
-            dimmer: { status: '0%', value: 0 },
-            fan: { status: 'OFF', value: 0 }
-        };
-        
-        this.simSensors = [];
-        this.simRules = [];
-        this.simLog = [];
-        this.globalVariables = {
-            'fx mode': '',
-            'fx night': ''
-        };
-        
-        this.sensorTypes = {
-            'pir': { name: 'PIR (bevægelse)', states: ['breached', 'safe'], type: 'binary' },
-            'door': { name: 'Dør-/vindueskontakt', states: ['opened', 'closed'], type: 'binary' },
-            'humidity': { name: 'Fugtighed (%)', states: [], type: 'numeric', unit: '%' },
-            'light': { name: 'Lys (lux)', states: [], type: 'numeric', unit: 'lux' },
-            'wind': { name: 'Vind (m/s)', states: [], type: 'numeric', unit: 'm/s' },
-            'temp': { name: 'Temperatur (°C)', states: [], type: 'numeric', unit: '°C' },
-            'smoke': { name: 'Røgalarm', states: ['detected', 'clear'], type: 'binary' },
-            'water': { name: 'Vandlækage', states: ['wet', 'dry'], type: 'binary' },
-            'co2': { name: 'CO₂ (ppm)', states: [], type: 'numeric', unit: 'ppm' },
-            'presence': { name: 'Tilstedeværelse', states: ['occupied', 'vacant'], type: 'binary' },
-            'alarm': { name: 'Alarm (Armed)', states: ['armed', 'disarmed'], type: 'binary' },
-            'home': { name: 'Home Mode', states: ['home', 'vacant'], type: 'binary' }
-        };
-        
-        this.startSimulationClock();
-        this.addLogEntry('SYS', 'SmartHome Simulator v2.0 (WebView2 SPA) klar.');
-        this.renderCreatedRules();
-    }
 
-    startSimulationClock() {
-        setInterval(() => {
-            const now = new Date();
-            const time = now.toTimeString().slice(0, 5);
-            const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.getDay()];
-            
-            document.getElementById('sim-time').textContent = time;
-            document.getElementById('sim-day').textContent = day;
-        }, 1000);
-    }
 
-    updateSensorStates() {
-        const sensorType = document.getElementById('sensor-type').value;
-        const stateContainer = document.getElementById('sensor-state-container');
-        const addButton = document.querySelector('button[onclick="window.appManager.addSensor()"]');
-        
-        if (sensorType) {
-            const sensor = this.sensorTypes[sensorType];
-            
-            if (sensor.type === 'binary') {
-                // Binary sensor - dropdown med states
-                stateContainer.innerHTML = `
-                    <select id="sensor-state">
-                        <option value="">Vælg state</option>
-                        ${sensor.states.map(state => `<option value="${state}">${state}</option>`).join('')}
-                    </select>
-                `;
-            } else {
-                // Numeric sensor - input felt med unit
-                stateContainer.innerHTML = `
-                    <input type="number" id="sensor-state" placeholder="Værdi" step="0.1">
-                    <span class="sensor-unit">${sensor.unit}</span>
-                `;
-            }
-            
-            stateContainer.style.display = 'flex';
-            addButton.style.display = 'inline-block';
-        } else {
-            stateContainer.style.display = 'none';
-            addButton.style.display = 'none';
-        }
-    }
 
-    addSensor() {
-        const sensorType = document.getElementById('sensor-type').value;
-        const sensorStateElement = document.getElementById('sensor-state');
-        const sensorState = sensorStateElement ? sensorStateElement.value : '';
-        
-        if (!sensorType || !sensorState) {
-            this.showNotification('Vælg både sensor type og state', 'warning');
-            return;
-        }
-        
-        const sensor = this.sensorTypes[sensorType];
-        const sensorId = `${sensorType}_${Date.now()}`;
-        const globalName = `sensor.${sensorType}`;
-        
-        const newSensor = {
-            id: sensorId,
-            type: sensorType,
-            name: sensor.name,
-            state: sensorState,
-            globalName: globalName,
-            value: sensorState,
-            dataType: sensor.type
-        };
-        
-        this.simSensors.push(newSensor);
-        this.renderSensors();
-        this.addLogEntry('SENSOR', `Sensor tilføjet: ${sensor.name} (${globalName}) = ${sensorState}`);
-        
-        // Reset dropdowns
-        document.getElementById('sensor-type').value = '';
-        document.getElementById('sensor-state-container').style.display = 'none';
-        document.querySelector('button[onclick="window.appManager.addSensor()"]').style.display = 'none';
-    }
 
-    renderSensors() {
-        const sensorsList = document.getElementById('sensors-list');
-        if (!sensorsList) return;
 
-        if (this.simSensors.length === 0) {
-            sensorsList.innerHTML = '<p class="no-sensors">Ingen sensorer tilføjet endnu</p>';
-            return;
-        }
 
-        sensorsList.innerHTML = this.simSensors.map(sensor => {
-            const sensorType = this.sensorTypes[sensor.type];
-            const unit = sensorType.unit ? ` ${sensorType.unit}` : '';
-            return `
-                <div class="sensor-item">
-                    <div class="sensor-info">
-                        <div class="sensor-name">${sensor.name}</div>
-                        <div class="sensor-global">${sensor.globalName}</div>
-                        <div class="sensor-value">${sensor.value}${unit} (${sensor.dataType})</div>
-                    </div>
-                    <div class="sensor-actions">
-                        <button class="btn btn-small" onclick="window.appManager.setSensorBuffer('${sensor.id}')">Sæt buffer</button>
-                        <button class="btn btn-small btn-danger" onclick="window.appManager.removeSensor('${sensor.id}')">Fjern</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
 
-    removeSensor(sensorId) {
-        const sensor = this.simSensors.find(s => s.id === sensorId);
-        if (sensor) {
-            this.simSensors = this.simSensors.filter(s => s.id !== sensorId);
-            this.renderSensors();
-            this.addLogEntry('SENSOR', `Sensor fjernet: ${sensor.name}`);
-        }
-    }
 
-    setSensorBuffer(sensorId) {
-        const sensor = this.simSensors.find(s => s.id === sensorId);
-        if (sensor) {
-            this.addLogEntry('BUFFER', `Buffer sat for ${sensor.globalName} = ${sensor.value}`);
-            this.showNotification(`Buffer sat for ${sensor.globalName}`, 'success');
-        }
-    }
 
-    toggleActor(actorType) {
-        const actor = this.simActors[actorType];
-        if (!actor) return;
-
-        if (actorType === 'light' || actorType === 'fan') {
-            actor.status = actor.status === 'OFF' ? 'ON' : 'OFF';
-            actor.value = actor.status === 'ON' ? 1 : 0;
-        }
-        
-        document.getElementById(`${actorType}-status`).textContent = actor.status;
-        this.addLogEntry('ACTOR', `${actorType.toUpperCase()} ændret til ${actor.status}`);
-    }
-
-    openDimmerDialog(actorType) {
-        const dialog = document.getElementById('dimmer-dialog');
-        const slider = document.getElementById('dimmer-slider');
-        const currentValue = document.getElementById('dimmer-current-value');
-        
-        slider.value = this.simActors.dimmer.value;
-        currentValue.textContent = this.simActors.dimmer.value;
-        
-        dialog.style.display = 'flex';
-    }
-
-    closeDimmerDialog() {
-        document.getElementById('dimmer-dialog').style.display = 'none';
-    }
-
-    updateDimmerValue(value) {
-        document.getElementById('dimmer-current-value').textContent = value;
-    }
-
-    setDimmerValue(value) {
-        document.getElementById('dimmer-slider').value = value;
-        document.getElementById('dimmer-current-value').textContent = value;
-    }
-
-    applyDimmerValue() {
-        const value = parseInt(document.getElementById('dimmer-slider').value);
-        this.simActors.dimmer.value = value;
-        this.simActors.dimmer.status = `${value}%`;
-        
-        document.getElementById('dimmer-status').textContent = `${value}%`;
-        this.closeDimmerDialog();
-        this.addLogEntry('ACTOR', `DÆMPER sat til ${value}%`);
-    }
 
     // Sensor Status Popup Functions
     openSensorStatusPopup(sensorData) {
@@ -3742,745 +4587,42 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         }
         
         this.closeSensorStatusPopup();
-        this.addLogEntry('SENSOR', `Sensor ${sensorDevice} sat til ${newValue}`);
     }
 
-    setGlobalVariables() {
-        const var1 = document.getElementById('global-var-1').value;
-        const var2 = document.getElementById('global-var-2').value;
-        
-        this.globalVariables['fx mode'] = var1;
-        this.globalVariables['fx night'] = var2;
-        
-        this.addLogEntry('GLOBAL', `Globale variabler sat: fx mode=${var1}, fx night=${var2}`);
-        this.showNotification('Globale variabler sat i buffer', 'success');
-    }
-
-    clearAllVariables() {
-        this.globalVariables = {};
-        document.getElementById('global-var-1').value = '';
-        document.getElementById('global-var-2').value = '';
-        
-        this.addLogEntry('GLOBAL', 'Alle globale variabler ryddet');
-        this.showNotification('Alle globale variabler ryddet', 'info');
-    }
-
-    addSimRule() {
-        const condition1 = document.getElementById('rule-condition-1').value;
-        const value1 = document.getElementById('rule-value-1').value;
-        const condition2 = document.getElementById('rule-condition-2').value;
-        const value2 = document.getElementById('rule-value-2').value;
-        const condition3 = document.getElementById('rule-condition-3').value;
-        const value3 = document.getElementById('rule-value-3').value;
-        const action = document.getElementById('rule-action').value;
-        const actionValue = document.getElementById('rule-action-value').value;
-        const ruleName = document.getElementById('rule-name').value;
-
-        if (!condition1) {
-            this.showNotification('Vælg mindst én betingelse', 'warning');
-            return;
-        }
-
-        const rule = {
-            id: 'sim_rule_' + Date.now(),
-            name: ruleName || 'Unavngivet regel',
-            conditions: [
-                { type: condition1, value: value1 },
-                { type: condition2, value: value2 },
-                { type: condition3, value: value3 }
-            ].filter(c => c.type),
-            action: action,
-            actionValue: actionValue,
-            enabled: true
-        };
-
-        this.simRules.push(rule);
-        this.addLogEntry('RULE', `Regel tilføjet: ${rule.name}`);
-        this.showNotification('Regel tilføjet', 'success');
-        this.renderCreatedRules();
-    }
-
-    clearAllRules() {
-        if (confirm('Er du sikker på, at du vil slette alle regler?')) {
-            this.simRules = [];
-            this.addLogEntry('RULE', 'Alle regler slettet');
-            this.showNotification('Alle regler slettet', 'info');
-            this.renderCreatedRules();
-        }
-    }
-
-    saveRules() {
-        const rulesData = JSON.stringify(this.simRules, null, 2);
-        const blob = new Blob([rulesData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'smarthome-rules.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        this.addLogEntry('SYSTEM', 'Regler gemt til fil');
-        this.showNotification('Regler gemt til fil', 'success');
-    }
-
-    loadRules() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        this.simRules = JSON.parse(e.target.result);
-                        this.addLogEntry('SYSTEM', 'Regler indlæst fra fil');
-                        this.showNotification('Regler indlæst fra fil', 'success');
-                    } catch (error) {
-                        this.showNotification('Fejl ved indlæsning af regler', 'error');
-                    }
-                };
-                reader.readAsText(file);
-            }
-        };
-        input.click();
-    }
-
-    runRules() {
-        this.addLogEntry('SYSTEM', 'Kører alle regler...');
-        
-        let triggeredRules = 0;
-        this.simRules.forEach(rule => {
-            if (this.evaluateRule(rule)) {
-                this.executeRule(rule);
-                triggeredRules++;
-            }
-        });
-        
-        this.addLogEntry('SYSTEM', `${triggeredRules} regler udløst`);
-        this.showNotification(`${triggeredRules} regler udløst`, 'info');
-    }
-
-    evaluateRule(rule) {
-        return rule.conditions.every(condition => {
-            switch (condition.type) {
-                case 'always':
-                    return true;
-                case 'time':
-                    return this.evaluateTimeCondition(condition.value);
-                case 'sensor':
-                    return this.evaluateSensorCondition(condition.value);
-                case 'global':
-                    return this.evaluateGlobalCondition(condition.value);
-                default:
-                    return false;
-            }
-        });
-    }
-
-    evaluateTimeCondition(value) {
-        const currentTime = new Date().toTimeString().slice(0, 5);
-        return currentTime === value;
-    }
-
-    evaluateSensorCondition(value) {
-        // Simplified sensor evaluation
-        return this.simSensors.some(sensor => sensor.value === value);
-    }
-
-    evaluateGlobalCondition(value) {
-        return Object.values(this.globalVariables).includes(value);
-    }
-
-    executeRule(rule) {
-        this.addLogEntry('ACTIVATION', `Regel udløst: ${rule.name}`);
-        
-        switch (rule.action) {
-            case 'light_on':
-                this.simActors.light.status = 'ON';
-                document.getElementById('light-status').textContent = 'ON';
-                break;
-            case 'light_off':
-                this.simActors.light.status = 'OFF';
-                document.getElementById('light-status').textContent = 'OFF';
-                break;
-            case 'dimmer':
-                const dimmerValue = parseInt(rule.actionValue) || 50;
-                this.simActors.dimmer.value = dimmerValue;
-                this.simActors.dimmer.status = `${dimmerValue}%`;
-                document.getElementById('dimmer-status').textContent = `${dimmerValue}%`;
-                break;
-            case 'fan_on':
-                this.simActors.fan.status = 'ON';
-                document.getElementById('fan-status').textContent = 'ON';
-                break;
-            case 'fan_off':
-                this.simActors.fan.status = 'OFF';
-                document.getElementById('fan-status').textContent = 'OFF';
-                break;
-            case 'notification':
-                this.showNotification(rule.actionValue || 'Regel udløst', 'info');
-                break;
-        }
-    }
-
-    activateChanges() {
-        this.addLogEntry('SYSTEM', 'Ændringer aktiveret - simulator klar');
-        this.showNotification('Ændringer aktiveret', 'success');
-    }
-
-    addLogEntry(type, message) {
-        const timestamp = new Date().toLocaleTimeString('da-DK', { 
-            hour12: false, 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        });
-        
-        const logEntry = {
-            timestamp: timestamp,
-            type: type,
-            message: message
-        };
-        
-        this.simLog.push(logEntry);
-        this.renderLog();
-    }
-
-    renderLog() {
-        const logOutput = document.getElementById('log-output');
-        if (!logOutput) return;
-
-        logOutput.innerHTML = this.simLog.map(entry => 
-            `<div class="log-entry ${entry.type.toLowerCase()}">${entry.timestamp} ${entry.type} ${entry.message}</div>`
-        ).join('');
-        
-        // Scroll to bottom
-        logOutput.scrollTop = logOutput.scrollHeight;
-    }
-
-    clearLog() {
-        this.simLog = [];
-        this.renderLog();
-        this.addLogEntry('SYSTEM', 'Log ryddet');
-    }
-
-    filterLog(filter) {
-        // Update button states
-        document.querySelectorAll('.log-filters .btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        // Filter logic would go here
-        this.showNotification(`Log filtreret: ${filter}`, 'info');
-    }
-
-    exportCSV() {
-        const csvContent = this.simLog.map(entry => 
-            `${entry.timestamp},${entry.type},${entry.message}`
-        ).join('\n');
-        
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'smarthome-log.csv';
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        this.showNotification('Log eksporteret til CSV', 'success');
-    }
-
-    copyLuaConditions() {
-        const conditions = this.simRules.map(rule => 
-            `-- ${rule.name}\nif (${rule.conditions.map(c => `${c.type} == "${c.value}"`).join(' and ')}) then`
-        ).join('\n');
-        
-        navigator.clipboard.writeText(conditions).then(() => {
-            this.showNotification('Lua conditions kopieret', 'success');
-        });
-    }
-
-    copyLuaActions() {
-        const actions = this.simRules.map(rule => 
-            `-- ${rule.name}\n    ${this.generateLuaAction(rule.action, rule.actionValue)}`
-        ).join('\n');
-        
-        navigator.clipboard.writeText(actions).then(() => {
-            this.showNotification('Lua actions kopieret', 'success');
-        });
-    }
-
-    generateLuaAction(action, value) {
-        switch (action) {
-            case 'light_on':
-                return 'fibaro:call(light_id, "turnOn")';
-            case 'light_off':
-                return 'fibaro:call(light_id, "turnOff")';
-            case 'dimmer':
-                return `fibaro:call(dimmer_id, "setValue", ${value})`;
-            case 'fan_on':
-                return 'fibaro:call(fan_id, "turnOn")';
-            case 'fan_off':
-                return 'fibaro:call(fan_id, "turnOff")';
-            case 'notification':
-                return `fibaro:call(1, "sendNotification", "${value}")`;
-            default:
-                return '-- Unknown action';
-        }
-    }
-
-    renderCreatedRules() {
-        const rulesList = document.getElementById('created-rules-list');
-        if (!rulesList) return;
-
-        if (this.simRules.length === 0) {
-            rulesList.innerHTML = '<p class="no-rules">Ingen regler oprettet endnu</p>';
-            return;
-        }
-
-        rulesList.innerHTML = this.simRules.map(rule => `
-            <div class="created-rule-item">
-                <div class="rule-item-header">
-                    <h5>${rule.name}</h5>
-                    <div class="rule-item-actions">
-                        <button class="btn-icon" onclick="window.appManager.deleteSimRule('${rule.id}')" title="Slet regel">🗑️</button>
-                    </div>
-                </div>
-                <div class="rule-item-content">
-                    <div class="rule-conditions">
-                        <strong>Betingelser:</strong>
-                        ${rule.conditions.map(condition => 
-                            `<span class="condition-tag">${condition.type} = "${condition.value}"</span>`
-                        ).join('')}
-                    </div>
-                    <div class="rule-action">
-                        <strong>Handling:</strong>
-                        <span class="action-tag">${this.getActionName(rule.action)} ${rule.actionValue ? `(${rule.actionValue})` : ''}</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    getActionName(action) {
-        const actionNames = {
-            'light_on': 'Tænd lys',
-            'light_off': 'Sluk lys',
-            'dimmer': 'Sæt dæmper',
-            'fan_on': 'Tænd ventilator',
-            'fan_off': 'Sluk ventilator',
-            'notification': 'Send notifikation'
-        };
-        return actionNames[action] || action;
-    }
-
-    deleteSimRule(ruleId) {
-        if (confirm('Er du sikker på, at du vil slette denne regel?')) {
-            this.simRules = this.simRules.filter(rule => rule.id !== ruleId);
-            this.addLogEntry('RULE', 'Regel slettet');
-            this.showNotification('Regel slettet', 'info');
-            this.renderCreatedRules();
-        }
-    }
-
-    addNewRule() {
-        const ruleId = 'rule_' + Date.now();
-        const newRule = {
-            id: ruleId,
-            name: 'Ny Regel ' + ((this.rules?.length || 0) + 1),
-            description: '',
-            conditions: [],
-            actions: [],
-            enabled: true
-        };
-        
-        if (!this.rules) this.rules = [];
-        this.rules.push(newRule);
-        this.renderRules();
-        this.showNotification('Ny regel oprettet', 'success');
-    }
-
-    renderRules() {
-        const ruleList = document.getElementById('rule-list');
-        if (!ruleList) return;
-
-        if (!this.rules || this.rules.length === 0) {
-            ruleList.innerHTML = `
-                <div class="no-rules">
-                    <p>Ingen regler oprettet endnu</p>
-                    <p>Klik på "Ny Regel" for at komme i gang</p>
-                </div>
-            `;
-            return;
-        }
-
-        ruleList.innerHTML = this.rules.map(rule => `
-            <div class="rule-item ${this.selectedRule?.id === rule.id ? 'selected' : ''}" onclick="window.appManager.selectRule('${rule.id}')">
-                <div class="rule-item-header">
-                    <h4>${rule.name}</h4>
-                    <div class="rule-item-actions">
-                        <button class="btn-icon" onclick="event.stopPropagation(); window.appManager.editRule('${rule.id}')" title="Rediger">✏️</button>
-                        <button class="btn-icon" onclick="event.stopPropagation(); window.appManager.deleteAdvancedRule('${rule.id}')" title="Slet">🗑️</button>
-                    </div>
-                </div>
-                <div class="rule-item-content">
-                    <p>${rule.description || 'Ingen beskrivelse'}</p>
-                    <div class="rule-stats">
-                        <span>${rule.conditions.length} betingelse(r)</span>
-                        <span>${rule.actions.length} handling(er)</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    selectRule(ruleId) {
-        if (!this.rules) return;
-        this.selectedRule = this.rules.find(rule => rule.id === ruleId);
-        this.renderRules();
-        this.generateLuaCode();
-    }
-
-    editRule(ruleId) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        // Vis regel editor popup
-        this.showRuleEditor(rule);
-    }
-
-    deleteAdvancedRule(ruleId) {
-        if (!this.rules) return;
-        if (confirm('Er du sikker på, at du vil slette denne regel?')) {
-            this.rules = this.rules.filter(rule => rule.id !== ruleId);
-            if (this.selectedRule?.id === ruleId) {
-                this.selectedRule = null;
-            }
-            this.renderRules();
-            this.generateLuaCode();
-            this.showNotification('Regel slettet', 'info');
-        }
-    }
-
-    showRuleEditor(rule) {
-        // Opret regel editor popup
-        const popup = document.createElement('div');
-        popup.className = 'rule-editor-popup';
-        popup.innerHTML = `
-            <div class="rule-editor-popup-content">
-                <div class="rule-editor-header">
-                    <h3>Rediger Regel: ${rule.name}</h3>
-                    <button class="close-btn" onclick="this.closest('.rule-editor-popup').remove()">&times;</button>
-                </div>
-                <div class="rule-editor-body">
-                    <div class="form-group">
-                        <label>Navn:</label>
-                        <input type="text" id="rule-name" value="${rule.name}">
-                    </div>
-                    <div class="form-group">
-                        <label>Beskrivelse:</label>
-                        <textarea id="rule-description">${rule.description}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Betingelser:</label>
-                        <div id="conditions-list"></div>
-                        <button class="btn btn-secondary" onclick="window.appManager.addCondition('${rule.id}')">+ Tilføj Betingelse</button>
-                    </div>
-                    <div class="form-group">
-                        <label>Handlinger:</label>
-                        <div id="actions-list"></div>
-                        <button class="btn btn-secondary" onclick="window.appManager.addAction('${rule.id}')">+ Tilføj Handling</button>
-                    </div>
-                </div>
-                <div class="rule-editor-footer">
-                    <button class="btn btn-secondary" onclick="this.closest('.rule-editor-popup').remove()">Annuller</button>
-                    <button class="btn btn-primary" onclick="window.appManager.saveRule('${rule.id}')">Gem Regel</button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(popup);
-        this.renderRuleConditions(rule.id);
-        this.renderRuleActions(rule.id);
-    }
-
-    addCondition(ruleId) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        const newCondition = {
-            id: 'cond_' + Date.now(),
-            type: 'motion_detected',
-            device: '',
-            operator: 'equals',
-            value: ''
-        };
-        
-        rule.conditions.push(newCondition);
-        this.renderRuleConditions(ruleId);
-    }
-
-    addAction(ruleId) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        const newAction = {
-            id: 'action_' + Date.now(),
-            type: 'turn_on_light',
-            device: '',
-            value: ''
-        };
-        
-        rule.actions.push(newAction);
-        this.renderRuleActions(ruleId);
-    }
-
-    renderRuleConditions(ruleId) {
-        const conditionsList = document.getElementById('conditions-list');
-        if (!conditionsList) return;
-
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        conditionsList.innerHTML = rule.conditions.map(condition => `
-            <div class="condition-item">
-                <select onchange="window.appManager.updateCondition('${ruleId}', '${condition.id}', 'type', this.value)">
-                    ${this.availableConditions.map(cond => 
-                        `<option value="${cond.type}" ${condition.type === cond.type ? 'selected' : ''}>${cond.name}</option>`
-                    ).join('')}
-                </select>
-                <select onchange="window.appManager.updateCondition('${ruleId}', '${condition.id}', 'operator', this.value)">
-                    <option value="equals" ${condition.operator === 'equals' ? 'selected' : ''}>Lig med</option>
-                    <option value="not_equals" ${condition.operator === 'not_equals' ? 'selected' : ''}>Ikke lig med</option>
-                    <option value="greater_than" ${condition.operator === 'greater_than' ? 'selected' : ''}>Større end</option>
-                    <option value="less_than" ${condition.operator === 'less_than' ? 'selected' : ''}>Mindre end</option>
-                </select>
-                <input type="text" value="${condition.value}" onchange="window.appManager.updateCondition('${ruleId}', '${condition.id}', 'value', this.value)">
-                <button class="btn-icon" onclick="window.appManager.removeCondition('${ruleId}', '${condition.id}')">🗑️</button>
-            </div>
-        `).join('');
-    }
-
-    renderRuleActions(ruleId) {
-        const actionsList = document.getElementById('actions-list');
-        if (!actionsList) return;
-
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        actionsList.innerHTML = rule.actions.map(action => `
-            <div class="action-item">
-                <select onchange="window.appManager.updateAction('${ruleId}', '${action.id}', 'type', this.value)">
-                    ${this.availableActions.map(act => 
-                        `<option value="${act.type}" ${action.type === act.type ? 'selected' : ''}>${act.name}</option>`
-                    ).join('')}
-                </select>
-                <select onchange="window.appManager.updateAction('${ruleId}', '${action.id}', 'device', this.value)">
-                    ${this.availableDevices.map(device => 
-                        `<option value="${device.id}" ${action.device === device.id ? 'selected' : ''}>${device.name}</option>`
-                    ).join('')}
-                </select>
-                <input type="text" value="${action.value}" onchange="window.appManager.updateAction('${ruleId}', '${action.id}', 'value', this.value)">
-                <button class="btn-icon" onclick="window.appManager.removeAction('${ruleId}', '${action.id}')">🗑️</button>
-            </div>
-        `).join('');
-    }
-
-    updateCondition(ruleId, conditionId, field, value) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        const condition = rule.conditions.find(cond => cond.id === conditionId);
-        if (!condition) return;
-
-        condition[field] = value;
-    }
-
-    updateAction(ruleId, actionId, field, value) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        const action = rule.actions.find(act => act.id === actionId);
-        if (!action) return;
-
-        action[field] = value;
-    }
-
-    removeCondition(ruleId, conditionId) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        rule.conditions = rule.conditions.filter(cond => cond.id !== conditionId);
-        this.renderRuleConditions(ruleId);
-    }
-
-    removeAction(ruleId, actionId) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        rule.actions = rule.actions.filter(act => act.id !== actionId);
-        this.renderRuleActions(ruleId);
-    }
-
-    saveRule(ruleId) {
-        if (!this.rules) return;
-        const rule = this.rules.find(rule => rule.id === ruleId);
-        if (!rule) return;
-
-        rule.name = document.getElementById('rule-name').value;
-        rule.description = document.getElementById('rule-description').value;
-
-        this.renderRules();
-        const ruleEditorPopup = document.querySelector('.rule-editor-popup');
-        if (ruleEditorPopup) {
-            ruleEditorPopup.remove();
-        }
-        this.showNotification('Regel gemt', 'success');
-    }
-
-    generateLuaCode() {
-        const output = document.getElementById('lua-code-output');
-        if (!output) return;
-
-        if (!this.selectedRule) {
-            output.innerHTML = `<code>-- Vælg en regel for at se Lua koden</code>`;
-            return;
-        }
-
-        const rule = this.selectedRule;
-        let luaCode = `-- Regel: ${rule.name}\n`;
-        luaCode += `-- Beskrivelse: ${rule.description || 'Ingen beskrivelse'}\n\n`;
-        
-        luaCode += `function rule_${rule.id.replace('rule_', '')}()\n`;
-        luaCode += `    -- Betingelser\n`;
-        
-        if (rule.conditions.length > 0) {
-            luaCode += `    if (`;
-            luaCode += rule.conditions.map((condition, index) => {
-                let conditionCode = '';
-                switch (condition.type) {
-                    case 'motion_detected':
-                        conditionCode = `fibaro:getValue(${condition.device}, "value") == "1"`;
-                        break;
-                    case 'door_open':
-                        conditionCode = `fibaro:getValue(${condition.device}, "value") == "1"`;
-                        break;
-                    case 'light_level':
-                        conditionCode = `fibaro:getValue(${condition.device}, "value") ${condition.operator === 'less_than' ? '<' : '>'} ${condition.value}`;
-                        break;
-                    case 'temperature':
-                        conditionCode = `fibaro:getValue(${condition.device}, "value") ${condition.operator === 'greater_than' ? '>' : '<'} ${condition.value}`;
-                        break;
-                    case 'time':
-                        conditionCode = `os.date("%H:%M") >= "${condition.value.split('-')[0]}" and os.date("%H:%M") <= "${condition.value.split('-')[1]}"`;
-                        break;
-                    default:
-                        conditionCode = `fibaro:getValue(${condition.device}, "value") == "${condition.value}"`;
-                }
-                return conditionCode;
-            }).join(' and ');
-            luaCode += `) then\n`;
-        } else {
-            luaCode += `    if (true) then\n`;
-        }
-        
-        luaCode += `        -- Handlinger\n`;
-        rule.actions.forEach(action => {
-            switch (action.type) {
-                case 'turn_on_light':
-                    luaCode += `        fibaro:call(${action.device}, "turnOn")\n`;
-                    break;
-                case 'turn_off_light':
-                    luaCode += `        fibaro:call(${action.device}, "turnOff")\n`;
-                    break;
-                case 'set_temperature':
-                    luaCode += `        fibaro:call(${action.device}, "setTargetLevel", ${action.value})\n`;
-                    break;
-                case 'send_notification':
-                    luaCode += `        fibaro:call(1, "sendNotification", "${action.value}")\n`;
-                    break;
-                case 'start_camera':
-                    luaCode += `        fibaro:call(${action.device}, "startRecording")\n`;
-                    break;
-                case 'play_sound':
-                    luaCode += `        fibaro:call(${action.device}, "playSound", "${action.value}")\n`;
-                    break;
-            }
-        });
-        
-        luaCode += `    end\n`;
-        luaCode += `end\n\n`;
-        luaCode += `-- Kald funktionen\n`;
-        luaCode += `rule_${rule.id.replace('rule_', '')}()`;
-
-        output.innerHTML = `<code>${luaCode}</code>`;
-    }
-
-    copyLuaCode() {
-        const codeElement = document.getElementById('lua-code-output');
-        if (!codeElement) return;
-
-        const code = codeElement.textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            this.showNotification('Lua kode kopieret til udklipsholder', 'success');
-        }).catch(() => {
-            this.showNotification('Kunne ikke kopiere kode', 'error');
-        });
-    }
-
-    validateLuaCode() {
-        if (!this.selectedRule) {
-            this.showNotification('Vælg en regel først', 'warning');
-            return;
-        }
-
-        const rule = this.selectedRule;
-        let isValid = true;
-        let errors = [];
-
-        if (rule.conditions.length === 0) {
-            errors.push('Regel skal have mindst én betingelse');
-            isValid = false;
-        }
-
-        if (rule.actions.length === 0) {
-            errors.push('Regel skal have mindst én handling');
-            isValid = false;
-        }
-
-        rule.conditions.forEach((condition, index) => {
-            if (!condition.device) {
-                errors.push(`Betingelse ${index + 1}: Vælg en enhed`);
-                isValid = false;
-            }
-            if (!condition.value) {
-                errors.push(`Betingelse ${index + 1}: Angiv en værdi`);
-                isValid = false;
-            }
-        });
-
-        rule.actions.forEach((action, index) => {
-            if (!action.device) {
-                errors.push(`Handling ${index + 1}: Vælg en enhed`);
-                isValid = false;
-            }
-        });
-
-        if (isValid) {
-            this.showNotification('✅ Regel er gyldig og klar til brug', 'success');
-        } else {
-            this.showNotification('❌ Regel har fejl: ' + errors.join(', '), 'error');
-        }
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // ===== DEVICE CONTROLS =====
     toggleDevice(button) {
@@ -4503,6 +4645,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         this.initializeRadiatorDisplay();
         this.setupWeatherStation();
         this.setupHumidityMeter();
+        this.setupTemperatureMeter();
         this.setupScenarioControls();
         
         // Update container dimensions when switching to smarthome tab
@@ -4556,9 +4699,10 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         icons.forEach(icon => {
             let isDragging = false;
             let startX, startY, initialX, initialY;
-            let animationFrameId = null;
             let dragStartTime = 0;
             let hasMoved = false;
+            let lastMoveTime = 0;
+            const MOVE_THROTTLE = 16; // ~60fps
 
             // Mouse events
             icon.addEventListener('mousedown', (e) => {
@@ -4583,6 +4727,11 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             });
 
             const handleMove = (clientX, clientY) => {
+                // Throttle mousemove events for better performance
+                const now = performance.now();
+                if (now - lastMoveTime < MOVE_THROTTLE) return;
+                lastMoveTime = now;
+                
                 // Always calculate movement for drag detection
                 const deltaX = clientX - startX;
                 const deltaY = clientY - startY;
@@ -4590,9 +4739,9 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 const timeSinceStart = Date.now() - dragStartTime;
                 
                 // Start dragging if either:
-                // 1. User has held mouse down for 500ms, OR
-                // 2. User has moved more than 15px
-                if (!isDragging && (timeSinceStart > 500 || distance > 15)) {
+                // 1. User has held mouse down for 200ms, OR
+                // 2. User has moved more than 10px
+                if (!isDragging && (timeSinceStart > 200 || distance > 10)) {
                     isDragging = true;
                     icon.classList.add('dragging');
                 }
@@ -4601,18 +4750,11 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 if (!isDragging) return;
                 
                 // Check if we've moved enough to consider it a drag
-                if (distance > 5) { // 5px threshold for drag
+                if (distance > 3) { // 3px threshold for drag
                     hasMoved = true;
                 }
                 
-                // Cancel previous animation frame
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                }
-                
-                // Use requestAnimationFrame for smooth performance
-                animationFrameId = requestAnimationFrame(() => {
-                    // Use cached container dimensions
+                // Direct calculation for maximum responsiveness (no requestAnimationFrame)
                     const containerWidth = containerDimensions.width;
                     const containerHeight = containerDimensions.height;
                     
@@ -4641,7 +4783,6 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         icon.style.left = newX + '%';
                         icon.style.top = newY + '%';
                     }
-                });
             };
 
             document.addEventListener('mousemove', (e) => {
@@ -4660,9 +4801,6 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         // Was dragging - stop dragging
                         isDragging = false;
                         icon.classList.remove('dragging');
-                        if (animationFrameId) {
-                            cancelAnimationFrame(animationFrameId);
-                        }
                         this.saveSmartIconStates();
                     } else {
                         // Was not dragging - check if it was a click
@@ -4679,6 +4817,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     // Reset drag state
                     dragStartTime = 0;
                     hasMoved = false;
+                    isDragging = false;
                 }
             };
             
@@ -4862,8 +5001,13 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     setupSliderControls() {
-        const switches = document.querySelectorAll('.lamp-switch');
-        const sliders = document.querySelectorAll('.lamp-slider');
+        console.log('Setting up slider controls...');
+        try {
+            const switches = document.querySelectorAll('.lamp-switch');
+            const sliders = document.querySelectorAll('.lamp-slider, .dimmer-slider, .device-slider');
+            
+            console.log('Found switches:', switches.length);
+            console.log('Found sliders:', sliders.length);
         
         // Handle switches
         switches.forEach(switchElement => {
@@ -4925,11 +5069,23 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         } else if (icon.dataset.device.includes('ventilator')) {
                             message = `${icon.dataset.deviceName} ${newValue === 'true' ? 'tændt' : 'slukket'}`;
                             this.updateSmartIconAppearance(icon);
+                        } else if (icon.dataset.device.includes('stikkontakt')) {
+                            // Handle smart stikkontakter with sinuskurve simulation
+                            if (newValue === 'true') {
+                                this.startSocketSimulation(deviceId);
+                                message = `${icon.dataset.deviceName} tændt - strømforbrug simuleres`;
+                            } else {
+                                this.stopSocketSimulation(deviceId);
+                                message = `${icon.dataset.deviceName} slukket - strømforbrug stoppet`;
+                            }
                         } else {
                             message = `${icon.dataset.deviceName} ${newValue === 'true' ? 'aktiveret' : 'deaktiveret'}`;
                         }
                         
                         this.showNotification(message, newValue === 'true' ? 'success' : 'info');
+                        
+                        // Check for active rules that should trigger
+                        this.checkActiveRules(deviceId, newValue === 'true');
                     }
                 }
                 
@@ -4938,8 +5094,17 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             
             // Listen for icon changes
             if (icon) {
-                const observer = new MutationObserver(() => {
+                const observer = new MutationObserver((mutations) => {
                     updateSwitchFromIcon();
+                    
+                    // Check if data-value changed and trigger rules
+                    mutations.forEach(mutation => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
+                            const newValue = icon.dataset.value === 'true';
+                            console.log('Icon value changed via direct click:', deviceId, 'to', newValue);
+                            this.checkActiveRules(deviceId, newValue);
+                        }
+                    });
                 });
                 observer.observe(icon, { attributes: true, attributeFilter: ['data-value'] });
                 
@@ -4960,10 +5125,24 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     const iconValue = icon.dataset.value;
                     if (icon.dataset.type === 'numeric') {
                         slider.value = iconValue;
+                        if (valueDisplay) {
                         valueDisplay.textContent = iconValue + '°C';
+                        }
                         
                         // Show as active if temperature > 15
                         if (parseInt(iconValue) > 15) {
+                            icon.classList.add('active');
+                        } else {
+                            icon.classList.remove('active');
+                        }
+                    } else if (icon.dataset.type === 'dimmer') {
+                        slider.value = iconValue;
+                        if (valueDisplay) {
+                            valueDisplay.textContent = iconValue + '%';
+                        }
+                        
+                        // Show as active if brightness > 0
+                        if (parseInt(iconValue) > 0) {
                             icon.classList.add('active');
                         } else {
                             icon.classList.remove('active');
@@ -4975,10 +5154,13 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             // Update icon when slider changes
             slider.addEventListener('input', () => {
                 const value = parseInt(slider.value);
-                valueDisplay.textContent = value + '°C';
                 
                 if (icon) {
                     if (icon.dataset.type === 'numeric') {
+                        // Temperature slider
+                        if (valueDisplay) {
+                            valueDisplay.textContent = value + '°C';
+                        }
                         icon.dataset.value = value;
                         
                         // Show as active if temperature > 15
@@ -4989,6 +5171,21 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         }
                         
                         this.showNotification(`${icon.dataset.deviceName} sat til ${value}°C`, 'info');
+                    } else if (icon.dataset.type === 'dimmer') {
+                        // Dimmer slider
+                        if (valueDisplay) {
+                            valueDisplay.textContent = value + '%';
+                        }
+                        icon.dataset.value = value;
+                        
+                        // Show as active if brightness > 0
+                        if (value > 0) {
+                            icon.classList.add('active');
+                        } else {
+                            icon.classList.remove('active');
+                        }
+                        
+                        this.showNotification(`${icon.dataset.deviceName} sat til ${value}%`, 'info');
                     }
                 }
                 
@@ -4997,8 +5194,17 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             
             // Listen for icon changes
             if (icon) {
-                const observer = new MutationObserver(() => {
+                const observer = new MutationObserver((mutations) => {
                     updateSliderFromIcon();
+                    
+                    // Check if data-value changed and trigger rules
+                    mutations.forEach(mutation => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
+                            const newValue = icon.dataset.value === 'true';
+                            console.log('Icon value changed via direct click (slider):', deviceId, 'to', newValue);
+                            this.checkActiveRules(deviceId, newValue);
+                        }
+                    });
                 });
                 observer.observe(icon, { attributes: true, attributeFilter: ['data-value'] });
                 
@@ -5006,6 +5212,54 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 updateSliderFromIcon();
             }
         });
+        } catch (error) {
+            console.error('Error in setupSliderControls:', error);
+            console.error('Error stack:', error.stack);
+        }
+    }
+
+    // ===== SMART STIKKONTAKTER SINUSKURVE SIMULATION =====
+    startSocketSimulation(deviceId) {
+        if (this.socketIntervals[deviceId]) {
+            clearInterval(this.socketIntervals[deviceId]);
+        }
+        
+        const powerData = this.socketPowerData[deviceId];
+        if (!powerData) return;
+        
+        let time = 0;
+        this.socketIntervals[deviceId] = setInterval(() => {
+            const power = Math.max(0, powerData.base + powerData.amplitude * Math.sin(time * powerData.frequency));
+            this.updateSocketPowerDisplay(deviceId, power);
+            time += 0.1;
+        }, 100); // Update every 100ms for smooth animation
+    }
+    
+    stopSocketSimulation(deviceId) {
+        if (this.socketIntervals[deviceId]) {
+            clearInterval(this.socketIntervals[deviceId]);
+            delete this.socketIntervals[deviceId];
+        }
+    }
+    
+    updateSocketPowerDisplay(deviceId, power) {
+        const icon = document.querySelector(`[data-device="${deviceId}"]`);
+        if (icon) {
+            // Update power consumption in dataset
+            icon.dataset.powerConsumption = power.toFixed(1);
+            
+            // Update visual indicator on floor plan
+            const powerDisplay = icon.querySelector('.power-display');
+            if (powerDisplay) {
+                powerDisplay.textContent = `${power.toFixed(0)}W`;
+            }
+            
+            // Update control panel power consumption display
+            const controlPanelPower = document.getElementById(`${deviceId}-power`);
+            if (controlPanelPower) {
+                controlPanelPower.textContent = `${power.toFixed(0)}W`;
+            }
+        }
     }
 
     // ===== RADIATOR TEMPERATURE CONTROL =====
@@ -5045,10 +5299,21 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             
             // Update icon active state based on temperature
             if (icon) {
-                if (this.radiatorTemp > 15) {
+                const wasActive = icon.classList.contains('active');
+                const isActive = this.radiatorTemp > 15;
+                
+                if (isActive) {
                     icon.classList.add('active');
                 } else {
                     icon.classList.remove('active');
+                }
+                
+                // Update dataset.value for rule checking
+                icon.dataset.value = isActive.toString();
+                
+                // Check for active rules if state changed
+                if (wasActive !== isActive) {
+                    this.checkActiveRules('aktuator-radiator', isActive);
                 }
             }
         }
@@ -5176,13 +5441,17 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
     // ===== UTILITY METHODS =====
     showNotification(message, type = 'info') {
-        // Simple notification system
+        // Initialize notification queue if it doesn't exist
+        if (!this.notificationQueue) {
+            this.notificationQueue = [];
+        }
+        
+        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
         notification.style.cssText = `
             position: fixed;
-            top: 80px;
             right: 20px;
             background: var(--bg-secondary);
             color: var(--text-primary);
@@ -5192,16 +5461,46 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             box-shadow: 0 10px 25px -5px var(--shadow-color);
             z-index: 1001;
             animation: slideIn 0.3s ease;
+            margin-bottom: 10px;
+            max-width: 300px;
+            word-wrap: break-word;
         `;
         
+        // Calculate position based on existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        const topOffset = 80 + (existingNotifications.length * 60); // 60px spacing between notifications
+        notification.style.top = `${topOffset}px`;
+        
+        // Add to queue
+        this.notificationQueue.push(notification);
+        
+        // Add to DOM
         document.body.appendChild(notification);
         
+        // Remove from queue and DOM after 3 seconds
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => {
-                document.body.removeChild(notification);
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+                // Remove from queue
+                const index = this.notificationQueue.indexOf(notification);
+                if (index > -1) {
+                    this.notificationQueue.splice(index, 1);
+                }
+                // Reposition remaining notifications
+                this.repositionNotifications();
             }, 300);
         }, 3000);
+    }
+    
+    repositionNotifications() {
+        const notifications = document.querySelectorAll('.notification');
+        notifications.forEach((notification, index) => {
+            const topOffset = 80 + (index * 60);
+            notification.style.top = `${topOffset}px`;
+        });
     }
 
     updateAlarmEffect(isActive) {
@@ -5264,6 +5563,53 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             });
         }
     }
+    
+    setupTemperatureMeter() {
+        const tempIcon = document.querySelector('[data-device="sovevaerelse-temperatur"]');
+        const tempPopup = document.getElementById('temperature-popup');
+        const tempSlider = document.getElementById('temperature-slider');
+        const tempValue = document.getElementById('temperature-value');
+        const tempClose = document.querySelector('.temperature-popup-close');
+        const tempSave = document.querySelector('.temperature-save-btn');
+
+        if (tempIcon) {
+            tempIcon.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showTemperaturePopup();
+            });
+        }
+
+        if (tempClose) {
+            tempClose.addEventListener('click', () => {
+                this.hideTemperaturePopup();
+            });
+        }
+
+        if (tempSave) {
+            tempSave.addEventListener('click', () => {
+                this.saveTemperatureSettings();
+            });
+        }
+
+        if (tempSlider) {
+            tempSlider.addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (tempValue) {
+                    tempValue.textContent = value + '°C';
+                }
+            });
+        }
+
+        // Close popup when clicking outside
+        if (tempPopup) {
+            tempPopup.addEventListener('click', (e) => {
+                if (e.target === tempPopup) {
+                    this.hideTemperaturePopup();
+                }
+            });
+        }
+    }
 
     showHumidityPopup() {
         const humidityPopup = document.getElementById('humidity-popup');
@@ -5296,8 +5642,56 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             const newHumidity = humiditySlider.value;
             humidityIcon.dataset.value = newHumidity;
             
+            // Update visual appearance
+            this.updateSmartIconAppearance(humidityIcon);
+            
+            // Check for active rules that should trigger
+            this.checkActiveRules('badevaerelse-fugtmaaler', true);
+            
             this.showNotification(`Fugtniveau sat til ${newHumidity}%`, 'success');
             this.hideHumidityPopup();
+        }
+    }
+    
+    showTemperaturePopup() {
+        const tempPopup = document.getElementById('temperature-popup');
+        const tempIcon = document.querySelector('[data-device="sovevaerelse-temperatur"]');
+        
+        if (tempPopup && tempIcon) {
+            const currentTemp = tempIcon.dataset.value || '21';
+            const tempSlider = document.getElementById('temperature-slider');
+            const tempValue = document.getElementById('temperature-value');
+            
+            tempSlider.value = currentTemp;
+            tempValue.textContent = currentTemp + '°C';
+            
+            tempPopup.style.display = 'flex';
+        }
+    }
+    
+    hideTemperaturePopup() {
+        const tempPopup = document.getElementById('temperature-popup');
+        if (tempPopup) {
+            tempPopup.style.display = 'none';
+        }
+    }
+    
+    saveTemperatureSettings() {
+        const tempSlider = document.getElementById('temperature-slider');
+        const tempIcon = document.querySelector('[data-device="sovevaerelse-temperatur"]');
+        
+        if (tempSlider && tempIcon) {
+            const newTemp = tempSlider.value;
+            tempIcon.dataset.value = newTemp;
+            
+            // Update visual appearance
+            this.updateSmartIconAppearance(tempIcon);
+            
+            // Check for active rules that should trigger
+            this.checkActiveRules('sovevaerelse-temperatur', true);
+            
+            this.showNotification(`Temperatur sat til ${newTemp}°C`, 'success');
+            this.hideTemperaturePopup();
         }
     }
 
@@ -5409,6 +5803,40 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const iconContent = icon.querySelector('.icon-content');
         
         if (!iconContent) return;
+        
+        // Handle different device types
+        if (icon.dataset.device.includes('stikkontakt')) {
+            // Smart stikkontakter - show power consumption
+            if (isOn) {
+                icon.classList.add('active');
+                const power = icon.dataset.powerConsumption || '0';
+                iconContent.innerHTML = `<span class="icon-symbol">⚡</span><div class="power-display">${parseFloat(power).toFixed(0)}W</div>`;
+            } else {
+                icon.classList.remove('active');
+                iconContent.innerHTML = '<span class="icon-symbol">⚡</span>';
+            }
+            return;
+        }
+        
+        if (icon.dataset.device.includes('temperatur')) {
+            // Temperature sensors - show only icon
+            iconContent.innerHTML = '<span class="icon-symbol">🌡️</span>';
+            return;
+        }
+        
+        if (icon.dataset.device.includes('altan-lys')) {
+            // Altanlys dimmer - show brightness percentage
+            const brightness = icon.dataset.value || '0';
+            const brightnessNum = parseInt(brightness);
+            if (brightnessNum > 0) {
+                icon.classList.add('active');
+                iconContent.innerHTML = `<span class="icon-symbol">💡</span><div class="power-display">${brightness}%</div>`;
+            } else {
+                icon.classList.remove('active');
+                iconContent.innerHTML = '<span class="icon-symbol">💡</span>';
+            }
+            return;
+        }
         
         if (icon.dataset.device.includes('lampe')) {
             if (isOn) {
@@ -7101,9 +7529,32 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
 
 // ===== INITIALIZE APP =====
-document.addEventListener('DOMContentLoaded', () => {
+function initializeApp() {
+    console.log('Attempting to initialize AppManager...');
+    try {
+        if (!window.appManager) {
+            console.log('Creating new AppManager instance...');
     window.appManager = new AppManager();
-});
+            console.log('AppManager initialized successfully:', window.appManager);
+        } else {
+            console.log('AppManager already exists:', window.appManager);
+        }
+    } catch (error) {
+        console.error('Error creating AppManager:', error);
+        console.error('Error stack:', error.stack);
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+// Also initialize immediately if DOM is already loaded
+if (document.readyState === 'loading') {
+    // DOM is still loading, wait for DOMContentLoaded
+} else {
+    // DOM is already loaded, initialize immediately
+    initializeApp();
+}
 
 // ===== GLOBAL FUNCTIONS =====
 function showNotification(message, type = 'info') {

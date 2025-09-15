@@ -114,11 +114,13 @@
 - [ ] **Ved "Ved ikke" svar** - Test sammen, spørg igen
 
 #### C. Backup Commit Format
-```bash
+```cmd
 git add .
-git commit -m "BACKUP: [Feature/Bug/Refactor] - [Beskrivelse] - $(date)"
+git commit -m "BACKUP: [Feature/Bug/Refactor] - [Beskrivelse] - %date%"
 # Eksempel: "BACKUP: Feature - E-Learning system with sensor content - 2024-01-15"
 ```
+
+**Note:** Brug `cmd` (Command Prompt) i stedet for PowerShell for bedre kompatibilitet med Windows kommandoer.
 
 #### D. Backup Frequency Guidelines
 - **Altid backup efter**: Ny feature, bug fix, Firebase update

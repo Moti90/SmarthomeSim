@@ -8,7 +8,13 @@ En interaktiv smarthome simulator med E-Learning moduler til undervisning.
 1. Klon repositoryet
 2. Kopier `firebase-config.template.js` til `firebase-config.js`
 3. Tilføj dine Firebase konfigurationsdetaljer i `firebase-config.js`
-4. Åbn `index.html` i din browser
+4. Start lokal server:
+   ```cmd
+   python -m http.server 8000
+   ```
+5. Åbn http://localhost:8000 i din browser
+
+**Note:** Brug `cmd` (Command Prompt) i stedet for PowerShell for bedre kompatibilitet med Windows kommandoer.
 
 ### GitHub Pages
 Appen er konfigureret til at køre på GitHub Pages uden følsomme API nøgler.
@@ -32,6 +38,14 @@ Appen er konfigureret til at køre på GitHub Pages uden følsomme API nøgler.
 - **Advanced Mode**: Avancerede funktioner til lærere
 - **Temaer**: Forskellige visuelle temaer
 - **Responsivt Design**: Fungerer på alle enheder
+
+## 📊 Kode Statistikker
+
+**Seneste oprydning (Wiresheet fjernelse):**
+- **Fjernet**: 1.308 linjer kode
+- **Filer påvirket**: 3 (index.html, js/app.js, css/style.css)
+- **Funktionalitet fjernet**: Wiresheet regel editor interface
+- **Resultat**: Renere kodebase med kun kontrolpanel funktionalitet
 
 ## 🛡️ Sikkerhed
 
