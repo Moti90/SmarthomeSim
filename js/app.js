@@ -1012,6 +1012,8 @@ class AppManager {
             // Also apply stored progress to UI after a short delay to ensure DOM is ready
             setTimeout(() => {
                 this.refreshElearningProgress();
+                // Force update all buttons with stored progress
+                this.forceUpdateAllButtons();
             }, 100);
         }
         
@@ -7703,6 +7705,31 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 console.log(`Button not found for: ${subtopicId}`);
             }
         });
+    }
+
+    forceUpdateAllButtons() {
+        console.log('🔄 Force updating all buttons with stored progress...');
+        console.log('🔄 Stored completed modules:', this.completedModules);
+        
+        if (this.completedModules.length === 0) {
+            console.log('🔄 No completed modules to update');
+            return;
+        }
+        
+        let buttonsUpdated = 0;
+        this.completedModules.forEach(subtopicId => {
+            const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
+            if (button) {
+                button.textContent = 'Gennemført ✓';
+                button.classList.add('completed');
+                buttonsUpdated++;
+                console.log(`✅ Force updated button for: ${subtopicId}`);
+            } else {
+                console.log(`❌ Button still not found for: ${subtopicId}`);
+            }
+        });
+        
+        console.log(`🔄 Force update complete: ${buttonsUpdated} buttons updated`);
     }
 
     async syncProgressWithFirebase() {
