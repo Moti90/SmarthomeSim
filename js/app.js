@@ -810,28 +810,45 @@ class AppManager {
     }
 
     saveRules() {
+        console.log('=== SAVING RULES ===');
         const ruleCards = document.querySelectorAll('.rule-card');
+        console.log('Found rule cards:', ruleCards.length);
+        
         const rules = Array.from(ruleCards).map(card => {
+            console.log('Processing rule card:', card.id);
+            
             const trigger1 = this.getZoneContent(card, 'trigger1');
             const trigger2 = this.getZoneContent(card, 'trigger2');
             const condition = this.getZoneContent(card, 'condition');
             const action = this.getZoneContent(card, 'action');
+            
+            console.log('Rule content:', { trigger1, trigger2, condition, action });
             
             // Create triggers array
             const triggers = [];
             if (trigger1) triggers.push(trigger1);
             if (trigger2) triggers.push(trigger2);
             
-            return {
+            const rule = {
                 id: card.id,
                 triggers: triggers,
                 condition: condition,
                 action: action,
                 timestamp: new Date().toISOString()
             };
+            
+            console.log('Created rule:', rule);
+            return rule;
         });
         
+        console.log('All rules to save:', rules);
         localStorage.setItem('smarthome-rules', JSON.stringify(rules));
+        console.log('Rules saved to localStorage');
+        
+        // Verify save
+        const savedRules = JSON.parse(localStorage.getItem('smarthome-rules') || '[]');
+        console.log('Verified saved rules:', savedRules);
+        
         this.showNotification(`${rules.length} regler gemt!`, 'success');
     }
 
@@ -3914,6 +3931,10 @@ class AppManager {
         // Get all saved rules from localStorage (both old and new format)
         const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
         const smarthomeRules = JSON.parse(localStorage.getItem('smarthome-rules') || '[]');
+        
+        console.log('=== LOADING RULES FROM LOCALSTORAGE ===');
+        console.log('savedRules (old format):', savedRules);
+        console.log('smarthome-rules (new format):', smarthomeRules);
         
         // Filter for block scene rules (old format)
         const blockSceneRules = savedRules.filter(rule => rule.type === 'block_scene');
