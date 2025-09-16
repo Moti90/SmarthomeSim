@@ -3997,12 +3997,18 @@ class AppManager {
             );
             
             if (matchingTriggers.length > 0 && isActive) {
+                console.log(`Found matching trigger for rule ${rule.id}:`, matchingTriggers);
+                console.log(`Rule has ${rule.triggers.length} triggers total`);
+                
                 // For multiple triggers, we need to check if ALL triggers are active
                 const allTriggersActive = this.checkAllTriggersActive(rule);
+                console.log(`All triggers active result:`, allTriggersActive);
                 
                 if (allTriggersActive) {
                     console.log(`✅ Triggering smarthome rule: ${rule.id}`);
                     this.executeSmarthomeRule(rule);
+                } else {
+                    console.log(`❌ Not all triggers are active for rule: ${rule.id}`);
                 }
             }
         });
