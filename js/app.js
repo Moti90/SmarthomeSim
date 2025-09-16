@@ -5323,6 +5323,11 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             
             // Update icon when switch changes
             switchElement.addEventListener('change', () => {
+                // Skip notifications if we're activating a scenario
+                if (this.activatingScenario) {
+                    return;
+                }
+                
                 // Special handling for alarmsystem (no icon on floor plan)
                 if (deviceId === 'alarmsystem') {
                     const isActive = switchElement.checked;
@@ -6011,6 +6016,9 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     activateScenario(scenario) {
+        // Set flag to prevent notifications during scenario activation
+        this.activatingScenario = true;
+        
         const scenarios = {
             morning: {
                 name: 'Morgen Scenario',
@@ -6098,6 +6106,11 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         }
 
         this.showNotification(`${selectedScenario.name} aktiveret!`, 'success');
+        
+        // Reset flag after a short delay to allow final notification
+        setTimeout(() => {
+            this.activatingScenario = false;
+        }, 100);
     }
 
     updateSmartIconAppearance(icon) {
