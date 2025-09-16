@@ -3766,18 +3766,26 @@ class AppManager {
     executeBlockScene(sceneData) {
         console.log('Executing block scene:', sceneData);
         
-        // Show rule execution popup
-        this.showRuleExecutionPopup(sceneData.name);
+        // Set flag to prevent recursive rule checks
+        this.executingRule = true;
         
-        // Execute all triggers first
-        sceneData.triggers.forEach(trigger => {
-            this.executeBlockTrigger(trigger);
-        });
-        
-        // Execute all actions
-        sceneData.actions.forEach(action => {
-            this.executeBlockAction(action);
-        });
+        try {
+            // Show rule execution popup
+            this.showRuleExecutionPopup(sceneData.name);
+            
+            // Execute all triggers first
+            sceneData.triggers.forEach(trigger => {
+                this.executeBlockTrigger(trigger);
+            });
+            
+            // Execute all actions
+            sceneData.actions.forEach(action => {
+                this.executeBlockAction(action);
+            });
+        } finally {
+            // Reset flag to allow rule checks again
+            this.executingRule = false;
+        }
     }
     
     showRuleExecutionPopup(ruleName) {
@@ -3928,6 +3936,12 @@ class AppManager {
     }
     
     checkActiveRules(deviceId, isActive) {
+        // Prevent recursive calls during rule execution
+        if (this.executingRule) {
+            console.log('Skipping rule check - currently executing rule');
+            return;
+        }
+        
         // Debounce to prevent infinite loops
         const now = Date.now();
         const lastCheck = this.lastRuleCheck || 0;
@@ -4035,6 +4049,9 @@ class AppManager {
     executeSmarthomeRule(rule) {
         console.log('Executing smarthome rule:', rule);
         
+        // Set flag to prevent recursive rule checks
+        this.executingRule = true;
+        
         try {
             // Execute the action based on the rule
             if (rule.action) {
@@ -4101,6 +4118,9 @@ class AppManager {
             console.error('Error executing smarthome rule:', error);
             console.error('Error stack:', error.stack);
             this.showNotification('Fejl ved udførelse af regel: ' + error.message, 'error');
+        } finally {
+            // Reset flag to allow rule checks again
+            this.executingRule = false;
         }
     }
 
