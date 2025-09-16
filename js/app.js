@@ -6980,102 +6980,190 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             'temperatur-sensoere': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
-                    <p>Hvorfor er temperatursensoere vigtige i et smarthome?</p>
+                    <p>Hvilken temperaturmålingsteknologi bruger de fleste moderne temperatursensoere?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q1" value="a"> De sparer strøm</label>
-                        <label><input type="radio" name="q1" value="b"> De gør hjemmet intelligent og komfortabelt</label>
-                        <label><input type="radio" name="q1" value="c"> De er billige at installere</label>
-                        <label><input type="radio" name="q1" value="d"> De ser moderne ud</label>
+                        <label><input type="radio" name="q1" value="a"> Termistor (NTC/PTC)</label>
+                        <label><input type="radio" name="q1" value="b"> Infrarød stråling</label>
+                        <label><input type="radio" name="q1" value="c"> Bimetaltermometer</label>
+                        <label><input type="radio" name="q1" value="d"> Kviksølvtermometer</label>
                     </div>
                 </div>
                 
                 <div class="quiz-question">
                     <h4>Spørgsmål 2:</h4>
-                    <p>Hvilken placering er bedst for temperatursensoere?</p>
+                    <p>Hvorfor skal temperatursensoere placeres væk fra direkte sollys og varmekilder?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q2" value="a"> Ved vinduerne</label>
-                        <label><input type="radio" name="q2" value="b"> I øjenhøjde (1,5-2m) væk fra varmekilder</label>
-                        <label><input type="radio" name="q2" value="c"> På gulvet</label>
-                        <label><input type="radio" name="q2" value="d"> Ved radiatorer</label>
+                        <label><input type="radio" name="q2" value="a"> De bliver ødelagt af varme</label>
+                        <label><input type="radio" name="q2" value="b"> De giver unøjagtige målinger af rumtemperatur</label>
+                        <label><input type="radio" name="q2" value="c"> De bruger mere strøm</label>
+                        <label><input type="radio" name="q2" value="d"> De sender for mange data</label>
                     </div>
                 </div>
                 
-                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b'])">Tjek Svar</button>
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er den typiske målenøjagtighed for en god temperatursensor?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> ±5°C</label>
+                        <label><input type="radio" name="q3" value="b"> ±0.5°C</label>
+                        <label><input type="radio" name="q3" value="c"> ±10°C</label>
+                        <label><input type="radio" name="q3" value="d"> ±1°C</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvilken protokol bruger de fleste temperatursensoere til kommunikation?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> WiFi</label>
+                        <label><input type="radio" name="q4" value="b"> Zigbee eller Z-Wave</label>
+                        <label><input type="radio" name="q4" value="c"> Bluetooth</label>
+                        <label><input type="radio" name="q4" value="d"> Ethernet</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
             'bevaegelsessensoere': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
-                    <p>Hvad er den primære anvendelse af bevægelsessensoere i smarthome?</p>
+                    <p>Hvilken teknologi bruger PIR (Passive Infrared) bevægelsessensoere?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q1" value="a"> At måle temperatur</label>
-                        <label><input type="radio" name="q1" value="b"> At automatisere lys og sikkerhed</label>
-                        <label><input type="radio" name="q1" value="c"> At spare strøm</label>
-                        <label><input type="radio" name="q1" value="d"> At spille musik</label>
+                        <label><input type="radio" name="q1" value="a"> Ultralyd</label>
+                        <label><input type="radio" name="q1" value="b"> Infrarød varmestråling fra kroppe</label>
+                        <label><input type="radio" name="q1" value="c"> Mikrobølger</label>
+                        <label><input type="radio" name="q1" value="d"> Kamera-baseret genkendelse</label>
                     </div>
                 </div>
                 
                 <div class="quiz-question">
                     <h4>Spørgsmål 2:</h4>
-                    <p>Hvor bør bevægelsessensoere IKKE placeres?</p>
+                    <p>Hvad er den typiske detektionsvinkel for en PIR-sensor?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q2" value="a"> På væggen</label>
-                        <label><input type="radio" name="q2" value="b"> Ved vinduer, radiatorer eller døråbninger</label>
-                        <label><input type="radio" name="q2" value="c"> I hjørnet af rummet</label>
-                        <label><input type="radio" name="q2" value="d"> Over døren</label>
+                        <label><input type="radio" name="q2" value="a"> 45°</label>
+                        <label><input type="radio" name="q2" value="b"> 90-120°</label>
+                        <label><input type="radio" name="q2" value="c"> 180°</label>
+                        <label><input type="radio" name="q2" value="d"> 360°</label>
                     </div>
                 </div>
                 
-                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b'])">Tjek Svar</button>
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvorfor skal PIR-sensorer placeres væk fra vinduer og radiatorer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> De kan blive ødelagt af varme</label>
+                        <label><input type="radio" name="q3" value="b"> Temperaturændringer kan forårsage falske alarmer</label>
+                        <label><input type="radio" name="q3" value="c"> De bruger mere strøm</label>
+                        <label><input type="radio" name="q3" value="d"> De sender for mange signaler</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er den optimale højde for installation af en PIR-sensor?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> 1 meter</label>
+                        <label><input type="radio" name="q4" value="b"> 2-3 meter</label>
+                        <label><input type="radio" name="q4" value="c"> 4-5 meter</label>
+                        <label><input type="radio" name="q4" value="d"> 6 meter</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
             'wifi-bluetooth': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
-                    <p>Hvilken protokol er bedst til enheder der kræver høj datatransmission?</p>
+                    <p>Hvilken frekvens bruger WiFi 2.4 GHz båndet?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q1" value="a"> Bluetooth</label>
-                        <label><input type="radio" name="q1" value="b"> WiFi</label>
-                        <label><input type="radio" name="q1" value="c"> Zigbee</label>
-                        <label><input type="radio" name="q1" value="d"> Z-Wave</label>
+                        <label><input type="radio" name="q1" value="a"> 2.400-2.483 GHz</label>
+                        <label><input type="radio" name="q1" value="b"> 2.400-2.500 GHz</label>
+                        <label><input type="radio" name="q1" value="c"> 2.300-2.400 GHz</label>
+                        <label><input type="radio" name="q1" value="d"> 2.500-2.600 GHz</label>
                     </div>
                 </div>
                 
                 <div class="quiz-question">
                     <h4>Spørgsmål 2:</h4>
-                    <p>Hvad er hovedulempen ved WiFi i smarthome sammenhæng?</p>
+                    <p>Hvad er den maksimale rækkevidde for Bluetooth Low Energy (BLE)?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q2" value="a"> Kort rækkevidde</label>
-                        <label><input type="radio" name="q2" value="b"> Højt strømforbrug</label>
-                        <label><input type="radio" name="q2" value="c"> Dårlig sikkerhed</label>
-                        <label><input type="radio" name="q2" value="d"> Dyrt at installere</label>
+                        <label><input type="radio" name="q2" value="a"> 10 meter</label>
+                        <label><input type="radio" name="q2" value="b"> 50 meter</label>
+                        <label><input type="radio" name="q2" value="c"> 100 meter</label>
+                        <label><input type="radio" name="q2" value="d"> 200 meter</label>
                     </div>
                 </div>
                 
-                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b'])">Tjek Svar</button>
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvilken protokol er bedst til batteridrevne enheder?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> WiFi</label>
+                        <label><input type="radio" name="q3" value="b"> Bluetooth Low Energy</label>
+                        <label><input type="radio" name="q3" value="c"> Ethernet</label>
+                        <label><input type="radio" name="q3" value="d"> 4G/5G</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved WiFi 6 (802.11ax) i smarthome sammenhæng?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Længere rækkevidde</label>
+                        <label><input type="radio" name="q4" value="b"> Bedre ydeevne med mange enheder</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'a', 'b', 'b'])">Tjek Svar</button>
             `,
             'zigbee-z-wave': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
-                    <p>Hvad er hovedfordelen ved Zigbee og Z-Wave protokoller?</p>
+                    <p>Hvilken frekvens bruger Zigbee i Europa?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q1" value="a"> Høj datatransmission</label>
-                        <label><input type="radio" name="q1" value="b"> Lavt strømforbrug og mesh-netværk</label>
-                        <label><input type="radio" name="q1" value="c"> Billige enheder</label>
-                        <label><input type="radio" name="q1" value="d"> Nem installation</label>
+                        <label><input type="radio" name="q1" value="a"> 2.4 GHz</label>
+                        <label><input type="radio" name="q1" value="b"> 868 MHz</label>
+                        <label><input type="radio" name="q1" value="c"> 5 GHz</label>
+                        <label><input type="radio" name="q1" value="d"> 433 MHz</label>
                     </div>
                 </div>
                 
                 <div class="quiz-question">
                     <h4>Spørgsmål 2:</h4>
-                    <p>Hvilken frekvens bruger Z-Wave i Europa?</p>
+                    <p>Hvad er den maksimale rækkevidde mellem to Z-Wave enheder?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q2" value="a"> 2.4 GHz</label>
-                        <label><input type="radio" name="q2" value="b"> 868 MHz</label>
-                        <label><input type="radio" name="q2" value="c"> 5 GHz</label>
-                        <label><input type="radio" name="q2" value="d"> 433 MHz</label>
+                        <label><input type="radio" name="q2" value="a"> 10 meter</label>
+                        <label><input type="radio" name="q2" value="b"> 30 meter</label>
+                        <label><input type="radio" name="q2" value="c"> 100 meter</label>
+                        <label><input type="radio" name="q2" value="d"> 200 meter</label>
                     </div>
                 </div>
                 
-                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b'])">Tjek Svar</button>
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvor mange enheder kan et Zigbee mesh-netværk maksimalt understøtte?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> 32 enheder</label>
+                        <label><input type="radio" name="q3" value="b"> 65.000 enheder</label>
+                        <label><input type="radio" name="q3" value="c"> 255 enheder</label>
+                        <label><input type="radio" name="q3" value="d"> 1000 enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved mesh-netværk i smarthome protokoller?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Bedre rækkevidde og pålidelighed</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
             // Automatisering quiz spørgsmål
             'scenarier': `
@@ -7644,22 +7732,13 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
             console.log('Loaded progress from Firebase:', completedModules);
             
-            // Also load from localStorage and merge (don't overwrite Firebase data)
-            const localProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
-            console.log('Loaded progress from localStorage:', localProgress);
-            
-            // Merge both sources, Firebase takes priority
-            const allCompletedModules = [...new Set([...completedModules, ...localProgress])];
-            console.log('Merged progress:', allCompletedModules);
+            // Firebase is the source of truth - update localStorage to match exactly
+            localStorage.setItem('learningProgress', JSON.stringify(completedModules));
+            console.log('Updated localStorage to match Firebase exactly');
             console.log('Firebase modules:', completedModules);
-            console.log('LocalStorage modules:', localProgress);
-            console.log('Total unique modules:', allCompletedModules.length);
+            console.log('Total modules from Firebase:', completedModules.length);
             
-            // Update localStorage with merged data to keep them in sync
-            localStorage.setItem('learningProgress', JSON.stringify(allCompletedModules));
-            console.log('Updated localStorage with merged progress');
-            
-            this.applyProgressToUI(allCompletedModules);
+            this.applyProgressToUI(completedModules);
 
         } catch (error) {
             console.error('Error loading progress from Firebase:', error);
