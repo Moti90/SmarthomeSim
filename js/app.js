@@ -555,218 +555,13 @@ class AppManager {
     }
     
 
-    setupRuleBuilder() {
-        // Setup rule builder controls
-        const createBtn = document.getElementById('create-rule');
-        const saveBtn = document.getElementById('save-rules');
-        const testBtn = document.getElementById('test-rules');
-
-        if (createBtn) {
-            createBtn.addEventListener('click', () => this.createNewRule());
-        }
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.saveRules());
-        }
-        if (testBtn) {
-            testBtn.addEventListener('click', () => this.testRules());
-        }
-
-        // Setup drag and drop for components
-        this.setupComponentDragAndDrop();
-        
-        // Create initial rule card
-        this.createNewRule();
-    }
-
-    setupComponentDragAndDrop() {
-        const componentItems = document.querySelectorAll('.component-item');
-        const dropZones = document.querySelectorAll('.drop-zone');
-
-        componentItems.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', JSON.stringify({
-                    type: item.dataset.type,
-                    subtype: item.dataset.subtype,
-                    name: item.querySelector('.component-name').textContent,
-                    icon: item.querySelector('.component-icon').textContent
-                }));
-                item.classList.add('dragging');
-            });
-
-            item.addEventListener('dragend', (e) => {
-                item.classList.remove('dragging');
-            });
-        });
-
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                zone.classList.add('drag-over');
-            });
-
-            zone.addEventListener('dragleave', (e) => {
-                zone.classList.remove('drag-over');
-            });
-
-            zone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                zone.classList.remove('drag-over');
-                
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-                this.addComponentToDropZone(zone, data);
-            });
-        });
-    }
 
 
 
 
-    createNewRule() {
-        const rulesContainer = document.getElementById('rules-container');
-        if (!rulesContainer) return;
 
-        const ruleId = 'rule_' + Date.now();
-        const ruleCard = document.createElement('div');
-        ruleCard.className = 'rule-card';
-        ruleCard.id = ruleId;
-        
-        ruleCard.innerHTML = `
-            <div class="rule-card-header">
-                <h4 class="rule-card-title">Regel ${rulesContainer.children.length + 1}</h4>
-                <button class="rule-card-delete" onclick="window.appManager.deleteRule('${ruleId}')">×</button>
-            </div>
-            <div class="rule-drop-zones">
-                <div class="triggers-section">
-                    <h5 class="section-title">🎯 Triggers (Begge skal være opfyldt)</h5>
-                    <div class="triggers-container">
-                        <div class="drop-zone" data-zone="trigger1">
-                            <span class="drop-zone-label">Trigger 1</span>
-                            <div class="drop-zone-content">
-                                <span class="drop-zone-icon">🚀</span>
-                                <span>Træk sensor her</span>
-                            </div>
-                        </div>
-                        <div class="drop-zone" data-zone="trigger2">
-                            <span class="drop-zone-label">Trigger 2</span>
-                            <div class="drop-zone-content">
-                                <span class="drop-zone-icon">🚀</span>
-                                <span>Træk sensor her</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="drop-zone" data-zone="condition">
-                    <span class="drop-zone-label">Betingelse (AND)</span>
-                    <div class="drop-zone-content">
-                        <span class="drop-zone-icon">🔗</span>
-                        <span>Træk betingelse her (valgfrit)</span>
-                    </div>
-                </div>
-                <div class="drop-zone" data-zone="action">
-                    <span class="drop-zone-label">Action (Så)</span>
-                    <div class="drop-zone-content">
-                        <span class="drop-zone-icon">⚡</span>
-                        <span>Træk action her</span>
-                    </div>
-                </div>
-            </div>
-            <div class="rule-preview">
-                <div class="rule-preview-empty">
-                    Træk komponenter for at bygge reglen
-                </div>
-            </div>
-        `;
 
-        rulesContainer.appendChild(ruleCard);
-        
-        // Re-setup drag and drop for new card
-        this.setupComponentDragAndDrop();
-        
-        this.showNotification('Ny regel oprettet!', 'success');
-    }
 
-    addComponentToDropZone(zone, data) {
-        // Check if zone already has content
-        if (zone.classList.contains('occupied')) {
-            this.showNotification('Drop zone er allerede fyldt', 'warning');
-            return;
-        }
-
-        // Check if this is a trigger zone and if we can add it
-        const zoneType = zone.dataset.zone;
-        if (zoneType === 'trigger1' || zoneType === 'trigger2') {
-            // Only allow trigger-type components in trigger zones
-            if (data.type !== 'trigger') {
-                this.showNotification('Kun trigger komponenter kan placeres i trigger zones', 'warning');
-                return;
-            }
-        } else if (zoneType === 'condition') {
-            // Only allow condition-type components in condition zones
-            if (data.type !== 'condition') {
-                this.showNotification('Kun betingelse komponenter kan placeres i betingelse zones', 'warning');
-                return;
-            }
-        } else if (zoneType === 'action') {
-            // Only allow action-type components in action zones
-            if (data.type !== 'action') {
-                this.showNotification('Kun action komponenter kan placeres i action zones', 'warning');
-                return;
-            }
-        }
-
-        // Add component to zone
-        zone.classList.add('occupied');
-        zone.innerHTML = `
-            <div class="drop-zone-content">
-                <span class="drop-zone-icon">${data.icon}</span>
-                <span>${data.name}</span>
-                <button class="remove-component" onclick="window.appManager.removeComponent(this)">×</button>
-            </div>
-        `;
-
-        // Update rule preview
-        this.updateRulePreview(zone.closest('.rule-card'));
-        
-        this.showNotification(`${data.name} tilføjet til regel`, 'success');
-    }
-
-    removeComponent(button) {
-        const zone = button.closest('.drop-zone');
-        const zoneType = zone.dataset.zone;
-        
-        // Reset zone content
-        zone.classList.remove('occupied');
-        
-        let label, icon, text;
-        if (zoneType === 'trigger1') {
-            label = 'Trigger 1';
-            icon = '🚀';
-            text = 'Træk sensor her';
-        } else if (zoneType === 'trigger2') {
-            label = 'Trigger 2';
-            icon = '🚀';
-            text = 'Træk sensor her';
-        } else if (zoneType === 'condition') {
-            label = 'Betingelse (AND)';
-            icon = '🔗';
-            text = 'Træk betingelse her (valgfrit)';
-        } else if (zoneType === 'action') {
-            label = 'Action (Så)';
-            icon = '⚡';
-            text = 'Træk action her';
-        }
-        
-        zone.innerHTML = `
-            <span class="drop-zone-label">${label}</span>
-            <div class="drop-zone-content">
-                <span class="drop-zone-icon">${icon}</span>
-                <span>${text}</span>
-            </div>
-        `;
-
-        // Update rule preview
-        this.updateRulePreview(zone.closest('.rule-card'));
-    }
 
     updateRulePreview(ruleCard) {
         const preview = ruleCard.querySelector('.rule-preview');
@@ -834,13 +629,13 @@ class AppManager {
             if (trigger2) triggers.push(trigger2);
             
             const rule = {
-                id: card.id,
+            id: card.id,
                 triggers: triggers,
                 condition: condition,
                 action: action,
-                timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString()
             };
-            
+        
             console.log('Created rule:', rule);
             return rule;
         });
@@ -3774,18 +3569,18 @@ class AppManager {
         this.executingRule = true;
         
         try {
-            // Show rule execution popup
-            this.showRuleExecutionPopup(sceneData.name);
-            
-            // Execute all triggers first
-            sceneData.triggers.forEach(trigger => {
-                this.executeBlockTrigger(trigger);
-            });
-            
-            // Execute all actions
-            sceneData.actions.forEach(action => {
-                this.executeBlockAction(action);
-            });
+        // Show rule execution popup
+        this.showRuleExecutionPopup(sceneData.name);
+        
+        // Execute all triggers first
+        sceneData.triggers.forEach(trigger => {
+            this.executeBlockTrigger(trigger);
+        });
+        
+        // Execute all actions
+        sceneData.actions.forEach(action => {
+            this.executeBlockAction(action);
+        });
         } finally {
             // Reset flag to allow rule checks again
             this.executingRule = false;
@@ -3991,8 +3786,8 @@ class AppManager {
                     
                     if (allTriggersActive) {
                         console.log(`✅ Triggering block scene rule: ${rule.name}`);
-                        this.executeBlockScene(rule);
-                    } else {
+                this.executeBlockScene(rule);
+            } else {
                         console.log(`❌ Not all block scene triggers are active for rule: ${rule.name}`);
                     }
                 } else {
