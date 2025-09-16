@@ -1411,6 +1411,40 @@
             refresh: () => {
                 console.log('🔄 Refreshing page...');
                 window.location.reload();
+            },
+            createTestProgress: async () => {
+                if (window.FirebaseConfig && window.FirebaseConfig.getFirestore) {
+                    try {
+                        const db = window.FirebaseConfig.getFirestore();
+                        const auth = window.FirebaseConfig.getAuth();
+                        
+                        if (auth.currentUser) {
+                            const testData = {
+                                userId: auth.currentUser.uid,
+                                subtopicId: 'test-modul',
+                                completedAt: new Date().toISOString(),
+                                timestamp: Date.now()
+                            };
+                            
+                            await db.collection('learning_progress').add(testData);
+                            console.log('✅ Test progress data created in Firebase!');
+                        } else {
+                            console.log('❌ No user logged in. Please log in first.');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error creating test data:', error);
+                    }
+                } else {
+                    console.log('❌ Firebase not initialized');
+                }
+            },
+            checkProgress: () => {
+                const localProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
+                console.log('📊 Current progress status:');
+                console.log('  - User logged in:', !!window.appManager?.currentUser);
+                console.log('  - Completed modules:', window.appManager?.completedModules || []);
+                console.log('  - localStorage progress:', localProgress);
+                console.log('  - Progress percentage:', Math.round((window.appManager?.completedModules?.length || 0) / 37 * 100) + '%');
             }
         };
         
@@ -1418,6 +1452,8 @@
         console.log('  - debugFirebase.clearData() - Clear Firestore data');
         console.log('  - debugFirebase.status() - Check Firebase status');
         console.log('  - debugFirebase.refresh() - Refresh the page');
+        console.log('  - debugFirebase.createTestProgress() - Create test progress data');
+        console.log('  - debugFirebase.checkProgress() - Check current progress status');
     </script>
 
     <!-- Advanced Mode Password Popup -->

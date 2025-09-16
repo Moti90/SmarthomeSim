@@ -12,6 +12,7 @@ class AppManager {
         // Initialize arrays
         this.rules = [];
         this.savedScenarios = [];
+        this.completedModules = []; // Track completed learning modules
         this.savedRules = [];
         this.simLog = [];
         this.simSensors = [];
@@ -50,6 +51,16 @@ class AppManager {
         this.updateSavedScenariosDisplay();
         this.setupScenarioControls();
         
+        // Load learning progress on app start (from localStorage as fallback)
+        this.loadProgressFromLocalStorage();
+        
+        // Update progress display immediately
+        this.updateOverallProgress();
+        
+        // If user is already logged in, sync with Firebase
+        if (this.currentUser) {
+            this.loadLearningProgress();
+        }
     }
 
     initializeFirebase() {
@@ -836,8 +847,9 @@ class AppManager {
                     this.showApp();
                     this.updateUserInfo();
                     
-                    // Load user's learning progress
+                    // Load user's learning progress and sync with Firebase
                     await this.loadLearningProgress();
+                    await this.syncProgressWithFirebase();
                 } else {
                     // User is signed out
                     this.currentUser = null;
@@ -1001,6 +1013,11 @@ class AppManager {
         } else if (tabName === 'elearning') {
             // Refresh progress when e-learning tab is opened
             this.loadLearningProgress();
+            
+            // Also apply stored progress to UI after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                this.refreshElearningProgress();
+            }, 100);
         }
         
         this.currentTab = tabName;
@@ -7496,9 +7513,10 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     updateOverallProgress() {
-        const allSubtopicButtons = document.querySelectorAll('.subtopic-btn');
-        const completedButtons = document.querySelectorAll('.subtopic-btn.completed');
-        const percentage = Math.round((completedButtons.length / allSubtopicButtons.length) * 100);
+        // Use stored completed modules instead of DOM elements
+        const totalModules = 37; // Total number of learning modules (from HTML stats)
+        const completedCount = this.completedModules.length;
+        const percentage = Math.round((completedCount / totalModules) * 100);
         
         const progressCircle = document.querySelector('.progress-circle-large');
         const progressText = document.querySelector('.progress-text-large');
@@ -7507,10 +7525,12 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             progressCircle.style.background = `conic-gradient(#78dbff ${percentage * 3.6}deg, #78dbff ${percentage * 3.6}deg, rgba(160, 174, 192, 0.2) ${percentage * 3.6}deg)`;
             progressText.textContent = `${percentage}%`;
         }
+        
+        console.log(`Progress updated: ${completedCount}/${totalModules} (${percentage}%)`);
     }
 
     checkAchievements() {
-        const completedCount = document.querySelectorAll('.subtopic-btn.completed').length;
+        const completedCount = this.completedModules.length;
         const achievements = document.querySelectorAll('.achievement-badge');
         
         // Unlock achievements based on progress
@@ -7611,10 +7631,20 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             });
 
             console.log('Loaded progress from Firebase:', completedModules);
-            this.applyProgressToUI(completedModules);
-
-            // Also load from localStorage and merge
-            this.loadProgressFromLocalStorage();
+            
+            // Also load from localStorage and merge (don't overwrite Firebase data)
+            const localProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
+            console.log('Loaded progress from localStorage:', localProgress);
+            
+            // Merge both sources, Firebase takes priority
+            const allCompletedModules = [...new Set([...completedModules, ...localProgress])];
+            console.log('Merged progress:', allCompletedModules);
+            
+            // Update localStorage with merged data to keep them in sync
+            localStorage.setItem('learningProgress', JSON.stringify(allCompletedModules));
+            console.log('Updated localStorage with merged progress');
+            
+            this.applyProgressToUI(allCompletedModules);
 
         } catch (error) {
             console.error('Error loading progress from Firebase:', error);
@@ -7630,6 +7660,10 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     applyProgressToUI(completedModules) {
+        // Update the stored completed modules
+        this.completedModules = [...new Set(completedModules)];
+        
+        // Update buttons if they exist in DOM (e-learning tab is active)
         completedModules.forEach(subtopicId => {
             const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
             if (button) {
@@ -7638,8 +7672,83 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             }
         });
         
-        // Update overall progress display
+        // Always update overall progress display regardless of tab state
         this.updateOverallProgress();
+        
+        console.log(`Applied progress to UI: ${completedModules.length} modules completed`);
+    }
+
+    refreshElearningProgress() {
+        // Force refresh of e-learning progress display
+        console.log('Refreshing e-learning progress display...');
+        
+        // Load from localStorage as fallback
+        const localProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
+        console.log('Local progress for refresh:', localProgress);
+        
+        // Apply to UI
+        this.applyProgressToUI(localProgress);
+        
+        // Update all subtopic buttons
+        localProgress.forEach(subtopicId => {
+            const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
+            if (button) {
+                button.textContent = 'Gennemført ✓';
+                button.classList.add('completed');
+                console.log(`Updated button for: ${subtopicId}`);
+            } else {
+                console.log(`Button not found for: ${subtopicId}`);
+            }
+        });
+    }
+
+    async syncProgressWithFirebase() {
+        if (!this.currentUser) return;
+
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) return;
+
+            const localProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
+            if (localProgress.length === 0) return;
+
+            const userId = this.currentUser.uid;
+            
+            // Check which modules are already in Firebase
+            const snapshot = await db.collection('learning_progress')
+                .where('userId', '==', userId)
+                .get();
+
+            const existingModules = new Set();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.subtopicId) {
+                    existingModules.add(data.subtopicId);
+                }
+            });
+
+            // Upload missing modules to Firebase
+            const missingModules = localProgress.filter(module => !existingModules.has(module));
+            
+            for (const subtopicId of missingModules) {
+                const progressData = {
+                    userId: userId,
+                    subtopicId: subtopicId,
+                    completedAt: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+                
+                await db.collection('learning_progress').add(progressData);
+                console.log('Synced module to Firebase:', subtopicId);
+            }
+
+            if (missingModules.length > 0) {
+                console.log(`Synced ${missingModules.length} modules to Firebase`);
+            }
+
+        } catch (error) {
+            console.error('Error syncing progress with Firebase:', error);
+        }
     }
 }
 
