@@ -6485,7 +6485,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     <h4>💡 Tips og tricks:</h4>
                     <ul>
                         <li><strong>Optimal fugtighed:</strong> 40-60% relativ luftfugtighed</li>
-                        <li><strong>Placering:</strong> Undgå badeværelse og køkken (for høj fugtighed)</li>
+                        <li><strong>Placering:</strong> I hjørner og områder med risiko for fugt, undgå badeværelse og køkken</li>
                         <li><strong>Kalibrering:</strong> Test med hygrometer for nøjagtighed</li>
                         <li><strong>Vedligeholdelse:</strong> Rens sensor regelmæssigt</li>
                         <li><strong>Alarmer:</strong> Indstil advarsler ved <30% eller >70%</li>
@@ -6527,6 +6527,24 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     <h4>Hvorfor er de vigtige?</h4>
                     <p>Ved at kende udendørs temperaturen kan dit smarthome system optimere opvarmning, køling og ventilation for maksimal komfort og energibesparelse.</p>
                     
+                    <h4>Temperaturmålingsteknologi:</h4>
+                    <ul>
+                        <li><strong>Termistor (NTC/PTC):</strong> De fleste moderne temperatursensoere bruger termistorer</li>
+                        <li><strong>NTC (Negative Temperature Coefficient):</strong> Modstand falder når temperaturen stiger</li>
+                        <li><strong>PTC (Positive Temperature Coefficient):</strong> Modstand stiger når temperaturen stiger</li>
+                        <li><strong>Målenøjagtighed:</strong> Gode temperatursensoere har typisk ±0.5°C nøjagtighed</li>
+                        <li><strong>Respons tid:</strong> Hurtig respons på temperaturændringer</li>
+                    </ul>
+                    
+                    <h4>Kommunikationsprotokoller:</h4>
+                    <ul>
+                        <li><strong>Zigbee:</strong> Lavt strømforbrug, mesh-netværk, god til sensorer</li>
+                        <li><strong>Z-Wave:</strong> Lavt strømforbrug, høj pålidelighed, god rækkevidde</li>
+                        <li><strong>WiFi:</strong> Højere strømforbrug, men direkte internetadgang</li>
+                        <li><strong>Bluetooth:</strong> Kort rækkevidde, lavt strømforbrug</li>
+                        <li><strong>433 MHz RF:</strong> Lang rækkevidde, lavt strømforbrug</li>
+                    </ul>
+                    
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
                         <li><strong>Klimastyring:</strong> Justerer indendørs temperatur baseret på udendørs</li>
@@ -6538,10 +6556,10 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     
                     <h4>💡 Tips og tricks:</h4>
                     <ul>
-                        <li><strong>Placering:</strong> Nordvendt væg, væk fra direkte sollys</li>
+                        <li><strong>Placering:</strong> Nordvendt væg, væk fra direkte sollys og varmekilder</li>
                         <li><strong>Højde:</strong> 2-3 meter over jorden</li>
                         <li><strong>Beskyttelse:</strong> Brug væderskærm mod regn og vind</li>
-                        <li><strong>Kalibrering:</strong> Sammenlign med vejrstation</li>
+                        <li><strong>Kalibrering:</strong> Sammenlign med vejrstation for nøjagtighed</li>
                         <li><strong>Vedligeholdelse:</strong> Rens regelmæssigt for støv og snavs</li>
                     </ul>
                 </div>
