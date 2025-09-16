@@ -6977,7 +6977,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
     getQuizContent(subtopicId) {
         const quizzes = {
-            'temperatur-sensoere': `
+            'udendørs-temperatur': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
                     <p>Hvilken temperaturmålingsteknologi bruger de fleste moderne temperatursensoere?</p>
@@ -7024,7 +7024,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
-            'bevaegelsessensoere': `
+            'pir-bevaegelsessensor': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
                     <p>Hvilken teknologi bruger PIR (Passive Infrared) bevægelsessensoere?</p>
@@ -7071,7 +7071,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
-            'wifi-bluetooth': `
+            'wifi': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
                     <p>Hvilken frekvens bruger WiFi 2.4 GHz båndet?</p>
@@ -7118,7 +7118,54 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'a', 'b', 'b'])">Tjek Svar</button>
             `,
-            'zigbee-z-wave': `
+            'bluetooth': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad står BLE for i Bluetooth Low Energy?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Bluetooth Long Energy</label>
+                        <label><input type="radio" name="q1" value="b"> Bluetooth Low Energy</label>
+                        <label><input type="radio" name="q1" value="c"> Bluetooth Light Energy</label>
+                        <label><input type="radio" name="q1" value="d"> Bluetooth Limited Energy</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvilken frekvens bruger Bluetooth?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> 2.4 GHz</label>
+                        <label><input type="radio" name="q2" value="b"> 5 GHz</label>
+                        <label><input type="radio" name="q2" value="c"> 868 MHz</label>
+                        <label><input type="radio" name="q2" value="d"> 433 MHz</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved Bluetooth Low Energy?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="c"> Længere rækkevidde</label>
+                        <label><input type="radio" name="q3" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvor mange enheder kan Bluetooth Classic understøtte samtidigt?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> 1 enhed</label>
+                        <label><input type="radio" name="q4" value="b"> 7 enheder</label>
+                        <label><input type="radio" name="q4" value="c"> 15 enheder</label>
+                        <label><input type="radio" name="q4" value="d"> 32 enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'a', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'zigbee': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
                     <p>Hvilken frekvens bruger Zigbee i Europa?</p>
@@ -7164,6 +7211,53 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 </div>
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'zwave': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvilken frekvens bruger Z-Wave i Europa?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> 2.4 GHz</label>
+                        <label><input type="radio" name="q1" value="b"> 868 MHz</label>
+                        <label><input type="radio" name="q1" value="c"> 5 GHz</label>
+                        <label><input type="radio" name="q1" value="d"> 433 MHz</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er den maksimale rækkevidde mellem to Z-Wave enheder?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> 10 meter</label>
+                        <label><input type="radio" name="q2" value="b"> 30 meter</label>
+                        <label><input type="radio" name="q2" value="c"> 100 meter</label>
+                        <label><input type="radio" name="q2" value="d"> 200 meter</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvor mange enheder kan et Z-Wave netværk maksimalt understøtte?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> 32 enheder</label>
+                        <label><input type="radio" name="q3" value="b"> 232 enheder</label>
+                        <label><input type="radio" name="q3" value="c"> 1000 enheder</label>
+                        <label><input type="radio" name="q3" value="d"> 65.000 enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved Z-Wave Plus?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Længere rækkevidde og bedre batterilevetid</label>
+                        <label><input type="radio" name="q4" value="c"> Billigere enheder</label>
+                        <label><input type="radio" name="q4" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
             // Automatisering quiz spørgsmål
             'scenarier': `
