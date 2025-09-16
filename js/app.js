@@ -4040,6 +4040,8 @@ class AppManager {
         try {
             // Execute the action based on the rule
             if (rule.action) {
+                console.log('Rule action:', rule.action);
+                
                 // Map action names to device IDs and actions
                 const actionMap = {
                     'Tænd Lys': { device: 'stue-lampe', action: 'on' },
@@ -4052,31 +4054,54 @@ class AppManager {
                 };
                 
                 const actionConfig = actionMap[rule.action];
+                console.log('Action config:', actionConfig);
+                
                 if (actionConfig) {
                     console.log('Executing action:', actionConfig);
                     
                     // Find the device element
                     const deviceElement = document.querySelector(`[data-device="${actionConfig.device}"]`);
+                    console.log('Device element found:', deviceElement);
+                    
                     if (deviceElement) {
+                        console.log('Current device value:', deviceElement.dataset.value);
+                        
                         // Update the device state
                         if (actionConfig.action === 'on') {
                             deviceElement.dataset.value = 'true';
-                            this.updateSmartIconAppearance(deviceElement);
+                            console.log('Setting device to ON');
+                            try {
+                                this.updateSmartIconAppearance(deviceElement);
+                            } catch (updateError) {
+                                console.error('Error updating smart icon appearance:', updateError);
+                            }
                         } else if (actionConfig.action === 'off') {
                             deviceElement.dataset.value = 'false';
-                            this.updateSmartIconAppearance(deviceElement);
+                            console.log('Setting device to OFF');
+                            try {
+                                this.updateSmartIconAppearance(deviceElement);
+                            } catch (updateError) {
+                                console.error('Error updating smart icon appearance:', updateError);
+                            }
                         }
                         
+                        console.log('Device value after update:', deviceElement.dataset.value);
                         this.showNotification(`Regel udført: ${rule.action}`, 'success');
                     } else {
                         console.warn('Device not found:', actionConfig.device);
+                        this.showNotification(`Fejl: Device ${actionConfig.device} ikke fundet`, 'error');
                     }
                 } else {
                     console.warn('Unknown action:', rule.action);
+                    this.showNotification(`Fejl: Ukendt action ${rule.action}`, 'error');
                 }
+            } else {
+                console.warn('Rule has no action');
+                this.showNotification('Fejl: Regel har ingen action', 'error');
             }
         } catch (error) {
             console.error('Error executing smarthome rule:', error);
+            console.error('Error stack:', error.stack);
             this.showNotification('Fejl ved udførelse af regel: ' + error.message, 'error');
         }
     }
