@@ -6513,15 +6513,24 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             'lysmåler-lux': `
                 <div class="theory-text">
                     <h4>Hvad er lysmålere (Lux)?</h4>
-                    <p>Lysmålere måler lysintensiteten i et rum i lux (lx). De kan automatisk justere kunstigt lys baseret på det naturlige lys og optimere energiforbruget.</p>
+                    <p>Lysmålere måler lysstyrke (illuminans) i et rum og opgøres i enheden lux (lx). De kan automatisk justere kunstigt lys baseret på det naturlige lys og optimere energiforbruget.</p>
                     
                     <h4>Hvorfor er de vigtige?</h4>
                     <p>Lysmålere sikrer optimal belysning i alle rum og sparer energi ved automatisk at justere lysstyrken baseret på det tilgængelige naturlige lys.</p>
                     
+                    <h4>Lux-værdier og målinger:</h4>
+                    <ul>
+                        <li><strong>Lux som enhed:</strong> Måler lysstyrke (illuminans) - mængden lys på en overflade</li>
+                        <li><strong>Kontor belysning:</strong> 300-500 lux er typisk for kontorarbejde</li>
+                        <li><strong>Læsebelysning:</strong> 500-1000 lux for komfortabel læsning</li>
+                        <li><strong>Dagslys:</strong> 10.000+ lux udendørs på en skyet dag</li>
+                        <li><strong>Aften belysning:</strong> 50-100 lux til afslappende stemning</li>
+                    </ul>
+                    
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
                         <li><strong>Automatisk lys:</strong> Justerer lysstyrke baseret på naturligt lys</li>
-                        <li><strong>Energibesparelse:</strong> Slukker lys når der er nok naturligt lys</li>
+                        <li><strong>Energibesparelse:</strong> Automatisere lys baseret på naturligt lys</li>
                         <li><strong>Komfort:</strong> Sikrer konstant optimal belysning</li>
                         <li><strong>Circadian rytme:</strong> Simulerer naturligt lysmønster</li>
                         <li><strong>Overvågning:</strong> Logger lysniveauer over tid</li>
@@ -6529,7 +6538,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     
                     <h4>💡 Tips og tricks:</h4>
                     <ul>
-                        <li><strong>Lux niveauer:</strong> 100-300 lux til almindeligt arbejde</li>
+                        <li><strong>Lux niveauer:</strong> 300-500 lux til kontor, 100-300 lux til almindeligt arbejde</li>
                         <li><strong>Placering:</strong> Undgå direkte sollys på sensoren</li>
                         <li><strong>Kalibrering:</strong> Test med luxmeter for nøjagtighed</li>
                         <li><strong>Indstillinger:</strong> Juster følsomhed efter behov</li>
@@ -6666,15 +6675,33 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             'vandlækage': `
                 <div class="theory-text">
                     <h4>Hvad er vandlækage sensoere?</h4>
-                    <p>Vandlækage sensoere detekterer vandlækager og oversvømmelser i dit hjem. De kan forhindre omfattende vandskader ved at give øjeblikkelige advarsler.</p>
+                    <p>Vandlækage sensoere detekterer vand på gulvet og sender øjeblikkelige advarsler til dit smarthome system. De kan forhindre omfattende vandskader ved at give dig tid til at reagere hurtigt.</p>
                     
                     <h4>Hvorfor er de vigtige?</h4>
-                    <p>Vandskader kan være meget dyre at reparere. Vandlækage sensoere giver dig tid til at reagere hurtigt og minimere skader.</p>
+                    <p>Vandskader kan være meget dyre at reparere. Vandlækage sensoere giver dig tid til at reagere hurtigt og minimere skader ved at detektere vand på gulvet.</p>
+                    
+                    <h4>Teknologi og funktion:</h4>
+                    <ul>
+                        <li><strong>Vanddetektion:</strong> Detekterer vand på gulvet ved hjælp af elektriske sensorer</li>
+                        <li><strong>Øjeblikkelig advarsel:</strong> Sender alarm så snart vand detekteres</li>
+                        <li><strong>Automatisk respons:</strong> Kan aktivere automatisk vandafbrydelse</li>
+                        <li><strong>Smarthome integration:</strong> Koble til dit smarthome system for automatisering</li>
+                        <li><strong>Batteridrevet:</strong> Fungerer selv ved strømafbrydelse</li>
+                    </ul>
+                    
+                    <h4>Kritiske områder for placering:</h4>
+                    <ul>
+                        <li><strong>Badeværelse:</strong> Ved toilet, bruser og vask</li>
+                        <li><strong>Køkken:</strong> Ved vaskemaskine, opvaskemaskine og vandvarmere</li>
+                        <li><strong>Kælder:</strong> Ved vandvarmere, vandledninger og afløb</li>
+                        <li><strong>Placering:</strong> På gulvet, hvor vand kan samle sig</li>
+                        <li><strong>Strategisk:</strong> Placer i hjørner og ved vandkilder</li>
+                    </ul>
                     
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
                         <li><strong>Skade forebyggelse:</strong> Advarer ved vandlækager</li>
-                        <li><strong>Automatisk respons:</strong> Slukker vandforsyning ved lækage</li>
+                        <li><strong>Automatisk respons:</strong> Alarm og automatisk vandafbrydelse</li>
                         <li><strong>Notifikationer:</strong> Sender øjeblikkelige advarsler</li>
                         <li><strong>Integration:</strong> Aktiverer pumper og ventilation</li>
                         <li><strong>Overvågning:</strong> Logger alle vandhændelser</li>
@@ -6682,7 +6709,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     
                     <h4>💡 Tips og tricks:</h4>
                     <ul>
-                        <li><strong>Placering:</strong> Ved vaskemaskiner, opvaskemaskiner, vandvarmere</li>
+                        <li><strong>Placering:</strong> På gulvet, hvor vand kan samle sig</li>
                         <li><strong>Test:</strong> Test regelmæssigt med vanddråber</li>
                         <li><strong>Batterier:</strong> Skift batterier årligt</li>
                         <li><strong>Vedligeholdelse:</strong> Rens sensoere regelmæssigt</li>
@@ -7611,6 +7638,94 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         <li><strong>Professionel hjælp:</strong> Overvej professionel vedligeholdelse for komplekse systemer</li>
                     </ul>
                 </div>
+            `,
+            'wifi': `
+                <div class="theory-text">
+                    <h4>Hvad er WiFi?</h4>
+                    <p>WiFi (Wireless Fidelity) er en trådløs netværksteknologi der giver enheder mulighed for at forbinde til internettet og kommunikere med hinanden uden kabler. Det er den mest almindelige protokol til smarthome enheder.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>WiFi giver høj hastighed og bred kompatibilitet, hvilket gør det ideelt til smarthome enheder der kræver hurtig datatransmission og internetadgang.</p>
+                    
+                    <h4>WiFi Specifikationer:</h4>
+                    <ul>
+                        <li><strong>Frekvens:</strong> 2.4 GHz (2.400-2.483 GHz) og 5 GHz</li>
+                        <li><strong>Rækkevidde:</strong> 30-100 meter (afhænger af hindringer)</li>
+                        <li><strong>Datatransmission:</strong> Op til 1 Gbps (WiFi 6)</li>
+                        <li><strong>Strømforbrug:</strong> Højt - kræver konstant strøm</li>
+                        <li><strong>Kompatibilitet:</strong> Universel kompatibilitet med alle enheder</li>
+                    </ul>
+                    
+                    <h4>WiFi Standarder:</h4>
+                    <ul>
+                        <li><strong>WiFi 4 (802.11n):</strong> Op til 150 Mbps, 2.4 GHz</li>
+                        <li><strong>WiFi 5 (802.11ac):</strong> Op til 1.3 Gbps, 5 GHz</li>
+                        <li><strong>WiFi 6 (802.11ax):</strong> Op til 9.6 Gbps, bedre ydeevne med mange enheder</li>
+                        <li><strong>WiFi 7 (802.11be):</strong> Op til 46 Gbps, nyeste standard</li>
+                    </ul>
+                    
+                    <h4>Anvendelser i dit smarthome:</h4>
+                    <ul>
+                        <li><strong>Hurtig kommunikation:</strong> Høj hastighed til video og data</li>
+                        <li><strong>Internetadgang:</strong> Direkte forbindelse til internettet</li>
+                        <li><strong>Kompatibilitet:</strong> Fungerer med alle moderne enheder</li>
+                        <li><strong>Skalering:</strong> Kan håndtere mange enheder samtidigt</li>
+                        <li><strong>Integration:</strong> Nem integration med eksisterende netværk</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Router placering:</strong> Centreret i hjemmet for bedste dækning</li>
+                        <li><strong>Frekvens valg:</strong> 2.4 GHz til rækkevidde, 5 GHz til hastighed</li>
+                        <li><strong>WiFi 6:</strong> Bedre ydeevne med mange enheder</li>
+                        <li><strong>Sikkerhed:</strong> Brug WPA3 kryptering</li>
+                        <li><strong>Vedligeholdelse:</strong> Opdater router firmware regelmæssigt</li>
+                    </ul>
+                </div>
+            `,
+            'bluetooth': `
+                <div class="theory-text">
+                    <h4>Hvad er Bluetooth?</h4>
+                    <p>Bluetooth er en trådløs kommunikationsprotokol designet til korte afstande mellem enheder. Det er ideelt til smarthome enheder der kræver lavt strømforbrug og simpel parring.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Bluetooth giver lavt strømforbrug og nem parring, hvilket gør det perfekt til batteridrevne smarthome enheder og personlige gadgets.</p>
+                    
+                    <h4>Bluetooth Specifikationer:</h4>
+                    <ul>
+                        <li><strong>Frekvens:</strong> 2.4 GHz ISM bånd</li>
+                        <li><strong>Rækkevidde:</strong> 1-10 meter (klassisk), 10-100 meter (BLE)</li>
+                        <li><strong>Datatransmission:</strong> Op til 2 Mbps (klassisk), 1 Mbps (BLE)</li>
+                        <li><strong>Strømforbrug:</strong> Meget lavt - ideelt til batteridrevne enheder</li>
+                        <li><strong>Parring:</strong> Simpel og sikker enhed-til-enhed forbindelse</li>
+                    </ul>
+                    
+                    <h4>Bluetooth Typer:</h4>
+                    <ul>
+                        <li><strong>Bluetooth Classic:</strong> Højere hastighed, kortere rækkevidde</li>
+                        <li><strong>Bluetooth Low Energy (BLE):</strong> Lavt strømforbrug, længere rækkevidde</li>
+                        <li><strong>Bluetooth 5.0+:</strong> Forbedret rækkevidde og hastighed</li>
+                        <li><strong>Bluetooth Mesh:</strong> Netværk af forbundne enheder</li>
+                    </ul>
+                    
+                    <h4>Anvendelser i dit smarthome:</h4>
+                    <ul>
+                        <li><strong>Batteridrevne enheder:</strong> Ideelt til sensorer og kontakter</li>
+                        <li><strong>Personlige gadgets:</strong> Smartphones, tablets, wearables</li>
+                        <li><strong>Korte afstande:</strong> Rum-specifikke enheder</li>
+                        <li><strong>Enkel parring:</strong> Nem installation og konfiguration</li>
+                        <li><strong>Lavt strømforbrug:</strong> Lang batterilevetid</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>BLE til sensorer:</strong> Perfekt til batteridrevne enheder</li>
+                        <li><strong>Parring sikkerhed:</strong> Brug sikre parringskoder</li>
+                        <li><strong>Rækkevidde:</strong> Test faktisk rækkevidde i dit hjem</li>
+                        <li><strong>Kompatibilitet:</strong> Tjek enheds Bluetooth version</li>
+                        <li><strong>Vedligeholdelse:</strong> Genstart enheder ved forbindelsesproblemer</li>
+                    </ul>
+                </div>
             `
         };
         
@@ -8057,23 +8172,23 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <div class="quiz-question">
                     <h4>Spørgsmål 2:</h4>
-                    <p>Hvad er den maksimale rækkevidde for Bluetooth Low Energy (BLE)?</p>
+                    <p>Hvad er den typiske rækkevidde for WiFi i et hjem?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q2" value="a"> 10 meter</label>
-                        <label><input type="radio" name="q2" value="b"> 50 meter</label>
-                        <label><input type="radio" name="q2" value="c"> 100 meter</label>
-                        <label><input type="radio" name="q2" value="d"> 200 meter</label>
+                        <label><input type="radio" name="q2" value="a"> 10-20 meter</label>
+                        <label><input type="radio" name="q2" value="b"> 30-100 meter</label>
+                        <label><input type="radio" name="q2" value="c"> 200-500 meter</label>
+                        <label><input type="radio" name="q2" value="d"> 1-5 kilometer</label>
                     </div>
                 </div>
                 
                 <div class="quiz-question">
                     <h4>Spørgsmål 3:</h4>
-                    <p>Hvilken protokol er bedst til batteridrevne enheder?</p>
+                    <p>Hvilken WiFi standard giver højeste hastighed?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q3" value="a"> WiFi</label>
-                        <label><input type="radio" name="q3" value="b"> Bluetooth Low Energy</label>
-                        <label><input type="radio" name="q3" value="c"> Ethernet</label>
-                        <label><input type="radio" name="q3" value="d"> 4G/5G</label>
+                        <label><input type="radio" name="q3" value="a"> WiFi 4 (802.11n)</label>
+                        <label><input type="radio" name="q3" value="b"> WiFi 5 (802.11ac)</label>
+                        <label><input type="radio" name="q3" value="c"> WiFi 6 (802.11ax)</label>
+                        <label><input type="radio" name="q3" value="d"> WiFi 7 (802.11be)</label>
                     </div>
                 </div>
                 
@@ -8088,7 +8203,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     </div>
                 </div>
                 
-                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'a', 'b', 'b'])">Tjek Svar</button>
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['a', 'b', 'c', 'b'])">Tjek Svar</button>
             `,
             'bluetooth': `
                 <div class="quiz-question">
@@ -9156,6 +9271,100 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 </div>
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b'])">Tjek Svar</button>
+            `,
+            'co2-måler': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad måler en CO₂-måler?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> Kuldioxidniveau i luften</label>
+                        <label><input type="radio" name="q1" value="c"> Luftfugtighed</label>
+                        <label><input type="radio" name="q1" value="d"> Bevægelse</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er det optimale CO₂-niveau i et rum?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Under 1000 ppm</label>
+                        <label><input type="radio" name="q2" value="b"> 1000-2000 ppm</label>
+                        <label><input type="radio" name="q2" value="c"> 2000-5000 ppm</label>
+                        <label><input type="radio" name="q2" value="d"> Over 5000 ppm</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad sker der ved høje CO₂-niveauer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Bedre koncentration</label>
+                        <label><input type="radio" name="q3" value="b"> Træthed og koncentrationsbesvær</label>
+                        <label><input type="radio" name="q3" value="c"> Højere energi</label>
+                        <label><input type="radio" name="q3" value="d"> Bedre søvn</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved CO₂-måling i smarthome?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> At spare strøm</label>
+                        <label><input type="radio" name="q4" value="b"> At aktivere ventilation ved høje niveauer</label>
+                        <label><input type="radio" name="q4" value="c"> At måle temperatur</label>
+                        <label><input type="radio" name="q4" value="d"> At detektere bevægelse</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'a', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'tilstedeværelsessensor': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er forskellen mellem bevægelsessensor og tilstedeværelsessensor?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Ingen forskel</label>
+                        <label><input type="radio" name="q1" value="b"> Tilstedeværelsessensor kan skelne mellem bevægelse og faktisk tilstedeværelse</label>
+                        <label><input type="radio" name="q1" value="c"> Tilstedeværelsessensor er billigere</label>
+                        <label><input type="radio" name="q1" value="d"> Tilstedeværelsessensor bruger mere strøm</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvilke teknologier bruger tilstedeværelsessensoere?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Kun PIR</label>
+                        <label><input type="radio" name="q2" value="b"> PIR, mikrobølger og lyd</label>
+                        <label><input type="radio" name="q2" value="c"> Kun mikrobølger</label>
+                        <label><input type="radio" name="q2" value="d"> Kun lyd</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvorfor er tilstedeværelsessensoere bedre til energibesparelse?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> De bruger mindre strøm</label>
+                        <label><input type="radio" name="q3" value="b"> De slukker lys kun når ingen er til stede</label>
+                        <label><input type="radio" name="q3" value="c"> De er billigere</label>
+                        <label><input type="radio" name="q3" value="d"> De er hurtigere</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvor placeres tilstedeværelsessensoere bedst?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> På gulvet</label>
+                        <label><input type="radio" name="q4" value="b"> Højere end PIR sensoere for bedre dækning</label>
+                        <label><input type="radio" name="q4" value="c"> Ved vinduerne</label>
+                        <label><input type="radio" name="q4" value="d"> På loftet</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
             `
         };
         
