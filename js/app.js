@@ -632,11 +632,23 @@ class AppManager {
                 <button class="rule-card-delete" onclick="window.appManager.deleteRule('${ruleId}')">×</button>
             </div>
             <div class="rule-drop-zones">
-                <div class="drop-zone" data-zone="trigger">
-                    <span class="drop-zone-label">Trigger (Hvornår)</span>
-                    <div class="drop-zone-content">
-                        <span class="drop-zone-icon">🚀</span>
-                        <span>Træk sensor her</span>
+                <div class="triggers-section">
+                    <h5 class="section-title">🎯 Triggers (Begge skal være opfyldt)</h5>
+                    <div class="triggers-container">
+                        <div class="drop-zone" data-zone="trigger1">
+                            <span class="drop-zone-label">Trigger 1</span>
+                            <div class="drop-zone-content">
+                                <span class="drop-zone-icon">🚀</span>
+                                <span>Træk sensor her</span>
+                            </div>
+                        </div>
+                        <div class="drop-zone" data-zone="trigger2">
+                            <span class="drop-zone-label">Trigger 2</span>
+                            <div class="drop-zone-content">
+                                <span class="drop-zone-icon">🚀</span>
+                                <span>Træk sensor her</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="drop-zone" data-zone="condition">
@@ -676,6 +688,28 @@ class AppManager {
             return;
         }
 
+        // Check if this is a trigger zone and if we can add it
+        const zoneType = zone.dataset.zone;
+        if (zoneType === 'trigger1' || zoneType === 'trigger2') {
+            // Only allow trigger-type components in trigger zones
+            if (data.type !== 'trigger') {
+                this.showNotification('Kun trigger komponenter kan placeres i trigger zones', 'warning');
+                return;
+            }
+        } else if (zoneType === 'condition') {
+            // Only allow condition-type components in condition zones
+            if (data.type !== 'condition') {
+                this.showNotification('Kun betingelse komponenter kan placeres i betingelse zones', 'warning');
+                return;
+            }
+        } else if (zoneType === 'action') {
+            // Only allow action-type components in action zones
+            if (data.type !== 'action') {
+                this.showNotification('Kun action komponenter kan placeres i action zones', 'warning');
+                return;
+            }
+        }
+
         // Add component to zone
         zone.classList.add('occupied');
         zone.innerHTML = `
@@ -698,11 +732,31 @@ class AppManager {
         
         // Reset zone content
         zone.classList.remove('occupied');
+        
+        let label, icon, text;
+        if (zoneType === 'trigger1') {
+            label = 'Trigger 1';
+            icon = '🚀';
+            text = 'Træk sensor her';
+        } else if (zoneType === 'trigger2') {
+            label = 'Trigger 2';
+            icon = '🚀';
+            text = 'Træk sensor her';
+        } else if (zoneType === 'condition') {
+            label = 'Betingelse (AND)';
+            icon = '🔗';
+            text = 'Træk betingelse her (valgfrit)';
+        } else if (zoneType === 'action') {
+            label = 'Action (Så)';
+            icon = '⚡';
+            text = 'Træk action her';
+        }
+        
         zone.innerHTML = `
-            <span class="drop-zone-label">${zoneType === 'trigger' ? 'Trigger (Hvornår)' : zoneType === 'condition' ? 'Betingelse (AND)' : 'Action (Så)'}</span>
+            <span class="drop-zone-label">${label}</span>
             <div class="drop-zone-content">
-                <span class="drop-zone-icon">${zoneType === 'trigger' ? '🚀' : zoneType === 'condition' ? '🔗' : '⚡'}</span>
-                <span>Træk ${zoneType === 'trigger' ? 'sensor' : zoneType === 'condition' ? 'betingelse' : 'action'} her${zoneType === 'condition' ? ' (valgfrit)' : ''}</span>
+                <span class="drop-zone-icon">${icon}</span>
+                <span>${text}</span>
             </div>
         `;
 
@@ -712,17 +766,33 @@ class AppManager {
 
     updateRulePreview(ruleCard) {
         const preview = ruleCard.querySelector('.rule-preview');
-        const trigger = ruleCard.querySelector('[data-zone="trigger"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
+        const trigger1 = ruleCard.querySelector('[data-zone="trigger1"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
+        const trigger2 = ruleCard.querySelector('[data-zone="trigger2"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
         const condition = ruleCard.querySelector('[data-zone="condition"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
         const action = ruleCard.querySelector('[data-zone="action"] .drop-zone-content span:not(.drop-zone-icon):not(.remove-component)');
 
         let ruleText = '';
         
-        if (trigger && action) {
-            ruleText = `Når ${trigger.textContent} `;
+        // Check if we have at least one trigger and an action
+        if ((trigger1 || trigger2) && action) {
+            ruleText = `Når `;
+            
+            // Add triggers
+            const triggers = [];
+            if (trigger1) triggers.push(trigger1.textContent);
+            if (trigger2) triggers.push(trigger2.textContent);
+            
+            if (triggers.length === 2) {
+                ruleText += `${triggers[0]} OG ${triggers[1]} `;
+            } else if (triggers.length === 1) {
+                ruleText += `${triggers[0]} `;
+            }
+            
+            // Add condition if present
             if (condition) {
                 ruleText += `og ${condition.textContent} `;
             }
+            
             ruleText += `så ${action.textContent}`;
             
             preview.innerHTML = `<div class="rule-preview-text">${ruleText}</div>`;
@@ -741,13 +811,25 @@ class AppManager {
 
     saveRules() {
         const ruleCards = document.querySelectorAll('.rule-card');
-        const rules = Array.from(ruleCards).map(card => ({
-            id: card.id,
-            trigger: this.getZoneContent(card, 'trigger'),
-            condition: this.getZoneContent(card, 'condition'),
-            action: this.getZoneContent(card, 'action'),
-            timestamp: new Date().toISOString()
-        }));
+        const rules = Array.from(ruleCards).map(card => {
+            const trigger1 = this.getZoneContent(card, 'trigger1');
+            const trigger2 = this.getZoneContent(card, 'trigger2');
+            const condition = this.getZoneContent(card, 'condition');
+            const action = this.getZoneContent(card, 'action');
+            
+            // Create triggers array
+            const triggers = [];
+            if (trigger1) triggers.push(trigger1);
+            if (trigger2) triggers.push(trigger2);
+            
+            return {
+                id: card.id,
+                triggers: triggers,
+                condition: condition,
+                action: action,
+                timestamp: new Date().toISOString()
+            };
+        });
         
         localStorage.setItem('smarthome-rules', JSON.stringify(rules));
         this.showNotification(`${rules.length} regler gemt!`, 'success');
