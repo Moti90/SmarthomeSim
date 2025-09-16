@@ -7706,7 +7706,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
     refreshElearningProgress() {
         // Force refresh of e-learning progress display
-        console.log('Refreshing e-learning progress display...');
+        console.log('🔄 NEW VERSION: Refreshing e-learning progress display...');
         
         // Check if e-learning content is loaded
         const allAvailableButtons = document.querySelectorAll('[data-subtopic]');
