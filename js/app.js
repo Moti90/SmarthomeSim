@@ -1009,8 +1009,10 @@ class AppManager {
             // Refresh progress when e-learning tab is opened
             this.loadLearningProgress();
             
-            // Refresh progress when e-learning tab is opened
-            this.refreshElearningProgress();
+            // Wait for e-learning content to be rendered, then refresh progress
+            setTimeout(() => {
+                this.refreshElearningProgress();
+            }, 500); // Increased delay to ensure content is loaded
         }
         
         this.currentTab = tabName;
@@ -7705,6 +7707,19 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     refreshElearningProgress() {
         // Force refresh of e-learning progress display
         console.log('Refreshing e-learning progress display...');
+        
+        // Check if e-learning content is loaded
+        const allAvailableButtons = document.querySelectorAll('[data-subtopic]');
+        console.log('🔍 Checking if e-learning content is loaded...');
+        console.log('🔍 Number of available subtopic buttons:', allAvailableButtons.length);
+        
+        if (allAvailableButtons.length === 0) {
+            console.log('⚠️ E-learning content not loaded yet, retrying in 1 second...');
+            setTimeout(() => {
+                this.refreshElearningProgress();
+            }, 1000);
+            return;
+        }
         
         // Load from localStorage as fallback
         const localProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
