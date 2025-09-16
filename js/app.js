@@ -828,13 +828,16 @@ class AppManager {
     setupAuthStateListener() {
         const auth = window.FirebaseConfig.getAuth();
         if (auth) {
-            auth.onAuthStateChanged((user) => {
+            auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     // User is signed in
                     this.currentUser = user;
                     this.hideLoading(); // Hide loading indicator
                     this.showApp();
                     this.updateUserInfo();
+                    
+                    // Load user's learning progress
+                    await this.loadLearningProgress();
                 } else {
                     // User is signed out
                     this.currentUser = null;
@@ -995,6 +998,9 @@ class AppManager {
         // Load data for specific tabs
         if (tabName === 'advanced') {
             this.initRuleEditor();
+        } else if (tabName === 'elearning') {
+            // Refresh progress when e-learning tab is opened
+            this.loadLearningProgress();
         }
         
         this.currentTab = tabName;
@@ -6383,6 +6389,9 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             button.classList.add('completed');
         }
         
+        // Save progress to Firebase and localStorage
+        this.saveLearningProgress(subtopicId);
+        
         this.showNotification(`${this.currentSubtopic.title} gennemført!`, 'success');
         this.updateOverallProgress();
         this.checkAchievements();
@@ -7524,6 +7533,113 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             achievements[3].classList.add('unlocked');
             this.showNotification('🏆 Præstation opnået: Ekspert!', 'success');
         }
+    }
+
+    // ===== LEARNING PROGRESS MANAGEMENT =====
+    async saveLearningProgress(subtopicId) {
+        if (!this.currentUser) {
+            console.log('No user logged in, saving to localStorage only');
+            this.saveProgressToLocalStorage(subtopicId);
+            return;
+        }
+
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                console.log('Firebase not available, saving to localStorage only');
+                this.saveProgressToLocalStorage(subtopicId);
+                return;
+            }
+
+            const userId = this.currentUser.uid;
+            const progressData = {
+                userId: userId,
+                subtopicId: subtopicId,
+                completedAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+
+            // Save to Firebase
+            await db.collection('learning_progress').add(progressData);
+            console.log('Progress saved to Firebase:', subtopicId);
+
+            // Also save to localStorage as backup
+            this.saveProgressToLocalStorage(subtopicId);
+
+        } catch (error) {
+            console.error('Error saving progress to Firebase:', error);
+            // Fallback to localStorage
+            this.saveProgressToLocalStorage(subtopicId);
+        }
+    }
+
+    saveProgressToLocalStorage(subtopicId) {
+        const savedProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
+        if (!savedProgress.includes(subtopicId)) {
+            savedProgress.push(subtopicId);
+            localStorage.setItem('learningProgress', JSON.stringify(savedProgress));
+            console.log('Progress saved to localStorage:', subtopicId);
+        }
+    }
+
+    async loadLearningProgress() {
+        if (!this.currentUser) {
+            console.log('No user logged in, loading from localStorage only');
+            this.loadProgressFromLocalStorage();
+            return;
+        }
+
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                console.log('Firebase not available, loading from localStorage only');
+                this.loadProgressFromLocalStorage();
+                return;
+            }
+
+            const userId = this.currentUser.uid;
+            const snapshot = await db.collection('learning_progress')
+                .where('userId', '==', userId)
+                .get();
+
+            const completedModules = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.subtopicId) {
+                    completedModules.push(data.subtopicId);
+                }
+            });
+
+            console.log('Loaded progress from Firebase:', completedModules);
+            this.applyProgressToUI(completedModules);
+
+            // Also load from localStorage and merge
+            this.loadProgressFromLocalStorage();
+
+        } catch (error) {
+            console.error('Error loading progress from Firebase:', error);
+            // Fallback to localStorage
+            this.loadProgressFromLocalStorage();
+        }
+    }
+
+    loadProgressFromLocalStorage() {
+        const savedProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
+        console.log('Loaded progress from localStorage:', savedProgress);
+        this.applyProgressToUI(savedProgress);
+    }
+
+    applyProgressToUI(completedModules) {
+        completedModules.forEach(subtopicId => {
+            const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
+            if (button) {
+                button.textContent = 'Gennemført ✓';
+                button.classList.add('completed');
+            }
+        });
+        
+        // Update overall progress display
+        this.updateOverallProgress();
     }
 }
 

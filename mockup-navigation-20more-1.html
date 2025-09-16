@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Header Mockups - 20 More (1-10)</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #1a1d29;
+            --bg-tertiary: #2d3142;
+            --accent-primary: #0c5874;
+            --accent-secondary: #a0aec0;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --text-muted: #718096;
+            --border-color: #4a5568;
+            --shadow-color: rgba(10, 14, 26, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 20px;
+        }
+
+        .mockup-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mockup-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mockup-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+
+        .mockup-description {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== MOCKUP 11: CIRCULAR MENU ===== */
+        .nav-circular {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-circular-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-circular-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-circular-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-circular-menu {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            height: 120px;
+        }
+
+        .nav-circular-center {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            z-index: 2;
+        }
+
+        .nav-circular-item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-circular-item:hover {
+            border-color: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .nav-circular-item.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .nav-circular-item:nth-child(2) { top: 0; left: 50%; transform: translateX(-50%); }
+        .nav-circular-item:nth-child(3) { top: 50%; right: 0; transform: translateY(-50%); }
+        .nav-circular-item:nth-child(4) { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .nav-circular-item:nth-child(5) { top: 50%; left: 0; transform: translateY(-50%); }
+
+        /* ===== MOCKUP 12: STEPPER STYLE ===== */
+        .nav-stepper {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-stepper-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-stepper-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-stepper-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-stepper-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .nav-stepper-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .nav-stepper-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-stepper-step.active .nav-stepper-circle {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .nav-stepper-step:hover .nav-stepper-circle {
+            border-color: var(--accent-primary);
+        }
+
+        .nav-stepper-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .nav-stepper-line {
+            width: 30px;
+            height: 2px;
+            background: var(--border-color);
+        }
+
+        /* ===== MOCKUP 13: ACCORDION STYLE ===== */
+        .nav-accordion {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-accordion-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-accordion-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-accordion-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-accordion-tab {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-accordion-tab:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .nav-accordion-tab.active {
+            border-color: var(--accent-primary);
+            background: rgba(12, 88, 116, 0.1);
+        }
+
+        .nav-accordion-tab-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-accordion-tab-icon {
+            font-size: 16px;
+        }
+
+        .nav-accordion-tab-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .nav-accordion-tab-arrow {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ===== MOCKUP 14: TABS WITH BADGES ===== */
+        .nav-badges {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-badges-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-badges-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-badges-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-badges-tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-badges-tab {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-badges-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .nav-badges-tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+            background: var(--bg-secondary);
+        }
+
+        .nav-badges-badge {
+            background: var(--error-color);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nav-badges-badge.warning {
+            background: var(--warning-color);
+        }
+
+        .nav-badges-badge.success {
+            background: var(--accent-primary);
+        }
+
+        /* ===== MOCKUP 15: FLOATING ACTION ===== */
+        .nav-floating-action {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-floating-action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-floating-action-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-floating-action-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-floating-action-main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .nav-floating-action-primary {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(12, 88, 116, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-floating-action-secondary {
+            position: absolute;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-floating-action-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-floating-action-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .nav-floating-action-btn:nth-child(1) { top: -50px; left: 50%; transform: translateX(-50%); }
+        .nav-floating-action-btn:nth-child(2) { top: 50%; right: -80px; transform: translateY(-50%); }
+        .nav-floating-action-btn:nth-child(3) { bottom: -50px; left: 50%; transform: translateX(-50%); }
+        .nav-floating-action-btn:nth-child(4) { top: 50%; left: -80px; transform: translateY(-50%); }
+
+        /* ===== MOCKUP 16: PROGRESS STYLE ===== */
+        .nav-progress {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-progress-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-progress-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-progress-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-progress-tab {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-progress-tab:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .nav-progress-tab.active {
+            border-color: var(--accent-primary);
+            background: rgba(12, 88, 116, 0.1);
+        }
+
+        .nav-progress-tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .nav-progress-tab-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-progress-tab-icon {
+            font-size: 16px;
+        }
+
+        .nav-progress-tab-progress {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-primary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .nav-progress-tab-fill {
+            height: 100%;
+            background: var(--accent-primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-progress-tab-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ===== MOCKUP 17: TIMELINE STYLE ===== */
+        .nav-timeline {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-timeline-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-timeline-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-timeline-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+        }
+
+        .nav-timeline-tabs::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .nav-timeline-tab {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px 15px 15px 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .nav-timeline-tab:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .nav-timeline-tab.active {
+            border-color: var(--accent-primary);
+            background: rgba(12, 88, 116, 0.1);
+        }
+
+        .nav-timeline-tab::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--border-color);
+            border-radius: 50%;
+            border: 3px solid var(--bg-tertiary);
+        }
+
+        .nav-timeline-tab.active::before {
+            background: var(--accent-primary);
+        }
+
+        .nav-timeline-tab-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .nav-timeline-tab-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* ===== MOCKUP 18: CHIP STYLE ===== */
+        .nav-chip {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-chip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-chip-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-chip-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-chip-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-chip-tab {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-chip-tab:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .nav-chip-tab.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .nav-chip-icon {
+            font-size: 12px;
+        }
+
+        /* ===== MOCKUP 19: SEGMENTED CONTROL ===== */
+        .nav-segmented {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-segmented-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-segmented-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-segmented-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-segmented-control {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px;
+            display: flex;
+            position: relative;
+        }
+
+        .nav-segmented-tab {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .nav-segmented-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-segmented-tab.active {
+            color: var(--text-primary);
+            background: var(--accent-primary);
+        }
+
+        /* ===== MOCKUP 20: DOCK STYLE ===== */
+        .nav-dock {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav-dock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-dock-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-dock-user {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .nav-dock-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-dock-tabs {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-dock-tab {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 60px;
+        }
+
+        .nav-dock-tab:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .nav-dock-tab.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .nav-dock-icon {
+            font-size: 18px;
+        }
+
+        .nav-dock-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .nav-circular-menu {
+                height: 100px;
+            }
+            
+            .nav-stepper-steps {
+                flex-wrap: wrap;
+            }
+            
+            .nav-floating-action-secondary {
+                position: static;
+                flex-direction: row;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            
+            .nav-chip-tabs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mockup-container">
+        <h1 style="text-align: center; margin-bottom: 30px; color: var(--text-primary);">Navigation Header Mockups - 20 More (1-10)</h1>
+
+        <!-- Mockup 11: Circular Menu -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">11. Circular Menu</h2>
+            <p class="mockup-description">Navigation i cirkulær form omkring et centrum</p>
+            
+            <div class="nav-circular">
+                <div class="nav-circular-header">
+                    <div class="nav-circular-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-circular-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-circular-menu">
+                    <div class="nav-circular-center">🏠</div>
+                    <div class="nav-circular-item active">⌂</div>
+                    <div class="nav-circular-item">◊</div>
+                    <div class="nav-circular-item">▶</div>
+                    <div class="nav-circular-item">⚙</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 12: Stepper Style -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">12. Stepper Style</h2>
+            <p class="mockup-description">Navigation som steps med forbindende linjer</p>
+            
+            <div class="nav-stepper">
+                <div class="nav-stepper-header">
+                    <div class="nav-stepper-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-stepper-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-stepper-steps">
+                    <div class="nav-stepper-step active">
+                        <div class="nav-stepper-circle">⌂</div>
+                        <div class="nav-stepper-label">Forside</div>
+                    </div>
+                    <div class="nav-stepper-line"></div>
+                    <div class="nav-stepper-step">
+                        <div class="nav-stepper-circle">◊</div>
+                        <div class="nav-stepper-label">E-Learning</div>
+                    </div>
+                    <div class="nav-stepper-line"></div>
+                    <div class="nav-stepper-step">
+                        <div class="nav-stepper-circle">▶</div>
+                        <div class="nav-stepper-label">Simulator</div>
+                    </div>
+                    <div class="nav-stepper-line"></div>
+                    <div class="nav-stepper-step">
+                        <div class="nav-stepper-circle">⚙</div>
+                        <div class="nav-stepper-label">Indstillinger</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 13: Accordion Style -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">13. Accordion Style</h2>
+            <p class="mockup-description">Navigation som accordion med udvidbare sektioner</p>
+            
+            <div class="nav-accordion">
+                <div class="nav-accordion-header">
+                    <div class="nav-accordion-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-accordion-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-accordion-tabs">
+                    <div class="nav-accordion-tab active">
+                        <div class="nav-accordion-tab-left">
+                            <span class="nav-accordion-tab-icon">⌂</span>
+                            <span class="nav-accordion-tab-text">Forside</span>
+                        </div>
+                        <span class="nav-accordion-tab-arrow">▼</span>
+                    </div>
+                    <div class="nav-accordion-tab">
+                        <div class="nav-accordion-tab-left">
+                            <span class="nav-accordion-tab-icon">◊</span>
+                            <span class="nav-accordion-tab-text">E-Learning</span>
+                        </div>
+                        <span class="nav-accordion-tab-arrow">▶</span>
+                    </div>
+                    <div class="nav-accordion-tab">
+                        <div class="nav-accordion-tab-left">
+                            <span class="nav-accordion-tab-icon">▶</span>
+                            <span class="nav-accordion-tab-text">Simulator</span>
+                        </div>
+                        <span class="nav-accordion-tab-arrow">▶</span>
+                    </div>
+                    <div class="nav-accordion-tab">
+                        <div class="nav-accordion-tab-left">
+                            <span class="nav-accordion-tab-icon">⚙</span>
+                            <span class="nav-accordion-tab-text">Indstillinger</span>
+                        </div>
+                        <span class="nav-accordion-tab-arrow">▶</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 14: Tabs with Badges -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">14. Tabs with Badges</h2>
+            <p class="mockup-description">Navigation med badges for notifikationer og status</p>
+            
+            <div class="nav-badges">
+                <div class="nav-badges-header">
+                    <div class="nav-badges-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-badges-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-badges-tabs">
+                    <button class="nav-badges-tab active">
+                        Forside
+                        <span class="nav-badges-badge">3</span>
+                    </button>
+                    <button class="nav-badges-tab">
+                        E-Learning
+                        <span class="nav-badges-badge warning">!</span>
+                    </button>
+                    <button class="nav-badges-tab">
+                        Simulator
+                        <span class="nav-badges-badge success">✓</span>
+                    </button>
+                    <button class="nav-badges-tab">
+                        Indstillinger
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 15: Floating Action -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">15. Floating Action</h2>
+            <p class="mockup-description">Primær knap med sekundære knapper omkring</p>
+            
+            <div class="nav-floating-action">
+                <div class="nav-floating-action-header">
+                    <div class="nav-floating-action-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-floating-action-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-floating-action-main">
+                    <button class="nav-floating-action-primary">
+                        <span>⌂</span>
+                        Forside
+                    </button>
+                    <div class="nav-floating-action-secondary">
+                        <button class="nav-floating-action-btn">◊</button>
+                        <button class="nav-floating-action-btn">▶</button>
+                        <button class="nav-floating-action-btn">⚙</button>
+                        <button class="nav-floating-action-btn">📊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 16: Progress Style -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">16. Progress Style</h2>
+            <p class="mockup-description">Navigation med progress bars for hver sektion</p>
+            
+            <div class="nav-progress">
+                <div class="nav-progress-header">
+                    <div class="nav-progress-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-progress-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-progress-tabs">
+                    <div class="nav-progress-tab active">
+                        <div class="nav-progress-tab-header">
+                            <div class="nav-progress-tab-title">
+                                <span class="nav-progress-tab-icon">⌂</span>
+                                Forside
+                            </div>
+                        </div>
+                        <div class="nav-progress-tab-progress">
+                            <div class="nav-progress-tab-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="nav-progress-tab-label">Komplet</div>
+                    </div>
+                    <div class="nav-progress-tab">
+                        <div class="nav-progress-tab-header">
+                            <div class="nav-progress-tab-title">
+                                <span class="nav-progress-tab-icon">◊</span>
+                                E-Learning
+                            </div>
+                        </div>
+                        <div class="nav-progress-tab-progress">
+                            <div class="nav-progress-tab-fill" style="width: 65%"></div>
+                        </div>
+                        <div class="nav-progress-tab-label">65% gennemført</div>
+                    </div>
+                    <div class="nav-progress-tab">
+                        <div class="nav-progress-tab-header">
+                            <div class="nav-progress-tab-title">
+                                <span class="nav-progress-tab-icon">▶</span>
+                                Simulator
+                            </div>
+                        </div>
+                        <div class="nav-progress-tab-progress">
+                            <div class="nav-progress-tab-fill" style="width: 30%"></div>
+                        </div>
+                        <div class="nav-progress-tab-label">30% gennemført</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 17: Timeline Style -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">17. Timeline Style</h2>
+            <p class="mockup-description">Navigation som timeline med forbindende linje</p>
+            
+            <div class="nav-timeline">
+                <div class="nav-timeline-header">
+                    <div class="nav-timeline-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-timeline-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-timeline-tabs">
+                    <div class="nav-timeline-tab active">
+                        <div class="nav-timeline-tab-title">Forside</div>
+                        <div class="nav-timeline-tab-description">Startside og oversigt</div>
+                    </div>
+                    <div class="nav-timeline-tab">
+                        <div class="nav-timeline-tab-title">E-Learning</div>
+                        <div class="nav-timeline-tab-description">Læring og quiz</div>
+                    </div>
+                    <div class="nav-timeline-tab">
+                        <div class="nav-timeline-tab-title">Simulator</div>
+                        <div class="nav-timeline-tab-description">Simulator og kontrol</div>
+                    </div>
+                    <div class="nav-timeline-tab">
+                        <div class="nav-timeline-tab-title">Indstillinger</div>
+                        <div class="nav-timeline-tab-description">Tema og præferencer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 18: Chip Style -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">18. Chip Style</h2>
+            <p class="mockup-description">Navigation som chips/pills med ikoner</p>
+            
+            <div class="nav-chip">
+                <div class="nav-chip-header">
+                    <div class="nav-chip-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-chip-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-chip-tabs">
+                    <div class="nav-chip-tab active">
+                        <span class="nav-chip-icon">⌂</span>
+                        Forside
+                    </div>
+                    <div class="nav-chip-tab">
+                        <span class="nav-chip-icon">◊</span>
+                        E-Learning
+                    </div>
+                    <div class="nav-chip-tab">
+                        <span class="nav-chip-icon">▶</span>
+                        Simulator
+                    </div>
+                    <div class="nav-chip-tab">
+                        <span class="nav-chip-icon">⚙</span>
+                        Indstillinger
+                    </div>
+                    <div class="nav-chip-tab">
+                        <span class="nav-chip-icon">📊</span>
+                        Statistik
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 19: Segmented Control -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">19. Segmented Control</h2>
+            <p class="mockup-description">iOS-stil segmented control navigation</p>
+            
+            <div class="nav-segmented">
+                <div class="nav-segmented-header">
+                    <div class="nav-segmented-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-segmented-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-segmented-control">
+                    <button class="nav-segmented-tab active">Forside</button>
+                    <button class="nav-segmented-tab">E-Learning</button>
+                    <button class="nav-segmented-tab">Simulator</button>
+                    <button class="nav-segmented-tab">Indstillinger</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mockup 20: Dock Style -->
+        <div class="mockup-section">
+            <h2 class="mockup-title">20. Dock Style</h2>
+            <p class="mockup-description">macOS-stil dock navigation med ikoner</p>
+            
+            <div class="nav-dock">
+                <div class="nav-dock-header">
+                    <div class="nav-dock-logo">
+                        <span>🏠</span>
+                        Smarthome
+                    </div>
+                    <span class="nav-dock-user">rasmusjakobsen1990@gmail.com</span>
+                </div>
+                <div class="nav-dock-container">
+                    <div class="nav-dock-tabs">
+                        <div class="nav-dock-tab active">
+                            <span class="nav-dock-icon">⌂</span>
+                            <span class="nav-dock-label">Forside</span>
+                        </div>
+                        <div class="nav-dock-tab">
+                            <span class="nav-dock-icon">◊</span>
+                            <span class="nav-dock-label">Læring</span>
+                        </div>
+                        <div class="nav-dock-tab">
+                            <span class="nav-dock-icon">▶</span>
+                            <span class="nav-dock-label">Sim</span>
+                        </div>
+                        <div class="nav-dock-tab">
+                            <span class="nav-dock-icon">⚙</span>
+                            <span class="nav-dock-label">Indst.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
