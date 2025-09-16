@@ -3928,32 +3928,27 @@ class AppManager {
     }
     
     checkActiveRules(deviceId, isActive) {
+        // Debounce to prevent infinite loops
+        const now = Date.now();
+        const lastCheck = this.lastRuleCheck || 0;
+        if (now - lastCheck < 100) { // 100ms debounce
+            return;
+        }
+        this.lastRuleCheck = now;
+        
         // Get all saved rules from localStorage (both old and new format)
         const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
         const smarthomeRules = JSON.parse(localStorage.getItem('smarthome-rules') || '[]');
         
-        console.log('=== LOADING RULES FROM LOCALSTORAGE ===');
-        console.log('savedRules (old format):', savedRules);
-        console.log('smarthome-rules (new format):', smarthomeRules);
-        
         // Filter for block scene rules (old format)
         const blockSceneRules = savedRules.filter(rule => rule.type === 'block_scene');
         
-        console.log('=== CHECKING ACTIVE RULES ===');
-        console.log('Device ID:', deviceId);
-        console.log('Is Active:', isActive);
-        console.log('Found block scene rules:', blockSceneRules);
-        console.log('Found smarthome rules:', smarthomeRules);
+        console.log(`=== CHECKING RULES for ${deviceId} (${isActive ? 'ACTIVE' : 'INACTIVE'}) ===`);
+        console.log(`Found ${blockSceneRules.length} block scene rules, ${smarthomeRules.length} smarthome rules`);
         
         // Check old format rules (block scene rules)
         blockSceneRules.forEach(rule => {
-            console.log('Checking block scene rule:', rule.name);
-            console.log('Rule active:', rule.active);
-            
-            if (rule.active === false) {
-                console.log('Rule is deactivated, skipping');
-                return;
-            }
+            if (rule.active === false) return;
             
             // Check if this device is a trigger in any rule
             const matchingTriggers = rule.triggers.filter(trigger => 
@@ -3967,24 +3962,15 @@ class AppManager {
                 )
             );
             
-            console.log('Matching triggers for', deviceId, ':', matchingTriggers);
-            
             if (matchingTriggers.length > 0 && isActive) {
-                console.log('✅ Triggering block scene rule:', rule.name);
+                console.log(`✅ Triggering block scene rule: ${rule.name}`);
                 this.executeBlockScene(rule);
-            } else {
-                console.log('❌ No matching triggers or not active');
             }
         });
         
         // Check new format rules (smarthome rules with multiple triggers)
         smarthomeRules.forEach(rule => {
-            console.log('Checking smarthome rule:', rule.id);
-            
-            if (!rule.triggers || rule.triggers.length === 0) {
-                console.log('Rule has no triggers, skipping');
-                return;
-            }
+            if (!rule.triggers || rule.triggers.length === 0) return;
             
             // Check if this device matches any of the triggers
             const deviceName = this.getDeviceName(deviceId);
@@ -3992,23 +3978,14 @@ class AppManager {
                 trigger === deviceName || trigger === deviceId
             );
             
-            console.log('Device name:', deviceName);
-            console.log('Rule triggers:', rule.triggers);
-            console.log('Matching triggers:', matchingTriggers);
-            
             if (matchingTriggers.length > 0 && isActive) {
                 // For multiple triggers, we need to check if ALL triggers are active
                 const allTriggersActive = this.checkAllTriggersActive(rule);
-                console.log('All triggers active:', allTriggersActive);
                 
                 if (allTriggersActive) {
-                    console.log('✅ Triggering smarthome rule:', rule.id);
+                    console.log(`✅ Triggering smarthome rule: ${rule.id}`);
                     this.executeSmarthomeRule(rule);
-                } else {
-                    console.log('❌ Not all triggers are active yet');
                 }
-            } else {
-                console.log('❌ No matching triggers or not active');
             }
         });
     }
