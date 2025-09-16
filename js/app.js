@@ -7726,6 +7726,105 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         <li><strong>Vedligeholdelse:</strong> Genstart enheder ved forbindelsesproblemer</li>
                     </ul>
                 </div>
+            `,
+            'zigbee': `
+                <div class="theory-text">
+                    <h4>Hvad er Zigbee?</h4>
+                    <p>Zigbee er en åben trådløs protokol baseret på IEEE 802.15.4 standarden, designet til smarthome og IoT enheder. Den bruger mesh-netværk for bedre rækkevidde og pålidelighed.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Zigbee giver lavt strømforbrug, god rækkevidde og mesh-netværk funktionalitet, hvilket gør det ideelt til batteridrevne smarthome enheder.</p>
+                    
+                    <h4>Zigbee Specifikationer:</h4>
+                    <ul>
+                        <li><strong>Frekvens:</strong> 2.4 GHz (globalt), 868 MHz (Europa), 915 MHz (USA)</li>
+                        <li><strong>Rækkevidde:</strong> 30-50 meter mellem enheder</li>
+                        <li><strong>Mesh-netværk:</strong> Selvhealende netværk med flere ruter</li>
+                        <li><strong>Enheder:</strong> Op til 65.000 enheder i et netværk</li>
+                        <li><strong>Strømforbrug:</strong> Meget lavt - ideelt til batteridrevne enheder</li>
+                    </ul>
+                    
+                    <h4>Zigbee Fordele:</h4>
+                    <ul>
+                        <li><strong>Åben standard:</strong> Ingen licensgebyrer</li>
+                        <li><strong>Mesh-netværk:</strong> Bedre rækkevidde og pålidelighed</li>
+                        <li><strong>Lavt strømforbrug:</strong> Lang batterilevetid</li>
+                        <li><strong>Skalering:</strong> Støtter mange enheder</li>
+                        <li><strong>Kompatibilitet:</strong> Åben standard sikrer kompatibilitet</li>
+                    </ul>
+                    
+                    <h4>Anvendelser i dit smarthome:</h4>
+                    <ul>
+                        <li><strong>Batteridrevne enheder:</strong> Sensorer, kontakter, fjernbetjeninger</li>
+                        <li><strong>Mesh-netværk:</strong> Selvhealende netværk med flere ruter</li>
+                        <li><strong>Kosteffektivt:</strong> Billigere end Z-Wave enheder</li>
+                        <li><strong>Skalering:</strong> Kan håndtere mange enheder</li>
+                        <li><strong>Integration:</strong> Nem integration med eksisterende netværk</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Mesh-netværk:</strong> Placer enheder strategisk for bedre dækning</li>
+                        <li><strong>Batteridrevne enheder:</strong> Perfekt til sensorer og kontakter</li>
+                        <li><strong>Kompatibilitet:</strong> Tjek Zigbee 3.0 kompatibilitet</li>
+                        <li><strong>Router enheder:</strong> Brug strømdrevne enheder som routere</li>
+                        <li><strong>Vedligeholdelse:</strong> Test netværk regelmæssigt</li>
+                    </ul>
+                </div>
+            `,
+            'zwave': `
+                <div class="theory-text">
+                    <h4>Hvad er Z-Wave?</h4>
+                    <p>Z-Wave er en proprietær trådløs protokol designet specifikt til smarthome enheder. Den bruger mesh-netværk og er kendt for sin pålidelighed og sikkerhed.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Z-Wave giver høj sikkerhed, god kompatibilitet og mesh-netværk funktionalitet, hvilket gør det ideelt til professionelle smarthome installationer.</p>
+                    
+                    <h4>Z-Wave Specifikationer:</h4>
+                    <ul>
+                        <li><strong>Frekvens:</strong> 868.42 MHz (Europa), 908.42 MHz (USA)</li>
+                        <li><strong>Rækkevidde:</strong> 30 meter mellem enheder</li>
+                        <li><strong>Mesh-netværk:</strong> Selvhealende netværk med flere ruter</li>
+                        <li><strong>Enheder:</strong> Op til 232 enheder i et netværk</li>
+                        <li><strong>Strømforbrug:</strong> Lavt - god til batteridrevne enheder</li>
+                    </ul>
+                    
+                    <h4>Z-Wave Fordele:</h4>
+                    <ul>
+                        <li><strong>Høj sikkerhed:</strong> AES-128 kryptering</li>
+                        <li><strong>Mesh-netværk:</strong> Bedre rækkevidde og pålidelighed</li>
+                        <li><strong>Kompatibilitet:</strong> Alle Z-Wave enheder fungerer sammen</li>
+                        <li><strong>Pålidelighed:</strong> Testet og certificeret</li>
+                        <li><strong>Professionel:</strong> Brugt af installatører</li>
+                    </ul>
+                    
+                    <h4>Z-Wave Plus:</h4>
+                    <ul>
+                        <li><strong>Længere rækkevidde:</strong> Op til 50% bedre rækkevidde</li>
+                        <li><strong>Bedre batterilevetid:</strong> Op til 50% længere batterilevetid</li>
+                        <li><strong>Hurtigere kommunikation:</strong> Op til 250% hurtigere</li>
+                        <li><strong>Bedre sikkerhed:</strong> Forbedret kryptering</li>
+                        <li><strong>Overvågning:</strong> Bedre netværksovervågning</li>
+                    </ul>
+                    
+                    <h4>Anvendelser i dit smarthome:</h4>
+                    <ul>
+                        <li><strong>Professionelle installationer:</strong> Høj sikkerhed og pålidelighed</li>
+                        <li><strong>Mesh-netværk:</strong> Selvhealende netværk med flere ruter</li>
+                        <li><strong>Kompatibilitet:</strong> Alle enheder fungerer sammen</li>
+                        <li><strong>Sikkerhed:</strong> Høj sikkerhed for kritiske systemer</li>
+                        <li><strong>Skalering:</strong> Kan håndtere mange enheder</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Z-Wave Plus:</strong> Vælg Z-Wave Plus enheder for bedre ydeevne</li>
+                        <li><strong>Mesh-netværk:</strong> Placer enheder strategisk for bedre dækning</li>
+                        <li><strong>Kompatibilitet:</strong> Alle Z-Wave enheder fungerer sammen</li>
+                        <li><strong>Router enheder:</strong> Brug strømdrevne enheder som routere</li>
+                        <li><strong>Vedligeholdelse:</strong> Test netværk regelmæssigt</li>
+                    </ul>
+                </div>
             `
         };
         
@@ -8266,12 +8365,12 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <div class="quiz-question">
                     <h4>Spørgsmål 2:</h4>
-                    <p>Hvad er den maksimale rækkevidde mellem to Z-Wave enheder?</p>
+                    <p>Hvad er den typiske rækkevidde mellem to Zigbee enheder?</p>
                     <div class="quiz-options">
-                        <label><input type="radio" name="q2" value="a"> 10 meter</label>
-                        <label><input type="radio" name="q2" value="b"> 30 meter</label>
-                        <label><input type="radio" name="q2" value="c"> 100 meter</label>
-                        <label><input type="radio" name="q2" value="d"> 200 meter</label>
+                        <label><input type="radio" name="q2" value="a"> 10-20 meter</label>
+                        <label><input type="radio" name="q2" value="b"> 30-50 meter</label>
+                        <label><input type="radio" name="q2" value="c"> 100-200 meter</label>
+                        <label><input type="radio" name="q2" value="d"> 500+ meter</label>
                     </div>
                 </div>
                 
