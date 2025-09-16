@@ -7513,12 +7513,29 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const completedCount = this.completedModules.length;
         const percentage = Math.round((completedCount / totalModules) * 100);
         
-        const progressCircle = document.querySelector('.progress-circle-large');
-        const progressText = document.querySelector('.progress-text-large');
+        // Find the "Samlet Fremgang" progress display
+        const progressElements = document.querySelectorAll('.stat-number');
+        let progressElement = null;
         
-        if (progressCircle && progressText) {
-            progressCircle.style.background = `conic-gradient(#78dbff ${percentage * 3.6}deg, #78dbff ${percentage * 3.6}deg, rgba(160, 174, 192, 0.2) ${percentage * 3.6}deg)`;
-            progressText.textContent = `${percentage}%`;
+        // Find the element that contains "Samlet Fremgang"
+        progressElements.forEach(element => {
+            const parent = element.closest('.stat-card');
+            if (parent && parent.textContent.includes('Samlet Fremgang')) {
+                progressElement = element;
+            }
+        });
+        
+        if (progressElement) {
+            progressElement.textContent = `${percentage}%`;
+            console.log(`✅ Updated "Samlet Fremgang" to: ${percentage}%`);
+        } else {
+            console.log('❌ Could not find "Samlet Fremgang" element');
+            // Fallback: try to find by class
+            const fallbackElement = document.querySelector('.stat-number');
+            if (fallbackElement) {
+                fallbackElement.textContent = `${percentage}%`;
+                console.log(`✅ Updated fallback element to: ${percentage}%`);
+            }
         }
         
         console.log(`Progress updated: ${completedCount}/${totalModules} (${percentage}%)`);
