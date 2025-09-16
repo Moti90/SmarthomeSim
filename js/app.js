@@ -6419,6 +6419,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     <h4>Hvorfor er de vigtige?</h4>
                     <p>PIR sensoere gør dit hjem intelligent ved automatisk at tænde lys, aktivere sikkerhed og spare energi. De er essentielle for komfort og sikkerhed.</p>
                     
+                    <h4>Teknologi og funktion:</h4>
+                    <ul>
+                        <li><strong>Infrarød varmestråling:</strong> PIR-sensorer detekterer varmestråling fra kroppe</li>
+                        <li><strong>Passive teknologi:</strong> Sender ikke signaler ud, kun modtager</li>
+                        <li><strong>Detektionsvinkel:</strong> Typisk 90-120° detektionsvinkel</li>
+                        <li><strong>Detektionsafstand:</strong> 5-12 meter afhængig af model</li>
+                        <li><strong>Følsomhed:</strong> Justerbar følsomhed for forskellige rumstørrelser</li>
+                    </ul>
+                    
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
                         <li><strong>Automatisk lys:</strong> Tænder lys når du kommer ind i et rum</li>
@@ -6590,6 +6599,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     <h4>Hvorfor er de vigtige?</h4>
                     <p>Vinddata hjælper med at automatisere vinduer, markiser og sikkerhedssystemer baseret på vejrforholdene, hvilket forbedrer komfort og sikkerhed.</p>
                     
+                    <h4>Målinger og enheder:</h4>
+                    <ul>
+                        <li><strong>Vindhastighed:</strong> Måles i m/s (meter per sekund) eller km/t (kilometer per time)</li>
+                        <li><strong>Vindretning:</strong> Måles i grader (0-360°) eller kompasretninger</li>
+                        <li><strong>Målenøjagtighed:</strong> Typisk ±0.1 m/s for vindhastighed</li>
+                        <li><strong>Måleområde:</strong> 0-50 m/s eller 0-180 km/t</li>
+                        <li><strong>Opdateringsfrekvens:</strong> Real-time målinger hvert sekund</li>
+                    </ul>
+                    
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
                         <li><strong>Vindue automatisering:</strong> Lukker vinduer ved stærk vind</li>
@@ -6612,10 +6630,19 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             'roegalarm': `
                 <div class="theory-text">
                     <h4>Hvad er røgalarmer?</h4>
-                    <p>Røgalarmer detekterer røg og brand og sender øjeblikkelige advarsler til dit smarthome system. De er kritiske for brandsikkerhed og kan redde liv.</p>
+                    <p>Røgalarmer detekterer røgpartikler i luften og sender øjeblikkelige advarsler til dit smarthome system. De er kritiske for brandsikkerhed og kan redde liv.</p>
                     
                     <h4>Hvorfor er de vigtige?</h4>
                     <p>Røgalarmer er din første forsvarslinje mod brand. De giver dig tid til at evakuere og kan automatisk aktivere sikkerhedsforanstaltninger.</p>
+                    
+                    <h4>Typer af røgalarmer:</h4>
+                    <ul>
+                        <li><strong>Optisk røgalarm:</strong> Bruger LED og fotodetektor til at detektere røgpartikler</li>
+                        <li><strong>Ioniserende røgalarm:</strong> Bruger radioaktiv stråling til at detektere røgpartikler</li>
+                        <li><strong>Kombineret:</strong> Både optisk og ioniserende teknologi for bedre dækning</li>
+                        <li><strong>Hvad de detekterer:</strong> Røgpartikler i luften fra brand</li>
+                        <li><strong>Reaktionstid:</strong> Øjeblikkelig advarsel ved røg detektion</li>
+                    </ul>
                     
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
@@ -6628,7 +6655,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     
                     <h4>💡 Tips og tricks:</h4>
                     <ul>
-                        <li><strong>Placering:</strong> I hver etage, væk fra køkken og badeværelse</li>
+                        <li><strong>Placering:</strong> På loftet, væk fra hjørner og køkken/badeværelse</li>
                         <li><strong>Test:</strong> Test månedligt med testknap</li>
                         <li><strong>Batterier:</strong> Skift batterier årligt</li>
                         <li><strong>Vedligeholdelse:</strong> Rens regelmæssigt for støv</li>
