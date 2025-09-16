@@ -18,6 +18,10 @@ class AppManager {
         this.simSensors = [];
         this.simRules = [];
         
+        // Notification queue system
+        this.notificationQueue = [];
+        this.isShowingNotification = false;
+        
         // Radiator temperature control
         this.radiatorTemp = 21.0;
         this.radiatorTarget = 21.0;
@@ -4005,14 +4009,22 @@ class AppManager {
     }
 
     checkAllTriggersActive(rule) {
+        console.log('=== CHECKING ALL TRIGGERS ACTIVE ===');
+        console.log('Rule triggers:', rule.triggers);
+        
         if (!rule.triggers || rule.triggers.length === 0) {
+            console.log('No triggers in rule');
             return false;
         }
         
         // Check if all triggers in the rule are currently active
         for (const triggerName of rule.triggers) {
+            console.log('Checking trigger:', triggerName);
+            
             // Find the device ID for this trigger name
             const deviceId = this.getDeviceIdFromName(triggerName);
+            console.log('Mapped device ID:', deviceId);
+            
             if (!deviceId) {
                 console.log('Device ID not found for trigger:', triggerName);
                 return false;
@@ -4020,12 +4032,16 @@ class AppManager {
             
             // Check if the device is active
             const deviceElement = document.querySelector(`[data-device="${deviceId}"]`);
+            console.log('Device element found:', deviceElement);
+            console.log('Device value:', deviceElement?.dataset.value);
+            
             if (!deviceElement || deviceElement.dataset.value !== 'true') {
                 console.log('Trigger not active:', triggerName, 'Device value:', deviceElement?.dataset.value);
                 return false;
             }
         }
         
+        console.log('All triggers are active!');
         return true;
     }
 
@@ -5727,6 +5743,24 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             this.notificationQueue = [];
         }
         
+        // Add to queue
+        this.notificationQueue.push({ message, type });
+        
+        // Process queue if not already processing
+        if (!this.isShowingNotification) {
+            this.processNotificationQueue();
+        }
+    }
+    
+    processNotificationQueue() {
+        if (this.notificationQueue.length === 0) {
+            this.isShowingNotification = false;
+            return;
+        }
+        
+        this.isShowingNotification = true;
+        const { message, type } = this.notificationQueue.shift();
+        
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
@@ -5734,6 +5768,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         notification.style.cssText = `
             position: fixed;
             right: 20px;
+            top: 80px;
             background: var(--bg-secondary);
             color: var(--text-primary);
             padding: 12px 20px;
@@ -5742,38 +5777,26 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             box-shadow: 0 10px 25px -5px var(--shadow-color);
             z-index: 1001;
             animation: slideIn 0.3s ease;
-            margin-bottom: 10px;
             max-width: 300px;
             word-wrap: break-word;
         `;
         
-        // Calculate position based on existing notifications
-        const existingNotifications = document.querySelectorAll('.notification');
-        const topOffset = 80 + (existingNotifications.length * 60); // 60px spacing between notifications
-        notification.style.top = `${topOffset}px`;
-        
-        // Add to queue
-        this.notificationQueue.push(notification);
-        
         // Add to DOM
         document.body.appendChild(notification);
         
-        // Remove from queue and DOM after 3 seconds
+        // Remove from DOM after 2 seconds
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.parentNode.removeChild(notification);
                 }
-                // Remove from queue
-                const index = this.notificationQueue.indexOf(notification);
-                if (index > -1) {
-                    this.notificationQueue.splice(index, 1);
-                }
-                // Reposition remaining notifications
-                this.repositionNotifications();
+                // Process next notification after a short delay
+                setTimeout(() => {
+                    this.processNotificationQueue();
+                }, 500); // 500ms delay between notifications
             }, 300);
-        }, 3000);
+        }, 2000);
     }
     
     repositionNotifications() {
