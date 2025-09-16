@@ -56,11 +56,6 @@ class AppManager {
         
         // Update progress display immediately
         this.updateOverallProgress();
-        
-        // If user is already logged in, sync with Firebase
-        if (this.currentUser) {
-            this.loadLearningProgress();
-        }
     }
 
     initializeFirebase() {
@@ -7655,27 +7650,35 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
     loadProgressFromLocalStorage() {
         const savedProgress = JSON.parse(localStorage.getItem('learningProgress') || '[]');
-        console.log('Loaded progress from localStorage:', savedProgress);
+        console.log('📚 Loading progress from localStorage:', savedProgress);
+        console.log('📚 Number of completed modules:', savedProgress.length);
         this.applyProgressToUI(savedProgress);
     }
 
     applyProgressToUI(completedModules) {
         // Update the stored completed modules
         this.completedModules = [...new Set(completedModules)];
+        console.log('🎯 Applying progress to UI:', completedModules);
+        console.log('🎯 Stored completed modules:', this.completedModules);
         
         // Update buttons if they exist in DOM (e-learning tab is active)
+        let buttonsUpdated = 0;
         completedModules.forEach(subtopicId => {
             const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
             if (button) {
                 button.textContent = 'Gennemført ✓';
                 button.classList.add('completed');
+                buttonsUpdated++;
+                console.log(`✅ Updated button for: ${subtopicId}`);
+            } else {
+                console.log(`❌ Button not found for: ${subtopicId} (e-learning tab not active)`);
             }
         });
         
         // Always update overall progress display regardless of tab state
         this.updateOverallProgress();
         
-        console.log(`Applied progress to UI: ${completedModules.length} modules completed`);
+        console.log(`🎯 Applied progress to UI: ${completedModules.length} modules completed, ${buttonsUpdated} buttons updated`);
     }
 
     refreshElearningProgress() {
