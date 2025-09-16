@@ -6969,6 +6969,585 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         <li>Foreslå optimeringer baseret på forbrugsmønstre</li>
                     </ul>
                 </div>
+            `,
+            // Sikkerhed & Privatliv teori-indhold
+            'netvaerkssikkerhed': `
+                <div class="theory-text">
+                    <h4>Hvad er netværkssikkerhed i smarthome?</h4>
+                    <p>Netværkssikkerhed handler om at beskytte dit smarthome netværk mod trusler og uautoriseret adgang. Det er fundamentet for al smarthome sikkerhed.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Et kompromitteret netværk kan give hackere adgang til alle dine smarthome enheder, personlige data og endda kontrol over dit hjem. Netværkssikkerhed er din første forsvarslinje.</p>
+                    
+                    <h4>Grundlæggende sikkerhedsforanstaltninger:</h4>
+                    <ul>
+                        <li><strong>WPA3 kryptering:</strong> Brug den nyeste WiFi sikkerhedsstandard</li>
+                        <li><strong>Stærke passwords:</strong> Minimum 12 karakterer med tal, bogstaver og symboler</li>
+                        <li><strong>Skjult netværk:</strong> Skjul SSID for at gøre det mindre synligt</li>
+                        <li><strong>MAC-adresse filtrering:</strong> Begræns adgang til kendte enheder</li>
+                        <li><strong>Firewall:</strong> Bloker uønsket trafik</li>
+                    </ul>
+                    
+                    <h4>Avancerede sikkerhedsforanstaltninger:</h4>
+                    <ul>
+                        <li><strong>VLAN opdeling:</strong> Separer IoT-enheder fra hovednetværket</li>
+                        <li><strong>VPN adgang:</strong> Sikker fjernadgang til dit hjem</li>
+                        <li><strong>Regelmæssige opdateringer:</strong> Hold router firmware opdateret</li>
+                        <li><strong>Netværksovervågning:</strong> Overvåg for mistænkelig aktivitet</li>
+                        <li><strong>Guest netværk:</strong> Separer gæsteenheder fra hovednetværket</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Router placering:</strong> Placer router centralt for bedre dækning</li>
+                        <li><strong>Password manager:</strong> Brug stærke, unikke passwords til alle enheder</li>
+                        <li><strong>Regelmæssige tjek:</strong> Tjek netværksaktivitet månedligt</li>
+                        <li><strong>Backup plan:</strong> Hav en plan til at skifte passwords hvis nødvendigt</li>
+                        <li><strong>Professionel hjælp:</strong> Overvej professionel sikkerhedsgennemgang</li>
+                    </ul>
+                </div>
+            `,
+            'enhedsikkerhed': `
+                <div class="theory-text">
+                    <h4>Hvad er enhedssikkerhed?</h4>
+                    <p>Enhedssikkerhed handler om at beskytte individuelle smarthome enheder mod sårbarheder og sikre at de fungerer sikkert i dit netværk.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Hver enhed i dit smarthome er en potentiel indgangsport for hackere. Svage enheder kan kompromittere hele dit system og give adgang til personlige data.</p>
+                    
+                    <h4>Grundlæggende enhedssikkerhed:</h4>
+                    <ul>
+                        <li><strong>Firmware opdateringer:</strong> Hold alle enheder opdateret med nyeste sikkerhedspatches</li>
+                        <li><strong>Stærke passwords:</strong> Skift standard passwords på alle enheder</li>
+                        <li><strong>Netværksisolation:</strong> Placer enheder på separat VLAN</li>
+                        <li><strong>Deaktiver unødvendige funktioner:</strong> Sluk funktioner du ikke bruger</li>
+                        <li><strong>Regelmæssige tjek:</strong> Overvåg enheder for mistænkelig aktivitet</li>
+                    </ul>
+                    
+                    <h4>Avancerede enhedssikkerhed:</h4>
+                    <ul>
+                        <li><strong>Zero-trust arkitektur:</strong> Verificer alle enheder før adgang</li>
+                        <li><strong>Enhedsautentificering:</strong> Brug certificater til enhedsidentifikation</li>
+                        <li><strong>Krypteret kommunikation:</strong> Sikre at al data er krypteret</li>
+                        <li><strong>Intrusion detection:</strong> Overvåg for angreb på enheder</li>
+                        <li><strong>Backup og recovery:</strong> Hav planer til at genoprette kompromitterede enheder</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Køb fra etablerede mærker:</strong> De har bedre sikkerhedsopdateringer</li>
+                        <li><strong>Læs sikkerhedsrapporter:</strong> Hold dig opdateret om sårbarheder</li>
+                        <li><strong>Test enheder:</strong> Brug sikkerhedsværktøjer til at teste enheder</li>
+                        <li><strong>Dokumenter enheder:</strong> Hold styr på alle enheder og deres sikkerhedsstatus</li>
+                        <li><strong>Professionel vurdering:</strong> Overvej sikkerhedsgennemgang af kritiske enheder</li>
+                    </ul>
+                </div>
+            `,
+            'data-privatliv': `
+                <div class="theory-text">
+                    <h4>Hvad er databeskyttelse og privatliv i smarthome?</h4>
+                    <p>Databeskyttelse handler om at beskytte dine personlige data og sikre privatliv i dit smarthome. Det er særligt vigtigt da smarthome enheder samler store mængder data om dit liv.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Smarthome enheder samler data om din daglige rutine, vaner, præferencer og endda lyd og video. Uden proper databeskyttelse kan disse data misbruges eller sælges til tredjeparter.</p>
+                    
+                    <h4>GDPR og smarthome:</h4>
+                    <ul>
+                        <li><strong>Samtykke:</strong> Du skal give eksplicit samtykke til dataindsamling</li>
+                        <li><strong>Dataminimering:</strong> Kun indsamle data der er nødvendige</li>
+                        <li><strong>Transparens:</strong> Være åben om hvordan data bruges</li>
+                        <li><strong>Ret til sletning:</strong> Du kan kræve at data slettes</li>
+                        <li><strong>Data portabilitet:</strong> Du kan flytte dine data til andre systemer</li>
+                    </ul>
+                    
+                    <h4>Lokale vs. cloud-baserede systemer:</h4>
+                    <ul>
+                        <li><strong>Lokale systemer:</strong> Data forbliver i dit hjem, bedre privatliv</li>
+                        <li><strong>Cloud systemer:</strong> Data sendes til tredjepartsservere, potentiel risiko</li>
+                        <li><strong>Hybrid løsninger:</strong> Kombiner lokale og cloud funktioner</li>
+                        <li><strong>End-to-end kryptering:</strong> Sikre at data er krypteret under transmission</li>
+                    </ul>
+                    
+                    <h4>Praktiske databeskyttelsesforanstaltninger:</h4>
+                    <ul>
+                        <li><strong>Læs privacy policies:</strong> Forstå hvordan dine data bruges</li>
+                        <li><strong>Deaktiver dataindsamling:</strong> Sluk unødvendig dataindsamling</li>
+                        <li><strong>Brug lokale systemer:</strong> Vælg enheder der ikke kræver cloud</li>
+                        <li><strong>Regelmæssige backups:</strong> Sikre dine data lokalt</li>
+                        <li><strong>Overvåg dataflow:</strong> Hold styr på hvilke data der sendes ud</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Vælg mærker der respekterer privatliv:</strong> Læs om mærkers databeskyttelse</li>
+                        <li><strong>Brug VPN:</strong> Krypter din internetforbindelse</li>
+                        <li><strong>Regelmæssige tjek:</strong> Gennemgå dataindsamling månedligt</li>
+                        <li><strong>Familiemeddelelser:</strong> Informer familie om databeskyttelse</li>
+                        <li><strong>Professionel rådgivning:</strong> Overvej juridisk rådgivning om GDPR</li>
+                    </ul>
+                </div>
+            `,
+            'access-control': `
+                <div class="theory-text">
+                    <h4>Hvad er adgangskontrol i smarthome?</h4>
+                    <p>Adgangskontrol handler om at kontrollere hvem der har adgang til dit smarthome system og hvilke funktioner de kan bruge. Det er essentielt for sikkerhed og privatliv.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Uden proper adgangskontrol kan uautoriserede personer få adgang til dit smarthome system, ændre indstillinger, se personlige data eller endda kontrollere enheder.</p>
+                    
+                    <h4>Grundlæggende adgangskontrol:</h4>
+                    <ul>
+                        <li><strong>Brugerkonti:</strong> Opret separate konti for hver bruger</li>
+                        <li><strong>Stærke passwords:</strong> Brug unikke, stærke passwords</li>
+                        <li><strong>Rollebaseret adgang:</strong> Giv brugere kun den adgang de har brug for</li>
+                        <li><strong>Regelmæssige gennemgange:</strong> Tjek brugeradgang månedligt</li>
+                        <li><strong>Deaktiver inaktive konti:</strong> Fjern adgang for brugere der ikke længere skal have det</li>
+                    </ul>
+                    
+                    <h4>Avancerede adgangskontrol:</h4>
+                    <ul>
+                        <li><strong>Multi-factor authentication (MFA):</strong> Kræv flere verifikationsmetoder</li>
+                        <li><strong>Biometrisk autentificering:</strong> Brug fingeraftryk eller ansigtsgenkendelse</li>
+                        <li><strong>Certificate-based authentication:</strong> Brug digitale certificater</li>
+                        <li><strong>Time-based access:</strong> Begræns adgang til specifikke tidspunkter</li>
+                        <li><strong>Location-based access:</strong> Begræns adgang baseret på lokation</li>
+                    </ul>
+                    
+                    <h4>Brugerroller og rettigheder:</h4>
+                    <ul>
+                        <li><strong>Administrator:</strong> Fuld adgang til alle funktioner</li>
+                        <li><strong>Bruger:</strong> Adgang til grundlæggende funktioner</li>
+                        <li><strong>Gæst:</strong> Begrænset adgang til specifikke funktioner</li>
+                        <li><strong>Børn:</strong> Sikker adgang med begrænsninger</li>
+                        <li><strong>Vedligeholdelse:</strong> Adgang til tekniske funktioner</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Princip om mindste privilegium:</strong> Giv kun den adgang der er nødvendig</li>
+                        <li><strong>Regelmæssige audits:</strong> Gennemgå brugeradgang regelmæssigt</li>
+                        <li><strong>Backup administratorer:</strong> Hav flere administratorer til nødsituationer</li>
+                        <li><strong>Dokumenter rettigheder:</strong> Hold styr på hvem der har hvilke rettigheder</li>
+                        <li><strong>Professionel rådgivning:</strong> Overvej sikkerhedsrådgivning for avancerede systemer</li>
+                    </ul>
+                </div>
+            `,
+            // Energistyring teori-indhold
+            'energimåling': `
+                <div class="theory-text">
+                    <h4>Hvad er energimåling i smarthome?</h4>
+                    <p>Energimåling handler om at måle og overvåge dit energiforbrug i real-time for at identificere energispild og optimere forbrug. Det er grundlaget for intelligent energistyring.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Uden energimåling ved du ikke hvor meget strøm du bruger eller hvor den går hen. Med præcise målinger kan du spare penge, reducere miljøpåvirkning og optimere dit energiforbrug.</p>
+                    
+                    <h4>Typer af energimåling:</h4>
+                    <ul>
+                        <li><strong>Hovedmåler:</strong> Måler totalt energiforbrug for hele huset</li>
+                        <li><strong>Enhedsmålere:</strong> Måler forbrug for individuelle enheder</li>
+                        <li><strong>Rum-målere:</strong> Måler forbrug per rum eller zone</li>
+                        <li><strong>Produktionsmåler:</strong> Måler energiproduktion fra solceller</li>
+                        <li><strong>Netværksmåler:</strong> Måler data fra elnettet</li>
+                    </ul>
+                    
+                    <h4>Teknologier til energimåling:</h4>
+                    <ul>
+                        <li><strong>Smart stikkontakter:</strong> Måler forbrug for enheder der er tilsluttet</li>
+                        <li><strong>CT-sensorer:</strong> Måler strøm gennem kabel uden at afbryde forbindelsen</li>
+                        <li><strong>Smart målere:</strong> Moderne elmålere med datakommunikation</li>
+                        <li><strong>IoT-sensorer:</strong> Små sensorer der måler specifikke enheder</li>
+                        <li><strong>Cloud-baserede systemer:</strong> Centraliseret dataindsamling og analyse</li>
+                    </ul>
+                    
+                    <h4>Praktiske anvendelser:</h4>
+                    <ul>
+                        <li><strong>Identifikation af energispild:</strong> Find enheder der bruger unødvendig strøm</li>
+                        <li><strong>Time-of-use optimering:</strong> Flyt forbrug til billige tidspunkter</li>
+                        <li><strong>Enhedsoptimering:</strong> Identificer ineffektive enheder</li>
+                        <li><strong>Budgettering:</strong> Hold styr på energikostninger</li>
+                        <li><strong>Miljørapportering:</strong> Mål CO₂-udslip fra energiforbrug</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start med hovedmåler:</strong> Få overblik over totalt forbrug først</li>
+                        <li><strong>Fokuser på store forbrugere:</strong> Varmepumpe, elkedel og ovn bruger mest</li>
+                        <li><strong>Brug real-time data:</strong> Øjeblikkelig feedback er mest effektivt</li>
+                        <li><strong>Dokumenter ændringer:</strong> Hold styr på hvornår du ændrer forbrug</li>
+                        <li><strong>Professionel installation:</strong> Brug elektriker til CT-sensorer</li>
+                    </ul>
+                </div>
+            `,
+            'smart-lys': `
+                <div class="theory-text">
+                    <h4>Hvad er smart belysning?</h4>
+                    <p>Smart belysning kombinerer energieffektive LED-pærer med intelligent styring for at optimere lyskvalitet, komfort og energiforbrug. Det er en af de mest effektive måder at spare energi på.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Belysning udgør typisk 15-20% af et hjemmes energiforbrug. Smart belysning kan reducere dette med op til 80% gennem automatisering og energieffektive teknologier.</p>
+                    
+                    <h4>LED-teknologi fordele:</h4>
+                    <ul>
+                        <li><strong>Energieffektivitet:</strong> 80-90% mindre strømforbrug end glødepærer</li>
+                        <li><strong>Levetid:</strong> 25.000-50.000 timer vs. 1.000 timer for glødepærer</li>
+                        <li><strong>Farvetemperatur:</strong> Justerbar fra varmt til køligt lys</li>
+                        <li><strong>Dimming:</strong> Justerbar lysstyrke for optimal komfort</li>
+                        <li><strong>Øjeblikkelig tænding:</strong> Ingen opvarmningstid</li>
+                    </ul>
+                    
+                    <h4>Smart belysningsfunktioner:</h4>
+                    <ul>
+                        <li><strong>Automatisk tænd/sluk:</strong> Baseret på bevægelse eller tid</li>
+                        <li><strong>Circadian rytme:</strong> Simulerer naturligt lysmønster</li>
+                        <li><strong>Farvetemperatur styring:</strong> Varmt lys om aftenen, køligt om dagen</li>
+                        <li><strong>Scene-kontrol:</strong> Foruddefinerede lysindstillinger</li>
+                        <li><strong>Fjernstyring:</strong> Kontrol via smartphone eller stemme</li>
+                    </ul>
+                    
+                    <h4>Anvendelser i smarthome:</h4>
+                    <ul>
+                        <li><strong>Morgenlys:</strong> Gradvist tænding der simulerer solopgang</li>
+                        <li><strong>Aftenlys:</strong> Dæmpet, varmt lys der forbereder på søvn</li>
+                        <li><strong>Sikkerhed:</strong> Simuler tilstedeværelse når du er væk</li>
+                        <li><strong>Produktivitet:</strong> Optimal lysstyrke til arbejde og læsning</li>
+                        <li><strong>Atmosfære:</strong> Skab den rette stemning til forskellige aktiviteter</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start med kritiske områder:</strong> Køkken, stue og soveværelse</li>
+                        <li><strong>Brug dimmable pærer:</strong> Giver mere fleksibilitet</li>
+                        <li><strong>Overvej farvetemperatur:</strong> Varmt lys (2700K) til afslapning</li>
+                        <li><strong>Test automatisering:</strong> Juster indstillinger efter behov</li>
+                        <li><strong>Professionel rådgivning:</strong> Overvej elektriker til komplekse installationer</li>
+                    </ul>
+                </div>
+            `,
+            'varmestyring': `
+                <div class="theory-text">
+                    <h4>Hvad er smart varmestyring?</h4>
+                    <p>Smart varmestyring bruger intelligente termostater og automatisering til at optimere varmeforbrug og sikre komfort. Det er en af de mest effektive måder at spare energi på i et hjem.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Opvarmning udgør typisk 40-60% af et hjemmes energiforbrug. Smart varmestyring kan reducere dette med 20-30% gennem intelligent styring og automatisering.</p>
+                    
+                    <h4>Smart termostat funktioner:</h4>
+                    <ul>
+                        <li><strong>Programmerbar styring:</strong> Forskellige temperaturer til forskellige tidspunkter</li>
+                        <li><strong>Læringsalgoritmer:</strong> Tilpasser sig dine vaner automatisk</li>
+                        <li><strong>Fjernstyring:</strong> Kontrol via smartphone eller computer</li>
+                        <li><strong>Geofencing:</strong> Automatisk justering baseret på lokation</li>
+                        <li><strong>Vejrdata integration:</strong> Justerer baseret på udetemperatur</li>
+                    </ul>
+                    
+                    <h4>Zone-baseret varmestyring:</h4>
+                    <ul>
+                        <li><strong>Rum-specifik kontrol:</strong> Forskellige temperaturer i forskellige rum</li>
+                        <li><strong>Smart ventiler:</strong> Automatisk regulering af varmeflow</li>
+                        <li><strong>Bevaringsstyring:</strong> Optimer varme baseret på rumstørrelse</li>
+                        <li><strong>Brugsmønstre:</strong> Varm kun rum der bruges</li>
+                        <li><strong>Energioptimering:</strong> Balancer komfort og energiforbrug</li>
+                    </ul>
+                    
+                    <h4>Varmepumpe integration:</h4>
+                    <ul>
+                        <li><strong>Høj energieffektivitet:</strong> Op til 400% effektivitet (COP 4.0)</li>
+                        <li><strong>Bidirektional varme:</strong> Varme om vinteren, køling om sommeren</li>
+                        <li><strong>Smart lading:</strong> Kør når strømmen er billigst</li>
+                        <li><strong>Vejrdata integration:</strong> Optimer baseret på udetemperatur</li>
+                        <li><strong>Backup varme:</strong> Automatisk aktivering ved ekstreme forhold</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start med hovedtermostat:</strong> Få kontrol over hovedopvarmning først</li>
+                        <li><strong>Brug læringsfunktioner:</strong> Lad systemet lære dine vaner</li>
+                        <li><strong>Overvej zone-opdeling:</strong> Særligt i store huse</li>
+                        <li><strong>Test automatisering:</strong> Juster indstillinger efter behov</li>
+                        <li><strong>Professionel installation:</strong> Brug VVS-mand til komplekse systemer</li>
+                    </ul>
+                </div>
+            `,
+            'solceller': `
+                <div class="theory-text">
+                    <h4>Hvad er solceller og vedvarende energi?</h4>
+                    <p>Solceller konverterer sollys til elektricitet og kan reducere dit energiforbrug fra elnettet betydeligt. De er en af de mest populære former for vedvarende energi til hjem.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Solceller kan reducere dine elregninger med 50-90% og gøre dit hjem mere bæredygtigt. De giver dig også energisikkerhed og uafhængighed fra elnettet.</p>
+                    
+                    <h4>Solcelle system komponenter:</h4>
+                    <ul>
+                        <li><strong>Solcellepaneler:</strong> Konverterer sollys til DC strøm</li>
+                        <li><strong>Wechselrichter:</strong> Konverterer DC til AC strøm</li>
+                        <li><strong>Batterilagring:</strong> Lagrer overskydende energi til senere brug</li>
+                        <li><strong>Netværksmåler:</strong> Måler strøm til og fra elnettet</li>
+                        <li><strong>Overvågningssystem:</strong> Sporer produktion og forbrug</li>
+                    </ul>
+                    
+                    <h4>Batterilagring fordele:</h4>
+                    <ul>
+                        <li><strong>Energiindependence:</strong> Brug din egen strøm når du vil</li>
+                        <li><strong>Peak shaving:</strong> Undgå dyre peak-tariffer</li>
+                        <li><strong>Backup strøm:</strong> Strøm under strømafbrydelser</li>
+                        <li><strong>Netværksstabilitet:</strong> Reducer belastning på elnettet</li>
+                        <li><strong>Økonomisk optimering:</strong> Sælg strøm når prisen er høj</li>
+                    </ul>
+                    
+                    <h4>Netmetering og salg:</h4>
+                    <ul>
+                        <li><strong>Netmetering:</strong> Sælg overskydende strøm til elnettet</li>
+                        <li><strong>Feed-in tariffer:</strong> Få betaling for produceret strøm</li>
+                        <li><strong>Time-of-use optimering:</strong> Sælg når prisen er høj</li>
+                        <li><strong>Netværksstabilitet:</strong> Bidrag til elnettets stabilitet</li>
+                        <li><strong>Økonomisk gevinst:</strong> Ekstra indtægt fra strømsalg</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start med overvågning:</strong> Mål dit nuværende forbrug først</li>
+                        <li><strong>Overvej batterilagring:</strong> Særligt hvis du har høje peak-tariffer</li>
+                        <li><strong>Professionel rådgivning:</strong> Brug certificerede installatører</li>
+                        <li><strong>Regelmæssig vedligeholdelse:</strong> Rens paneler for optimal produktion</li>
+                        <li><strong>Overvåg ydeevne:</strong> Hold styr på produktion og forbrug</li>
+                    </ul>
+                </div>
+            `,
+            'energi-automation': `
+                <div class="theory-text">
+                    <h4>Hvad er energi-automatisering?</h4>
+                    <p>Energi-automatisering bruger intelligente algoritmer og automatisering til at optimere dit energiforbrug automatisk. Det kombinerer energimåling, prisdynamik og brugeradfærd for maksimal effektivitet.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Energi-automatisering kan reducere dine energikostninger med 20-40% gennem intelligent styring af hvornår og hvordan du bruger energi. Det gør energistyring automatisk og optimalt.</p>
+                    
+                    <h4>Load shifting strategier:</h4>
+                    <ul>
+                        <li><strong>Time-of-use optimering:</strong> Flyt forbrug til billige tidspunkter</li>
+                        <li><strong>Peak shaving:</strong> Reducer forbrug under dyre timer</li>
+                        <li><strong>Smart charging:</strong> Lad elbiler når strømmen er billigst</li>
+                        <li><strong>Varmepumpe styring:</strong> Kør når strømmen er billigst</li>
+                        <li><strong>Vaskemaskine optimering:</strong> Start automatisk ved lav elpris</li>
+                    </ul>
+                    
+                    <h4>Demand response systemer:</h4>
+                    <ul>
+                        <li><strong>Automatisk reduktion:</strong> Reducer forbrug ved høj efterspørgsel</li>
+                        <li><strong>Netværksstabilitet:</strong> Bidrag til elnettets stabilitet</li>
+                        <li><strong>Økonomisk gevinst:</strong> Få betaling for at reducere forbrug</li>
+                        <li><strong>Miljømæssig påvirkning:</strong> Reducer CO₂-udslip</li>
+                        <li><strong>Energisikkerhed:</strong> Undgå strømafbrydelser</li>
+                    </ul>
+                    
+                    <h4>Intelligente automatiseringer:</h4>
+                    <ul>
+                        <li><strong>Vejrdata integration:</strong> Juster baseret på vejrforhold</li>
+                        <li><strong>Brugeradfærd læring:</strong> Tilpas til dine vaner</li>
+                        <li><strong>Enhedsoptimering:</strong> Optimer hver enhed individuelt</li>
+                        <li><strong>Systemkoordinering:</strong> Koordiner alle enheder sammen</li>
+                        <li><strong>Fremtidig forudsigelse:</strong> Forudsig og planlæg forbrug</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start med store forbrugere:</strong> Varmepumpe, elkedel og vaskemaskine</li>
+                        <li><strong>Brug real-time priser:</strong> Få data om nuværende elpriser</li>
+                        <li><strong>Test automatisering:</strong> Juster indstillinger efter behov</li>
+                        <li><strong>Overvåg besparelser:</h4> Hold styr på hvor meget du sparer</li>
+                        <li><strong>Professionel rådgivning:</strong> Overvej energirådgivning for optimering</li>
+                    </ul>
+                </div>
+            `,
+            // Fejlfinding teori-indhold
+            'grundlaeggende-fejlfinding': `
+                <div class="theory-text">
+                    <h4>Hvad er grundlæggende fejlfinding i smarthome?</h4>
+                    <p>Grundlæggende fejlfinding handler om at identificere og løse problemer i dit smarthome system systematisk. Det er en vigtig færdighed der sparer tid og frustration.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Smarthome systemer kan have problemer med enheder, netværk, software eller konfiguration. Systematisk fejlfinding hjælper dig med at identificere og løse problemer hurtigt og effektivt.</p>
+                    
+                    <h4>Fejlfinding processen:</h4>
+                    <ul>
+                        <li><strong>Identificer problemet:</strong> Hvad fungerer ikke som forventet?</li>
+                        <li><strong>Dokumenter symptomer:</strong> Skriv ned hvad der sker</li>
+                        <li><strong>Isoler problemet:</strong> Test en enhed ad gangen</li>
+                        <li><strong>Undersøg mulige årsager:</strong> Netværk, strøm, konfiguration</li>
+                        <li><strong>Test løsninger:</strong> Prøv en løsning ad gangen</li>
+                        <li><strong>Verificer løsningen:</strong> Sikre at problemet er løst</li>
+                    </ul>
+                    
+                    <h4>Grundlæggende fejlfindingsteknikker:</h4>
+                    <ul>
+                        <li><strong>Genstart enheden:</strong> Ofte løser det simple problemer</li>
+                        <li><strong>Tjek strømforsyning:</strong> Sikre at enheden har strøm</li>
+                        <li><strong>Test netværksforbindelse:</strong> Ping test og signalstyrke</li>
+                        <li><strong>Gennemgå konfiguration:</strong> Tjek indstillinger og passwords</li>
+                        <li><strong>Opdater firmware:</strong> Installer nyeste versioner</li>
+                    </ul>
+                    
+                    <h4>Dokumentation og logging:</h4>
+                    <ul>
+                        <li><strong>Fejllogger:</strong> Hold styr på alle fejl og løsninger</li>
+                        <li><strong>Konfigurationsbackup:</strong> Gem indstillinger før ændringer</li>
+                        <li><strong>Testresultater:</strong> Dokumenter hvad der virker og ikke virker</li>
+                        <li><strong>Løsningsdatabase:</strong> Byg en database med løsninger</li>
+                        <li><strong>Regelmæssige tjek:</strong> Planlæg præventive tjek</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start simpelt:</strong> Prøv de mest almindelige løsninger først</li>
+                        <li><strong>Én ændring ad gangen:</strong> Undgå at ændre flere ting samtidigt</li>
+                        <li><strong>Test grundigt:</strong> Verificer at løsningen virker</li>
+                        <li><strong>Dokumenter alt:</strong> Hold styr på hvad du gør</li>
+                        <li><strong>Professionel hjælp:</strong> Kontakt support når du er i tvivl</li>
+                    </ul>
+                </div>
+            `,
+            'netvaerks-problemer': `
+                <div class="theory-text">
+                    <h4>Hvad er netværksproblemer i smarthome?</h4>
+                    <p>Netværksproblemer er en af de mest almindelige årsager til smarthome fejl. De kan påvirke enheders forbindelse, hastighed og pålidelighed.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Uden stabil netværksforbindelse kan smarthome enheder ikke kommunikere med hinanden eller med dig. Netværksproblemer kan gøre hele dit smarthome system ubrugeligt.</p>
+                    
+                    <h4>Almindelige netværksproblemer:</h4>
+                    <ul>
+                        <li><strong>Svag signalstyrke:</strong> Enheder kan ikke forbinde til netværket</li>
+                        <li><strong>Interferens:</strong> Andre enheder forstyrrer netværkssignalet</li>
+                        <li><strong>Overbelastning:</strong> For mange enheder på samme netværk</li>
+                        <li><strong>Konfigurationsfejl:</strong> Forkerte indstillinger eller passwords</li>
+                        <li><strong>Hardware problemer:</strong> Defekte routere eller enheder</li>
+                    </ul>
+                    
+                    <h4>Fejlfinding af netværksproblemer:</h4>
+                    <ul>
+                        <li><strong>Test forbindelse:</strong> Ping test og speed test</li>
+                        <li><strong>Mål signalstyrke:</strong> Brug WiFi analyzer apps</li>
+                        <li><strong>Tjek router status:</strong> LED indikatorer og logfiler</li>
+                        <li><strong>Test forskellige kanaler:</strong> Undgå overbelastede kanaler</li>
+                        <li><strong>Genstart netværksudstyr:</strong> Router, switches og enheder</li>
+                    </ul>
+                    
+                    <h4>Netværksoptimering:</h4>
+                    <ul>
+                        <li><strong>Router placering:</strong> Centralt placeret for bedre dækning</li>
+                        <li><strong>Kanal optimering:</strong> Vælg mindre brugte kanaler</li>
+                        <li><strong>Mesh netværk:</strong> Udvid dækning med flere access points</li>
+                        <li><strong>Band opdeling:</strong> Separer 2.4GHz og 5GHz netværk</li>
+                        <li><strong>QoS konfiguration:</strong> Prioriter vigtig trafik</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start med routeren:</strong> Genstart router først</li>
+                        <li><strong>Test en enhed ad gangen:</strong> Isoler problemet</li>
+                        <li><strong>Brug netværksværktøjer:</strong> WiFi analyzer og speed test</li>
+                        <li><strong>Dokumenter ændringer:</strong> Hold styr på hvad der virker</li>
+                        <li><strong>Professionel hjælp:</strong> Kontakt netværkstekniker for komplekse problemer</li>
+                    </ul>
+                </div>
+            `,
+            'enheds-problemer': `
+                <div class="theory-text">
+                    <h4>Hvad er enhedsproblemer i smarthome?</h4>
+                    <p>Enhedsproblemer handler om fejl og problemer med individuelle smarthome enheder. De kan være hardware-relaterede, software-relaterede eller konfigurationsrelaterede.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Enhedsproblemer kan påvirke funktionaliteten af dit smarthome system og gøre det mindre pålideligt. Hurtig identificering og løsning af enhedsproblemer er essentielt for systemstabilitet.</p>
+                    
+                    <h4>Typer af enhedsproblemer:</h4>
+                    <ul>
+                        <li><strong>Hardware problemer:</strong> Defekte komponenter eller strømforsyning</li>
+                        <li><strong>Software problemer:</strong> Firmware fejl eller kompatibilitetsproblemer</li>
+                        <li><strong>Konfigurationsproblemer:</strong> Forkerte indstillinger eller passwords</li>
+                        <li><strong>Kommunikationsproblemer:</h4> Enheder kan ikke kommunikere med systemet</li>
+                        <li><strong>Ydeevneproblemer:</strong> Enheder fungerer langsomt eller uforudsigeligt</li>
+                    </ul>
+                    
+                    <h4>Fejlfinding af enhedsproblemer:</h4>
+                    <ul>
+                        <li><strong>Tjek enhedsstatus:</strong> LED indikatorer og status beskeder</li>
+                        <li><strong>Test strømforsyning:</strong> Sikre at enheden har strøm</li>
+                        <li><strong>Gennemgå konfiguration:</strong> Tjek indstillinger og passwords</li>
+                        <li><strong>Opdater firmware:</strong> Installer nyeste versioner</li>
+                        <li><strong>Test i isolation:</strong> Test enheden separat fra systemet</li>
+                    </ul>
+                    
+                    <h4>Enhedsvedligeholdelse:</h4>
+                    <ul>
+                        <li><strong>Regelmæssige opdateringer:</strong> Hold firmware opdateret</li>
+                        <li><strong>Rensning og vedligeholdelse:</strong> Rens enheder regelmæssigt</li>
+                        <li><strong>Backup konfiguration:</strong> Gem indstillinger før ændringer</li>
+                        <li><strong>Overvåg ydeevne:</strong> Hold styr på enheders funktion</li>
+                        <li><strong>Planlæg udskiftning:</strong> Erstat enheder der nærmer sig end of life</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Start med genstart:</strong> Ofte løser det simple problemer</li>
+                        <li><strong>Test en ad gangen:</strong> Isoler problemet til specifik enhed</li>
+                        <li><strong>Dokumenter fejl:</strong> Hold styr på hvad der virker og ikke virker</li>
+                        <li><strong>Backup før ændringer:</strong> Gem konfiguration før du ændrer noget</li>
+                        <li><strong>Professionel hjælp:</strong> Kontakt support for komplekse problemer</li>
+                    </ul>
+                </div>
+            `,
+            'system-vedligeholdelse': `
+                <div class="theory-text">
+                    <h4>Hvad er systemvedligeholdelse i smarthome?</h4>
+                    <p>Systemvedligeholdelse handler om at holde dit smarthome system kørende optimalt gennem regelmæssige opdateringer, backups og sikkerhedstjek. Det er essentielt for langtidsholdbarhed og sikkerhed.</p>
+                    
+                    <h4>Hvorfor er det vigtigt?</h4>
+                    <p>Uden regelmæssig vedligeholdelse kan dit smarthome system blive langsomt, usikkert eller endda stoppe med at fungere. Vedligeholdelse sikrer optimal ydeevne og sikkerhed over tid.</p>
+                    
+                    <h4>Regelmæssige opdateringer:</h4>
+                    <ul>
+                        <li><strong>Firmware opdateringer:</strong> Hold alle enheder opdateret</li>
+                        <li><strong>Software opdateringer:</strong> Opdater apps og systemer</li>
+                        <li><strong>Sikkerhedspatches:</strong> Installer sikkerhedsopdateringer</li>
+                        <li><strong>Feature opdateringer:</strong> Få adgang til nye funktioner</li>
+                        <li><strong>Kompatibilitetsopdateringer:</strong> Sikre kompatibilitet mellem enheder</li>
+                    </ul>
+                    
+                    <h4>Backup og recovery:</h4>
+                    <ul>
+                        <li><strong>Konfigurationsbackup:</strong> Gem indstillinger regelmæssigt</li>
+                        <li><strong>Data backup:</strong> Sikre vigtige data</li>
+                        <li><strong>System backup:</strong> Fuld system backup før store ændringer</li>
+                        <li><strong>Recovery plan:</strong> Hav en plan til at genoprette systemet</li>
+                        <li><strong>Test recovery:</strong> Test backup og recovery regelmæssigt</li>
+                    </ul>
+                    
+                    <h4>Sikkerhedsvedligeholdelse:</h4>
+                    <ul>
+                        <li><strong>Password rotation:</strong> Skift passwords regelmæssigt</li>
+                        <li><strong>Sikkerhedstjek:</strong> Gennemgå sikkerhedsindstillinger</li>
+                        <li><strong>Access review:</strong> Tjek brugeradgang og rettigheder</li>
+                        <li><strong>Threat monitoring:</strong> Overvåg for sikkerhedstrusler</li>
+                        <li><strong>Incident response:</strong> Hav en plan til sikkerhedshændelser</li>
+                    </ul>
+                    
+                    <h4>Performance monitoring:</h4>
+                    <ul>
+                        <li><strong>System performance:</strong> Overvåg ydeevne og responsivitet</li>
+                        <li><strong>Network monitoring:</strong> Hold styr på netværkshastighed og stabilitet</li>
+                        <li><strong>Enhedsstatus:</strong> Overvåg alle enheders funktion</li>
+                        <li><strong>Error logging:</strong> Hold styr på fejl og problemer</li>
+                        <li><strong>Capacity planning:</strong> Planlæg udvidelse og opgradering</li>
+                    </ul>
+                    
+                    <h4>💡 Tips og tricks:</h4>
+                    <ul>
+                        <li><strong>Planlæg vedligeholdelse:</strong> Sæt tid af til regelmæssig vedligeholdelse</li>
+                        <li><strong>Automatiser hvor muligt:</strong> Brug automatisering til rutineopgaver</li>
+                        <li><strong>Dokumenter alt:</strong> Hold styr på alle ændringer og opdateringer</li>
+                        <li><strong>Test efter ændringer:</strong> Verificer at alt virker efter opdateringer</li>
+                        <li><strong>Professionel hjælp:</strong> Overvej professionel vedligeholdelse for komplekse systemer</li>
+                    </ul>
+                </div>
             `
         };
         
