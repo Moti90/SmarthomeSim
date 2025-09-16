@@ -7777,6 +7777,617 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'a', 'b', 'b'])">Tjek Svar</button>
             `,
+            'netvaerkssikkerhed': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er den vigtigste sikkerhedsforanstaltning for smarthome netværk?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Stærkt WiFi-password</label>
+                        <label><input type="radio" name="q1" value="b"> WPA3 kryptering og stærkt password</label>
+                        <label><input type="radio" name="q1" value="c"> Skjult netværksnavn</label>
+                        <label><input type="radio" name="q1" value="d"> MAC-adresse filtrering</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er en VLAN i smarthome sammenhæng?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> En WiFi-frekvens</label>
+                        <label><input type="radio" name="q2" value="b"> Et virtuelt netværk der isolerer enheder</label>
+                        <label><input type="radio" name="q2" value="c"> En Bluetooth protokol</label>
+                        <label><input type="radio" name="q2" value="d"> En Zigbee mesh</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvor ofte skal router-firmware opdateres?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Hver uge</label>
+                        <label><input type="radio" name="q3" value="b"> Hver måned</label>
+                        <label><input type="radio" name="q3" value="c"> Hver 3. måned</label>
+                        <label><input type="radio" name="q3" value="d"> Hver 6. måned</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved at bruge en dedikeret IoT-netværk?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Bedre sikkerhed og isolering</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'c', 'b'])">Tjek Svar</button>
+            `,
+            'enhedsikkerhed': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er den vigtigste sikkerhedsforanstaltning for smarthome enheder?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Skjult enhedsnavn</label>
+                        <label><input type="radio" name="q1" value="b"> Regelmæssige firmware opdateringer</label>
+                        <label><input type="radio" name="q1" value="c"> Stærkt password</label>
+                        <label><input type="radio" name="q1" value="d"> MAC-adresse ændring</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er en "zero-day" sårbarhed?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> En sårbarhed der er kendt i 0 dage</label>
+                        <label><input type="radio" name="q2" value="b"> En sårbarhed der ikke har nogen patch endnu</label>
+                        <label><input type="radio" name="q2" value="c"> En sårbarhed der er 0% farlig</label>
+                        <label><input type="radio" name="q2" value="d"> En sårbarhed der kræver 0 adgang</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved at købe enheder fra etablerede mærker?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Billigere pris</label>
+                        <label><input type="radio" name="q3" value="b"> Bedre sikkerhed og support</label>
+                        <label><input type="radio" name="q3" value="c"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="d"> Lavere strømforbrug</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedulempen ved at bruge standard passwords på enheder?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="b"> Let adgang for hackere</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere hastighed</label>
+                        <label><input type="radio" name="q4" value="d"> Dyre enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'data-privatliv': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er GDPR i smarthome sammenhæng?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> En WiFi protokol</label>
+                        <label><input type="radio" name="q1" value="b"> Databeskyttelsesregler for personlige data</label>
+                        <label><input type="radio" name="q1" value="c"> En Bluetooth standard</label>
+                        <label><input type="radio" name="q1" value="d"> En Zigbee protokol</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved lokale smarthome systemer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Bedre privatliv og kontrol over data</label>
+                        <label><input type="radio" name="q2" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q2" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedulempen ved cloud-baserede smarthome systemer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="b"> Data sendes til tredjepartsservere</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere hastighed</label>
+                        <label><input type="radio" name="q3" value="d"> Dyre enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved end-to-end kryptering?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Kun afsender og modtager kan læse data</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'access-control': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedformålet med adgangskontrol i smarthome?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> At spare strøm</label>
+                        <label><input type="radio" name="q1" value="b"> At kontrollere hvem der har adgang til systemet</label>
+                        <label><input type="radio" name="q1" value="c"> At øge hastigheden</label>
+                        <label><input type="radio" name="q1" value="d"> At reducere omkostninger</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved multi-factor authentication (MFA)?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Bedre sikkerhed gennem flere verifikationsmetoder</label>
+                        <label><input type="radio" name="q2" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q2" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedulempen ved at give alle brugere admin-rettigheder?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="b"> Øget sikkerhedsrisiko</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere hastighed</label>
+                        <label><input type="radio" name="q3" value="d"> Dyre enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved role-based access control (RBAC)?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Brugere får kun adgang til det de har brug for</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'energimåling': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedformålet med energimåling i smarthome?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> At øge hastigheden</label>
+                        <label><input type="radio" name="q1" value="b"> At identificere energispild og optimere forbrug</label>
+                        <label><input type="radio" name="q1" value="c"> At spare strøm</label>
+                        <label><input type="radio" name="q1" value="d"> At reducere omkostninger</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er enheden for elektrisk effekt?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Volt (V)</label>
+                        <label><input type="radio" name="q2" value="b"> Watt (W)</label>
+                        <label><input type="radio" name="q2" value="c"> Ampere (A)</label>
+                        <label><input type="radio" name="q2" value="d"> Ohm (Ω)</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved real-time energimåling?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Øjeblikkelig feedback på energiforbrug</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvilke enheder bruger typisk mest strøm i et hjem?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> LED-pærer</label>
+                        <label><input type="radio" name="q4" value="b"> Varmepumpe, elkedel og ovn</label>
+                        <label><input type="radio" name="q4" value="c"> Smartphone opladere</label>
+                        <label><input type="radio" name="q4" value="d"> WiFi router</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'smart-lys': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedfordelen ved LED-belysning?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q1" value="b"> Lavere strømforbrug og længere levetid</label>
+                        <label><input type="radio" name="q1" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q1" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved smart belysning?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Automatisk styring og energibesparelse</label>
+                        <label><input type="radio" name="q2" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q2" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved dimmable LED-pærer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Justerbar lysstyrke og energibesparelse</label>
+                        <label><input type="radio" name="q3" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q3" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved farvetemperatur-styring?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Justerbar farvetemperatur for komfort</label>
+                        <label><input type="radio" name="q4" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q4" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'varmestyring': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedfordelen ved smart varmestyring?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q1" value="b"> Automatisk temperaturstyring og energibesparelse</label>
+                        <label><input type="radio" name="q1" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q1" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved zone-baseret varmestyring?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Individuel temperaturstyring per rum</label>
+                        <label><input type="radio" name="q2" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q2" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved varmepumper?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Høj energieffektivitet</label>
+                        <label><input type="radio" name="q3" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q3" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved termostater med læringsfunktion?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Automatisk tilpasning til brugerens vaner</label>
+                        <label><input type="radio" name="q4" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q4" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'solceller': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedfordelen ved solceller?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q1" value="b"> Gratis strøm fra solen</label>
+                        <label><input type="radio" name="q1" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q1" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved batterilagring?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Lagring af overskydende solenergi</label>
+                        <label><input type="radio" name="q2" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q2" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved netmetering?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Salg af overskydende strøm til elnettet</label>
+                        <label><input type="radio" name="q3" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q3" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved smart energistyring?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Optimering af energiforbrug og produktion</label>
+                        <label><input type="radio" name="q4" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q4" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'energi-automation': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedformålet med energi-automatisering?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q1" value="b"> Automatisk optimering af energiforbrug</label>
+                        <label><input type="radio" name="q1" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q1" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved load shifting?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Flytning af energiforbrug til billige tidspunkter</label>
+                        <label><input type="radio" name="q2" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q2" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved peak shaving?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Reduktion af peak energiforbrug</label>
+                        <label><input type="radio" name="q3" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q3" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved demand response?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Automatisk reduktion af energiforbrug ved høj efterspørgsel</label>
+                        <label><input type="radio" name="q4" value="c"> Billigere pris</label>
+                        <label><input type="radio" name="q4" value="d"> Bedre sikkerhed</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'grundlaeggende-fejlfinding': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er det første skridt i fejlfinding af smarthome enheder?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> At købe nye enheder</label>
+                        <label><input type="radio" name="q1" value="b"> At genstarte enheden</label>
+                        <label><input type="radio" name="q1" value="c"> At kontakte support</label>
+                        <label><input type="radio" name="q1" value="d"> At kaste enheden ud</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved at dokumentere fejl?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Bedre forståelse af problemet og løsning</label>
+                        <label><input type="radio" name="q2" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q2" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved at teste en enhed i isolation?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> At identificere om problemet er med enheden eller systemet</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved at bruge en systematisk fejlfindingstilgang?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Mere effektiv og pålidelig fejlfinding</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'netvaerks-problemer': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er det første skridt i fejlfinding af netværksproblemer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> At købe nye enheder</label>
+                        <label><input type="radio" name="q1" value="b"> At tjekke netværksforbindelsen</label>
+                        <label><input type="radio" name="q1" value="c"> At kontakte support</label>
+                        <label><input type="radio" name="q1" value="d"> At kaste enheden ud</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved at tjekke netværksstyrke?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> At identificere om problemet er signalstyrke</label>
+                        <label><input type="radio" name="q2" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q2" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved at tjekke netværkskonfiguration?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> At identificere om problemet er konfiguration</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved at tjekke netværkssikkerhed?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> At identificere om problemet er sikkerhed</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'enheds-problemer': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er det første skridt i fejlfinding af enhedsproblemer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> At købe nye enheder</label>
+                        <label><input type="radio" name="q1" value="b"> At tjekke enhedens status</label>
+                        <label><input type="radio" name="q1" value="c"> At kontakte support</label>
+                        <label><input type="radio" name="q1" value="d"> At kaste enheden ud</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved at tjekke enhedens firmware?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> At identificere om problemet er firmware</label>
+                        <label><input type="radio" name="q2" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q2" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved at tjekke enhedens strømforsyning?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> At identificere om problemet er strømforsyning</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved at tjekke enhedens konfiguration?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> At identificere om problemet er konfiguration</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'system-vedligeholdelse': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedformålet med systemvedligeholdelse?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q1" value="b"> At holde systemet kørende optimalt</label>
+                        <label><input type="radio" name="q1" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q1" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved regelmæssige opdateringer?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Bedre sikkerhed og funktionalitet</label>
+                        <label><input type="radio" name="q2" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q2" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved regelmæssige backups?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Beskyttelse mod datatab</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved regelmæssige sikkerhedstjek?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Beskyttelse mod sikkerhedstrusler</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
             // Automatisering quiz spørgsmål
             'scenarier': `
                 <div class="quiz-question">
