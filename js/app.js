@@ -3981,8 +3981,25 @@ class AppManager {
             );
             
             if (matchingTriggers.length > 0 && isActive) {
-                console.log(`✅ Triggering block scene rule: ${rule.name}`);
-                this.executeBlockScene(rule);
+                console.log(`Found matching trigger for block scene rule: ${rule.name}`);
+                console.log(`Rule has ${rule.triggers.length} triggers total`);
+                
+                // For multiple triggers, check if ALL triggers are active (AND-logic)
+                if (rule.triggers.length > 1) {
+                    const allTriggersActive = this.checkAllBlockSceneTriggersActive(rule);
+                    console.log(`All block scene triggers active: ${allTriggersActive}`);
+                    
+                    if (allTriggersActive) {
+                        console.log(`✅ Triggering block scene rule: ${rule.name}`);
+                        this.executeBlockScene(rule);
+                    } else {
+                        console.log(`❌ Not all block scene triggers are active for rule: ${rule.name}`);
+                    }
+                } else {
+                    // Single trigger - execute immediately
+                    console.log(`✅ Triggering single trigger block scene rule: ${rule.name}`);
+                    this.executeBlockScene(rule);
+                }
             }
         });
         
@@ -4048,6 +4065,34 @@ class AppManager {
         }
         
         console.log('All triggers are active!');
+        return true;
+    }
+    
+    checkAllBlockSceneTriggersActive(rule) {
+        console.log('=== CHECKING ALL BLOCK SCENE TRIGGERS ACTIVE ===');
+        console.log('Rule triggers:', rule.triggers);
+        
+        if (!rule.triggers || rule.triggers.length === 0) {
+            console.log('No triggers in rule');
+            return false;
+        }
+        
+        // Check if all triggers in the rule are currently active
+        for (const trigger of rule.triggers) {
+            console.log('Checking block scene trigger:', trigger.sensorId);
+            
+            // Check if the device is active
+            const deviceElement = document.querySelector(`[data-device="${trigger.sensorId}"]`);
+            console.log('Device element found:', deviceElement);
+            console.log('Device value:', deviceElement?.dataset.value);
+            
+            if (!deviceElement || deviceElement.dataset.value !== 'true') {
+                console.log('Block scene trigger not active:', trigger.sensorId, 'Device value:', deviceElement?.dataset.value);
+                return false;
+            }
+        }
+        
+        console.log('All block scene triggers are active!');
         return true;
     }
 
