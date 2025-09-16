@@ -1009,12 +1009,8 @@ class AppManager {
             // Refresh progress when e-learning tab is opened
             this.loadLearningProgress();
             
-            // Also apply stored progress to UI after a short delay to ensure DOM is ready
-            setTimeout(() => {
-                this.refreshElearningProgress();
-                // Force update all buttons with stored progress
-                this.forceUpdateAllButtons();
-            }, 100);
+            // Refresh progress when e-learning tab is opened
+            this.refreshElearningProgress();
         }
         
         this.currentTab = tabName;
@@ -7663,27 +7659,47 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     applyProgressToUI(completedModules) {
         // Update the stored completed modules
         this.completedModules = [...new Set(completedModules)];
-        console.log('🎯 Applying progress to UI:', completedModules);
-        console.log('🎯 Stored completed modules:', this.completedModules);
+        console.log('🎯 Applying progress to UI:', this.completedModules);
+        console.log('🎯 Number of modules to apply:', this.completedModules.length);
         
-        // Update buttons if they exist in DOM (e-learning tab is active)
+        // Log all available subtopic buttons in the DOM to debug if they are present
+        const allAvailableButtons = document.querySelectorAll('[data-subtopic]');
+        console.log('🔍 All subtopic buttons currently in DOM:', allAvailableButtons);
+        console.log('🔍 Number of available subtopic buttons:', allAvailableButtons.length);
+
         let buttonsUpdated = 0;
-        completedModules.forEach(subtopicId => {
-            const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
-            if (button) {
-                button.textContent = 'Gennemført ✓';
-                button.classList.add('completed');
-                buttonsUpdated++;
-                console.log(`✅ Updated button for: ${subtopicId}`);
-            } else {
-                console.log(`❌ Button not found for: ${subtopicId} (e-learning tab not active)`);
+        // Update buttons if they exist in DOM (e-learning tab is active)
+        this.completedModules.forEach(subtopicId => {
+            const possibleSubtopicIds = [
+                subtopicId,
+                subtopicId.replace('pir-', 'pic-'),
+                subtopicId.replace('pic-', 'pir-'),
+                subtopicId.replace('bevegelsessensor', 'bevoegelsessensor'),
+                subtopicId.replace('bevoegelsessensor', 'bevegelsessensor'),
+                subtopicId.replace('pir-bevegelsessensor', 'pic-bevoegelsessensor'),
+                subtopicId.replace('pic-bevoegelsessensor', 'pir-bevegelsessensor'),
+            ];
+            let buttonFound = false;
+            for (const id of possibleSubtopicIds) {
+                const button = document.querySelector(`[data-subtopic="${id}"]`);
+                if (button) {
+                    button.textContent = 'Gennemført ✓';
+                    button.classList.add('completed');
+                    buttonsUpdated++;
+                    console.log(`✅ Updated button for: ${id} (original: ${subtopicId})`);
+                    buttonFound = true;
+                    break;
+                }
+            }
+            if (!buttonFound) {
+                console.log(`❌ Button not found for: ${subtopicId} (e-learning tab not active or ID mismatch)`);
             }
         });
         
         // Always update overall progress display regardless of tab state
         this.updateOverallProgress();
         
-        console.log(`🎯 Applied progress to UI: ${completedModules.length} modules completed, ${buttonsUpdated} buttons updated`);
+        console.log(`Applied progress to UI: ${this.completedModules.length} modules completed, ${buttonsUpdated} buttons updated`);
     }
 
     refreshElearningProgress() {
@@ -7697,66 +7713,8 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         // Apply to UI
         this.applyProgressToUI(localProgress);
         
-        // Update all subtopic buttons
-        localProgress.forEach(subtopicId => {
-            const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
-            if (button) {
-                button.textContent = 'Gennemført ✓';
-                button.classList.add('completed');
-                console.log(`Updated button for: ${subtopicId}`);
-            } else {
-                console.log(`Button not found for: ${subtopicId}`);
-            }
-        });
     }
 
-    forceUpdateAllButtons() {
-        console.log('🔄 Force updating all buttons with stored progress...');
-        console.log('🔄 Stored completed modules:', this.completedModules);
-        
-        if (this.completedModules.length === 0) {
-            console.log('🔄 No completed modules to update');
-            return;
-        }
-        
-        let buttonsUpdated = 0;
-        this.completedModules.forEach(subtopicId => {
-            // Try different possible button selectors
-            let button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
-            
-            if (!button) {
-                // Try alternative selectors for common variations
-                const variations = [
-                    subtopicId.replace('pic-', 'pir-'),
-                    subtopicId.replace('pir-', 'pic-'),
-                    subtopicId.replace('bevoegelsessensor', 'bevaegelsessensor'),
-                    subtopicId.replace('bevaegelsessensor', 'bevoegelsessensor')
-                ];
-                
-                for (const variation of variations) {
-                    button = document.querySelector(`[data-subtopic="${variation}"]`);
-                    if (button) {
-                        console.log(`🔄 Found button with variation: ${variation} (original: ${subtopicId})`);
-                        break;
-                    }
-                }
-            }
-            
-            if (button) {
-                button.textContent = 'Gennemført ✓';
-                button.classList.add('completed');
-                buttonsUpdated++;
-                console.log(`✅ Force updated button for: ${subtopicId}`);
-            } else {
-                console.log(`❌ Button still not found for: ${subtopicId}`);
-                // List all available buttons for debugging
-                const allButtons = document.querySelectorAll('[data-subtopic]');
-                console.log('Available buttons:', Array.from(allButtons).map(b => b.dataset.subtopic));
-            }
-        });
-        
-        console.log(`🔄 Force update complete: ${buttonsUpdated} buttons updated`);
-    }
 
     async syncProgressWithFirebase() {
         if (!this.currentUser) return;
