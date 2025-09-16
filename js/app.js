@@ -6554,6 +6554,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         <li><strong>433 MHz RF:</strong> Lang rækkevidde, lavt strømforbrug</li>
                     </ul>
                     
+                    <h4>IP-rating og vædersikkerhed:</h4>
+                    <ul>
+                        <li><strong>IP65 minimum:</strong> Udendørs temperatursensoere skal minimum have IP65 rating</li>
+                        <li><strong>IP65 betyder:</strong> Støvtæt og beskyttet mod vandstråler fra alle retninger</li>
+                        <li><strong>IP66:</strong> Endnu bedre beskyttelse mod kraftige vandstråler</li>
+                        <li><strong>IP67:</strong> Beskyttet mod nedsænkning i vand op til 1 meter</li>
+                        <li><strong>IP68:</strong> Beskyttet mod kontinuerlig nedsænkning i vand</li>
+                    </ul>
+                    
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
                         <li><strong>Klimastyring:</strong> Justerer indendørs temperatur baseret på udendørs</li>
