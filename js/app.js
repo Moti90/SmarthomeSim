@@ -7636,6 +7636,9 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             // Merge both sources, Firebase takes priority
             const allCompletedModules = [...new Set([...completedModules, ...localProgress])];
             console.log('Merged progress:', allCompletedModules);
+            console.log('Firebase modules:', completedModules);
+            console.log('LocalStorage modules:', localProgress);
+            console.log('Total unique modules:', allCompletedModules.length);
             
             // Update localStorage with merged data to keep them in sync
             localStorage.setItem('learningProgress', JSON.stringify(allCompletedModules));
@@ -7718,7 +7721,27 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         
         let buttonsUpdated = 0;
         this.completedModules.forEach(subtopicId => {
-            const button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
+            // Try different possible button selectors
+            let button = document.querySelector(`[data-subtopic="${subtopicId}"]`);
+            
+            if (!button) {
+                // Try alternative selectors for common variations
+                const variations = [
+                    subtopicId.replace('pic-', 'pir-'),
+                    subtopicId.replace('pir-', 'pic-'),
+                    subtopicId.replace('bevoegelsessensor', 'bevaegelsessensor'),
+                    subtopicId.replace('bevaegelsessensor', 'bevoegelsessensor')
+                ];
+                
+                for (const variation of variations) {
+                    button = document.querySelector(`[data-subtopic="${variation}"]`);
+                    if (button) {
+                        console.log(`🔄 Found button with variation: ${variation} (original: ${subtopicId})`);
+                        break;
+                    }
+                }
+            }
+            
             if (button) {
                 button.textContent = 'Gennemført ✓';
                 button.classList.add('completed');
@@ -7726,6 +7749,9 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 console.log(`✅ Force updated button for: ${subtopicId}`);
             } else {
                 console.log(`❌ Button still not found for: ${subtopicId}`);
+                // List all available buttons for debugging
+                const allButtons = document.querySelectorAll('[data-subtopic]');
+                console.log('Available buttons:', Array.from(allButtons).map(b => b.dataset.subtopic));
             }
         });
         
