@@ -7119,6 +7119,288 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
+            'doer-vindueskontakt': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er hovedformålet med dør-/vindueskontakter?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> At måle temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> At detektere åbning/lukning af døre og vinduer</label>
+                        <label><input type="radio" name="q1" value="c"> At styre lys</label>
+                        <label><input type="radio" name="q1" value="d"> At måle luftfugtighed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvilken teknologi bruger de fleste dør-/vindueskontakter?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Reed switch (magnetisk kontakt)</label>
+                        <label><input type="radio" name="q2" value="b"> PIR-sensor</label>
+                        <label><input type="radio" name="q2" value="c"> Temperatursensor</label>
+                        <label><input type="radio" name="q2" value="d"> Kamera</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvor placeres magneten i en dør-/vindueskontakt?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> På døren/vinduet</label>
+                        <label><input type="radio" name="q3" value="b"> På karmen</label>
+                        <label><input type="radio" name="q3" value="c"> På væggen</label>
+                        <label><input type="radio" name="q3" value="d"> På gulvet</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er den typiske rækkevidde for en dør-/vindueskontakt?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> 1-2 cm</label>
+                        <label><input type="radio" name="q4" value="b"> 5-10 cm</label>
+                        <label><input type="radio" name="q4" value="c"> 1-2 meter</label>
+                        <label><input type="radio" name="q4" value="d"> 10-20 meter</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'a', 'a', 'b'])">Tjek Svar</button>
+            `,
+            'lysmåler-lux': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad måler en lysmåler (lux-sensor)?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> Lysstyrke (illuminans)</label>
+                        <label><input type="radio" name="q1" value="c"> Luftfugtighed</label>
+                        <label><input type="radio" name="q1" value="d"> Bevægelse</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er enheden for lysstyrke?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Watt</label>
+                        <label><input type="radio" name="q2" value="b"> Lux</label>
+                        <label><input type="radio" name="q2" value="c"> Lumen</label>
+                        <label><input type="radio" name="q2" value="d"> Kelvin</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvor mange lux er der typisk i et kontor?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> 50-100 lux</label>
+                        <label><input type="radio" name="q3" value="b"> 300-500 lux</label>
+                        <label><input type="radio" name="q3" value="c"> 1000-2000 lux</label>
+                        <label><input type="radio" name="q3" value="d"> 10000+ lux</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvorfor er lysmåling vigtig i smarthome?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> At spare strøm på belysning</label>
+                        <label><input type="radio" name="q4" value="b"> At automatisere lys baseret på naturligt lys</label>
+                        <label><input type="radio" name="q4" value="c"> At måle temperatur</label>
+                        <label><input type="radio" name="q4" value="d"> At detektere bevægelse</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'udendørs-temperatur': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvorfor er udendørs temperatursensoere vigtige?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> At måle indendørs temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> At automatisere systemer baseret på vejrforhold</label>
+                        <label><input type="radio" name="q1" value="c"> At spare strøm</label>
+                        <label><input type="radio" name="q1" value="d"> At detektere bevægelse</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvor placeres udendørs temperatursensoere bedst?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> I direkte sollys</label>
+                        <label><input type="radio" name="q2" value="b"> I skygge, væk fra varmekilder</label>
+                        <label><input type="radio" name="q2" value="c"> Ved radiatorer</label>
+                        <label><input type="radio" name="q2" value="d"> På gulvet</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvilken IP-rating skal udendørs temperatursensoere minimum have?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> IP20</label>
+                        <label><input type="radio" name="q3" value="b"> IP44</label>
+                        <label><input type="radio" name="q3" value="c"> IP65</label>
+                        <label><input type="radio" name="q3" value="d"> IP68</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er den typiske målenøjagtighed for udendørs temperatursensoere?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> ±5°C</label>
+                        <label><input type="radio" name="q4" value="b"> ±1°C</label>
+                        <label><input type="radio" name="q4" value="c"> ±0.1°C</label>
+                        <label><input type="radio" name="q4" value="d"> ±10°C</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'c', 'b'])">Tjek Svar</button>
+            `,
+            'vindmåler': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad måler en vindmåler?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> Vindhastighed og vindretning</label>
+                        <label><input type="radio" name="q1" value="c"> Luftfugtighed</label>
+                        <label><input type="radio" name="q1" value="d"> Lufttryk</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er enheden for vindhastighed?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Lux</label>
+                        <label><input type="radio" name="q2" value="b"> m/s eller km/t</label>
+                        <label><input type="radio" name="q2" value="c"> Watt</label>
+                        <label><input type="radio" name="q2" value="d"> Pascal</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvor placeres vindmåleren bedst?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Inde i huset</label>
+                        <label><input type="radio" name="q3" value="b"> Højt oppe, væk fra forhindringer</label>
+                        <label><input type="radio" name="q3" value="c"> På gulvet</label>
+                        <label><input type="radio" name="q3" value="d"> Ved vinduerne</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvorfor er vindmåling vigtig i smarthome?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> At måle temperatur</label>
+                        <label><input type="radio" name="q4" value="b"> At automatisere systemer baseret på vejrforhold</label>
+                        <label><input type="radio" name="q4" value="c"> At spare strøm</label>
+                        <label><input type="radio" name="q4" value="d"> At detektere bevægelse</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'roegalarm': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad detekterer en røgalarm?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> Røgpartikler i luften</label>
+                        <label><input type="radio" name="q1" value="c"> Bevægelse</label>
+                        <label><input type="radio" name="q1" value="d"> Luftfugtighed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvilke to hovedtyper røgalarmer findes der?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Optisk og ioniserende</label>
+                        <label><input type="radio" name="q2" value="b"> PIR og ultralyd</label>
+                        <label><input type="radio" name="q2" value="c"> WiFi og Bluetooth</label>
+                        <label><input type="radio" name="q2" value="d"> Analog og digital</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvor placeres røgalarmer bedst?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> På gulvet</label>
+                        <label><input type="radio" name="q3" value="b"> På loftet, væk fra hjørner</label>
+                        <label><input type="radio" name="q3" value="c"> Ved vinduerne</label>
+                        <label><input type="radio" name="q3" value="d"> Ved radiatorer</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvor ofte skal røgalarmer testes?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Hver uge</label>
+                        <label><input type="radio" name="q4" value="b"> Hver måned</label>
+                        <label><input type="radio" name="q4" value="c"> Hver 6. måned</label>
+                        <label><input type="radio" name="q4" value="d"> Hvert år</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'a', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'vandlækage': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad detekterer en vandlækagesensor?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> Vand på gulvet</label>
+                        <label><input type="radio" name="q1" value="c"> Bevægelse</label>
+                        <label><input type="radio" name="q1" value="d"> Luftfugtighed</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvor placeres vandlækagesensorer bedst?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> På væggen</label>
+                        <label><input type="radio" name="q2" value="b"> På gulvet, hvor vand kan samle sig</label>
+                        <label><input type="radio" name="q2" value="c"> På loftet</label>
+                        <label><input type="radio" name="q2" value="d"> Ved vinduerne</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvilke områder er mest kritiske for vandlækagedetektion?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Stuen og soveværelset</label>
+                        <label><input type="radio" name="q3" value="b"> Badeværelse, køkken og kælder</label>
+                        <label><input type="radio" name="q3" value="c"> Gang og entre</label>
+                        <label><input type="radio" name="q3" value="d"> Loft og tag</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad sker der typisk når en vandlækagesensor aktiveres?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Lyset tændes</label>
+                        <label><input type="radio" name="q4" value="b"> Alarm og automatisk vandafbrydelse</label>
+                        <label><input type="radio" name="q4" value="c"> Temperatur sænkes</label>
+                        <label><input type="radio" name="q4" value="d"> Musik spilles</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
             'wifi': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
@@ -7306,6 +7588,194 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 </div>
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'matter': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er Matter standarden?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> En WiFi protokol</label>
+                        <label><input type="radio" name="q1" value="b"> En åben standard for smarthome interoperabilitet</label>
+                        <label><input type="radio" name="q1" value="c"> En Bluetooth variant</label>
+                        <label><input type="radio" name="q1" value="d"> En Zigbee protokol</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvilke protokoller understøtter Matter?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Kun WiFi</label>
+                        <label><input type="radio" name="q2" value="b"> WiFi, Thread og Ethernet</label>
+                        <label><input type="radio" name="q2" value="c"> Kun Bluetooth</label>
+                        <label><input type="radio" name="q2" value="d"> Kun Zigbee</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvem udviklede Matter standarden?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Apple alene</label>
+                        <label><input type="radio" name="q3" value="b"> Connectivity Standards Alliance (CSA)</label>
+                        <label><input type="radio" name="q3" value="c"> Google alene</label>
+                        <label><input type="radio" name="q3" value="d"> Amazon alene</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvad er hovedfordelen ved Matter?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q4" value="b"> Interoperabilitet mellem forskellige mærker</label>
+                        <label><input type="radio" name="q4" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q4" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'thread': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er Thread protokollen?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> En WiFi variant</label>
+                        <label><input type="radio" name="q1" value="b"> En IPv6-baseret mesh-netværksprotokol</label>
+                        <label><input type="radio" name="q1" value="c"> En Bluetooth protokol</label>
+                        <label><input type="radio" name="q1" value="d"> En Zigbee variant</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvilken frekvens bruger Thread?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> 2.4 GHz</label>
+                        <label><input type="radio" name="q2" value="b"> 5 GHz</label>
+                        <label><input type="radio" name="q2" value="c"> 868 MHz</label>
+                        <label><input type="radio" name="q2" value="d"> 433 MHz</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedfordelen ved Thread mesh-netværk?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højere hastighed</label>
+                        <label><input type="radio" name="q3" value="b"> Selvhealing og pålidelig forbindelse</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere strømforbrug</label>
+                        <label><input type="radio" name="q3" value="d"> Billigere enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvor mange enheder kan et Thread netværk understøtte?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> 32 enheder</label>
+                        <label><input type="radio" name="q4" value="b"> 250+ enheder</label>
+                        <label><input type="radio" name="q4" value="c"> 1000 enheder</label>
+                        <label><input type="radio" name="q4" value="d"> 65.000 enheder</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'a', 'b', 'b'])">Tjek Svar</button>
+            `,
+            'rf-433': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvilken frekvens bruger 433 MHz RF protokollen?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> 2.4 GHz</label>
+                        <label><input type="radio" name="q1" value="b"> 433 MHz</label>
+                        <label><input type="radio" name="q1" value="c"> 868 MHz</label>
+                        <label><input type="radio" name="q1" value="d"> 5 GHz</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er hovedfordelen ved 433 MHz RF?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> Høj hastighed</label>
+                        <label><input type="radio" name="q2" value="b"> Læng rækkevidde og billige enheder</label>
+                        <label><input type="radio" name="q2" value="c"> Lavt strømforbrug</label>
+                        <label><input type="radio" name="q2" value="d"> Mesh-netværk</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedulempen ved 433 MHz RF?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Kort rækkevidde</label>
+                        <label><input type="radio" name="q3" value="b"> Ingen kryptering og interferens</label>
+                        <label><input type="radio" name="q3" value="c"> Højt strømforbrug</label>
+                        <label><input type="radio" name="q3" value="d"> Dyre enheder</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvor mange enheder kan 433 MHz RF understøtte?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> 1 enhed</label>
+                        <label><input type="radio" name="q4" value="b"> 4 enheder</label>
+                        <label><input type="radio" name="q4" value="c"> 16 enheder</label>
+                        <label><input type="radio" name="q4" value="d"> Ubegrænset</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'c'])">Tjek Svar</button>
+            `,
+            'infrared': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad er infrarød (IR) kommunikation?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Radiofrekvens kommunikation</label>
+                        <label><input type="radio" name="q1" value="b"> Lys-baseret kommunikation med infrarød stråling</label>
+                        <label><input type="radio" name="q1" value="c"> Bluetooth kommunikation</label>
+                        <label><input type="radio" name="q1" value="d"> WiFi kommunikation</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er den typiske rækkevidde for IR kommunikation?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> 1-10 meter</label>
+                        <label><input type="radio" name="q2" value="b"> 10-100 meter</label>
+                        <label><input type="radio" name="q2" value="c"> 100-1000 meter</label>
+                        <label><input type="radio" name="q2" value="d"> 1-10 kilometer</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad er hovedulempen ved IR kommunikation?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Højt strømforbrug</label>
+                        <label><input type="radio" name="q3" value="b"> Kræver direkte synslinje</label>
+                        <label><input type="radio" name="q3" value="c"> Dyre enheder</label>
+                        <label><input type="radio" name="q3" value="d"> Kompliceret installation</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvilke enheder bruger typisk IR kommunikation?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Temperatursensoere</label>
+                        <label><input type="radio" name="q4" value="b"> Fjernbetjeninger og TV'er</label>
+                        <label><input type="radio" name="q4" value="c"> Bevægelsessensoere</label>
+                        <label><input type="radio" name="q4" value="d"> Lysmåler</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'a', 'b', 'b'])">Tjek Svar</button>
             `,
             // Automatisering quiz spørgsmål
             'scenarier': `
