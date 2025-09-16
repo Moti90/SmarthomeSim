@@ -7072,6 +7072,53 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 
                 <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
+            'fugtighedssensor': `
+                <div class="quiz-question">
+                    <h4>Spørgsmål 1:</h4>
+                    <p>Hvad måler fugtighedssensoere?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> Temperatur</label>
+                        <label><input type="radio" name="q1" value="b"> Luftfugtighed</label>
+                        <label><input type="radio" name="q1" value="c"> Luftkvalitet</label>
+                        <label><input type="radio" name="q1" value="d"> Lysstyrke</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 2:</h4>
+                    <p>Hvad er den ideelle luftfugtighed i et hjem?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q2" value="a"> 20-30%</label>
+                        <label><input type="radio" name="q2" value="b"> 40-60%</label>
+                        <label><input type="radio" name="q2" value="c"> 70-80%</label>
+                        <label><input type="radio" name="q2" value="d"> 90-100%</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 3:</h4>
+                    <p>Hvad kan høj luftfugtighed føre til?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q3" value="a"> Tør luft</label>
+                        <label><input type="radio" name="q3" value="b"> Skimmel og kondens</label>
+                        <label><input type="radio" name="q3" value="c"> Lavere temperatur</label>
+                        <label><input type="radio" name="q3" value="d"> Bedre luftkvalitet</label>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <h4>Spørgsmål 4:</h4>
+                    <p>Hvor placeres fugtighedssensoere bedst?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q4" value="a"> Ved vinduerne</label>
+                        <label><input type="radio" name="q4" value="b"> I hjørner og områder med risiko for fugt</label>
+                        <label><input type="radio" name="q4" value="c"> På gulvet</label>
+                        <label><input type="radio" name="q4" value="d"> Ved radiatorer</label>
+                    </div>
+                </div>
+                
+                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+            `,
             'wifi': `
                 <div class="quiz-question">
                     <h4>Spørgsmål 1:</h4>
