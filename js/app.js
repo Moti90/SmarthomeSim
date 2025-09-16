@@ -3894,25 +3894,39 @@ class AppManager {
             return deviceElement.dataset.deviceName;
         }
         
-        // Fallback to deviceId if not found
-        return deviceId;
+        // Map device IDs to display names for rule matching
+        const deviceNameMap = {
+            'bevaegelsessensor-entre': 'Bevægelse Entre',
+            'bevaegelsessensor-stue': 'Bevægelse Stue',
+            'doer-vindueskontakt-entre': 'Dør Kontakt Entre',
+            'doer-vindueskontakt-stue': 'Dør Kontakt Stue',
+            'temperatur-sensor': 'Temperatur Sensor',
+            'fugtighedssensor': 'Fugtighedssensor',
+            'stue-lampe': 'Stue Lampe',
+            'aktuator-radiator': 'Radiator',
+            'gardiner': 'Gardiner'
+        };
+        
+        return deviceNameMap[deviceId] || deviceId;
     }
     
     checkActiveRules(deviceId, isActive) {
-        // Get all saved rules from localStorage
+        // Get all saved rules from localStorage (both old and new format)
         const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        const smarthomeRules = JSON.parse(localStorage.getItem('smarthome-rules') || '[]');
         
-        // Filter for block scene rules
+        // Filter for block scene rules (old format)
         const blockSceneRules = savedRules.filter(rule => rule.type === 'block_scene');
         
         console.log('=== CHECKING ACTIVE RULES ===');
         console.log('Device ID:', deviceId);
         console.log('Is Active:', isActive);
         console.log('Found block scene rules:', blockSceneRules);
+        console.log('Found smarthome rules:', smarthomeRules);
         
-        // Check each rule
+        // Check old format rules (block scene rules)
         blockSceneRules.forEach(rule => {
-            console.log('Checking rule:', rule.name);
+            console.log('Checking block scene rule:', rule.name);
             console.log('Rule active:', rule.active);
             
             if (rule.active === false) {
@@ -3935,12 +3949,136 @@ class AppManager {
             console.log('Matching triggers for', deviceId, ':', matchingTriggers);
             
             if (matchingTriggers.length > 0 && isActive) {
-                console.log('✅ Triggering rule:', rule.name);
+                console.log('✅ Triggering block scene rule:', rule.name);
                 this.executeBlockScene(rule);
             } else {
                 console.log('❌ No matching triggers or not active');
             }
         });
+        
+        // Check new format rules (smarthome rules with multiple triggers)
+        smarthomeRules.forEach(rule => {
+            console.log('Checking smarthome rule:', rule.id);
+            
+            if (!rule.triggers || rule.triggers.length === 0) {
+                console.log('Rule has no triggers, skipping');
+                return;
+            }
+            
+            // Check if this device matches any of the triggers
+            const deviceName = this.getDeviceName(deviceId);
+            const matchingTriggers = rule.triggers.filter(trigger => 
+                trigger === deviceName || trigger === deviceId
+            );
+            
+            console.log('Device name:', deviceName);
+            console.log('Rule triggers:', rule.triggers);
+            console.log('Matching triggers:', matchingTriggers);
+            
+            if (matchingTriggers.length > 0 && isActive) {
+                // For multiple triggers, we need to check if ALL triggers are active
+                const allTriggersActive = this.checkAllTriggersActive(rule);
+                console.log('All triggers active:', allTriggersActive);
+                
+                if (allTriggersActive) {
+                    console.log('✅ Triggering smarthome rule:', rule.id);
+                    this.executeSmarthomeRule(rule);
+                } else {
+                    console.log('❌ Not all triggers are active yet');
+                }
+            } else {
+                console.log('❌ No matching triggers or not active');
+            }
+        });
+    }
+
+    checkAllTriggersActive(rule) {
+        if (!rule.triggers || rule.triggers.length === 0) {
+            return false;
+        }
+        
+        // Check if all triggers in the rule are currently active
+        for (const triggerName of rule.triggers) {
+            // Find the device ID for this trigger name
+            const deviceId = this.getDeviceIdFromName(triggerName);
+            if (!deviceId) {
+                console.log('Device ID not found for trigger:', triggerName);
+                return false;
+            }
+            
+            // Check if the device is active
+            const deviceElement = document.querySelector(`[data-device="${deviceId}"]`);
+            if (!deviceElement || deviceElement.dataset.value !== 'true') {
+                console.log('Trigger not active:', triggerName, 'Device value:', deviceElement?.dataset.value);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    getDeviceIdFromName(deviceName) {
+        // Map display names back to device IDs
+        const nameToIdMap = {
+            'Bevægelse Entre': 'bevaegelsessensor-entre',
+            'Bevægelse Stue': 'bevaegelsessensor-stue',
+            'Dør Kontakt Entre': 'doer-vindueskontakt-entre',
+            'Dør Kontakt Stue': 'doer-vindueskontakt-stue',
+            'Temperatur Sensor': 'temperatur-sensor',
+            'Fugtighedssensor': 'fugtighedssensor',
+            'Stue Lampe': 'stue-lampe',
+            'Radiator': 'aktuator-radiator',
+            'Gardiner': 'gardiner'
+        };
+        
+        return nameToIdMap[deviceName] || deviceName;
+    }
+
+    executeSmarthomeRule(rule) {
+        console.log('Executing smarthome rule:', rule);
+        
+        try {
+            // Execute the action based on the rule
+            if (rule.action) {
+                // Map action names to device IDs and actions
+                const actionMap = {
+                    'Tænd Lys': { device: 'stue-lampe', action: 'on' },
+                    'Sluk Lys': { device: 'stue-lampe', action: 'off' },
+                    'Dæmp Lys': { device: 'stue-lampe', action: 'dim' },
+                    'Tænd Radiator': { device: 'aktuator-radiator', action: 'on' },
+                    'Sluk Radiator': { device: 'aktuator-radiator', action: 'off' },
+                    'Åbn Gardiner': { device: 'gardiner', action: 'open' },
+                    'Luk Gardiner': { device: 'gardiner', action: 'close' }
+                };
+                
+                const actionConfig = actionMap[rule.action];
+                if (actionConfig) {
+                    console.log('Executing action:', actionConfig);
+                    
+                    // Find the device element
+                    const deviceElement = document.querySelector(`[data-device="${actionConfig.device}"]`);
+                    if (deviceElement) {
+                        // Update the device state
+                        if (actionConfig.action === 'on') {
+                            deviceElement.dataset.value = 'true';
+                            this.updateSmartIconAppearance(deviceElement);
+                        } else if (actionConfig.action === 'off') {
+                            deviceElement.dataset.value = 'false';
+                            this.updateSmartIconAppearance(deviceElement);
+                        }
+                        
+                        this.showNotification(`Regel udført: ${rule.action}`, 'success');
+                    } else {
+                        console.warn('Device not found:', actionConfig.device);
+                    }
+                } else {
+                    console.warn('Unknown action:', rule.action);
+                }
+            }
+        } catch (error) {
+            console.error('Error executing smarthome rule:', error);
+            this.showNotification('Fejl ved udførelse af regel: ' + error.message, 'error');
+        }
     }
 
     // ===== SAVED RULES MANAGEMENT =====
