@@ -4185,6 +4185,9 @@ class AppManager {
                     <div class="icon">📋</div>
                     <h3>Ingen gemte regler</h3>
                     <p>Byg og gem nogle regler i Block Editor for at se dem her</p>
+                    <button onclick="window.appManager.showOldRules()" class="btn btn-secondary" style="margin-top: 10px;">
+                        🔍 Vis gamle regler (Block Editor)
+                    </button>
                 </div>
             `;
         } else {
@@ -4244,6 +4247,32 @@ class AppManager {
     closeSavedRulesModal() {
         const modal = document.getElementById('saved-rules-modal');
         modal.classList.add('hidden');
+    }
+    
+    showOldRules() {
+        const savedRules = JSON.parse(localStorage.getItem('savedRules') || '[]');
+        const smarthomeRules = JSON.parse(localStorage.getItem('smarthome-rules') || '[]');
+        
+        let message = `Gamle regler (Block Editor): ${savedRules.length}\n`;
+        savedRules.forEach(rule => {
+            message += `- ${rule.name} (${rule.type || 'unknown'})\n`;
+        });
+        
+        message += `\nNye regler (Regelbygger): ${smarthomeRules.length}\n`;
+        smarthomeRules.forEach(rule => {
+            message += `- ${rule.id} (${rule.triggers?.length || 0} triggers)\n`;
+        });
+        
+        alert(message);
+        
+        // Option to clear old rules
+        if (savedRules.length > 0) {
+            if (confirm('Vil du slette alle gamle regler (Block Editor)?')) {
+                localStorage.removeItem('savedRules');
+                this.showNotification('Gamle regler slettet!', 'success');
+                this.showSavedRules(); // Refresh
+            }
+        }
     }
     
     testSavedRule(ruleId) {
