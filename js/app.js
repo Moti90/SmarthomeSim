@@ -6976,6 +6976,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     getQuizContent(subtopicId) {
+        console.log('🔍 getQuizContent called with subtopicId:', subtopicId);
         const quizzes = {
             'udendørs-temperatur': `
                 <div class="quiz-question">
@@ -7388,7 +7389,9 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             `
         };
         
-        return quizzes[subtopicId] || '<p>Quiz kommer snart...</p>';
+        const result = quizzes[subtopicId] || '<p>Quiz kommer snart...</p>';
+        console.log('🔍 Quiz result for', subtopicId, ':', result.substring(0, 50) + '...');
+        return result;
     }
 
     // Exercise content removed - only theory and quiz now
