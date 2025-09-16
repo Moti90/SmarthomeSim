@@ -6446,6 +6446,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     <h4>Hvorfor er de vigtige?</h4>
                     <p>Dør-/vindueskontakter giver dig fuld kontrol over sikkerheden i dit hjem og kan automatisere forskellige funktioner baseret på om døre og vinduer er åbne eller lukkede.</p>
                     
+                    <h4>Teknologi og funktion:</h4>
+                    <ul>
+                        <li><strong>Reed switch (magnetisk kontakt):</strong> De fleste dør-/vindueskontakter bruger reed switch teknologi</li>
+                        <li><strong>Magnetisk felt:</strong> Reed switch aktiveres når magneten er tæt på</li>
+                        <li><strong>Rækkevidde:</strong> Typisk 5-10 cm mellem magnet og sensor</li>
+                        <li><strong>Pålidelighed:</strong> Høj pålidelighed og lang levetid</li>
+                        <li><strong>Strømforbrug:</strong> Meget lavt strømforbrug</li>
+                    </ul>
+                    
                     <h4>Anvendelser i dit smarthome:</h4>
                     <ul>
                         <li><strong>Sikkerhedsalarm:</strong> Advarer når døre/vinduer åbnes uautoriseret</li>
