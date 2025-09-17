@@ -1232,6 +1232,16 @@
                                     </label>
                                 </div>
 
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Lærer Dashboard</h4>
+                                        <p>Åbn lærer dashboard for at se highscore og progress over alle elever</p>
+                                    </div>
+                                    <button class="btn btn-secondary" onclick="window.appManager.openTeacherDashboard()">
+                                        👨‍🏫 Åbn Lærer Dashboard
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
 
@@ -1479,6 +1489,28 @@
             <div class="password-popup-footer">
                 <button type="button" id="cancel-password" class="btn btn-secondary">Annuller</button>
                 <button type="button" id="submit-password" class="btn btn-primary">Aktiver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard Password Popup -->
+    <div id="teacher-password-popup" class="password-popup">
+        <div class="password-popup-content">
+            <div class="password-popup-header">
+                <h3>👨‍🏫 Lærer Dashboard</h3>
+                <p>Indtast lærer koden for at åbne elev highscore dashboard</p>
+            </div>
+            <div class="password-popup-body">
+                <div class="password-input-group">
+                    <input type="password" id="teacher-password-input" placeholder="Indtast lærer kode..." autocomplete="current-password" maxlength="20">
+                    <button type="button" id="toggle-teacher-password-visibility" class="password-toggle">
+                        <span class="password-icon">👁️</span>
+                    </button>
+                </div>
+            </div>
+            <div class="password-popup-footer">
+                <button type="button" id="cancel-teacher-password" class="btn btn-secondary">Annuller</button>
+                <button type="button" id="submit-teacher-password" class="btn btn-primary">Åbn Dashboard</button>
             </div>
         </div>
     </div>

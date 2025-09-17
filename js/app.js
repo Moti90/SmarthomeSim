@@ -1137,6 +1137,632 @@ class AppManager {
         this.saveSetting('laptopOptimization', isEnabled);
     }
 
+    // Teacher Dashboard
+    openTeacherDashboard() {
+        this.showTeacherPasswordPopup();
+    }
+
+    showTeacherPasswordPopup() {
+        const popup = document.getElementById('teacher-password-popup');
+        const passwordInput = document.getElementById('teacher-password-input');
+        
+        popup.style.display = 'flex';
+        passwordInput.focus();
+        
+        // Event listeners for popup
+        document.getElementById('submit-teacher-password').onclick = () => this.validateTeacherPassword();
+        document.getElementById('cancel-teacher-password').onclick = () => this.cancelTeacherPassword();
+        document.getElementById('toggle-teacher-password-visibility').onclick = () => this.toggleTeacherPasswordVisibility();
+        
+        // Enter key support
+        passwordInput.onkeypress = (e) => {
+            if (e.key === 'Enter') {
+                this.validateTeacherPassword();
+            }
+        };
+        
+        // Escape key support
+        document.addEventListener('keydown', this.handleTeacherPasswordPopupEscape);
+    }
+
+    hideTeacherPasswordPopup() {
+        const popup = document.getElementById('teacher-password-popup');
+        popup.style.display = 'none';
+        document.removeEventListener('keydown', this.handleTeacherPasswordPopupEscape);
+    }
+
+    cancelTeacherPassword() {
+        this.hideTeacherPasswordPopup();
+    }
+
+    handleTeacherPasswordPopupEscape = (e) => {
+        if (e.key === 'Escape') {
+            this.cancelTeacherPassword();
+        }
+    }
+
+    toggleTeacherPasswordVisibility() {
+        const passwordInput = document.getElementById('teacher-password-input');
+        const toggleButton = document.getElementById('toggle-teacher-password-visibility');
+        const icon = toggleButton.querySelector('.password-icon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.textContent = '🙈';
+        } else {
+            passwordInput.type = 'password';
+            icon.textContent = '👁️';
+        }
+    }
+
+    validateTeacherPassword() {
+        const passwordInput = document.getElementById('teacher-password-input');
+        const enteredPassword = passwordInput.value.trim().toUpperCase();
+        
+        // Lærer kode: "TEC25"
+        const correctPassword = 'TEC25';
+        
+        if (enteredPassword === correctPassword) {
+            // Korrekt kode - åbn lærer dashboard
+            this.showNotification('🔓 Lærer kode accepteret - åbner dashboard...', 'success');
+            this.hideTeacherPasswordPopup();
+            this.showTeacherDashboard();
+        } else {
+            // Forkert kode
+            this.showNotification('❌ Forkert lærer kode. Prøv igen.', 'error');
+            passwordInput.value = '';
+            passwordInput.focus();
+            
+            // Ryst input feltet for feedback
+            passwordInput.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                passwordInput.style.animation = '';
+            }, 500);
+        }
+    }
+
+    showTeacherDashboard() {
+        // Create teacher dashboard overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'teacher-dashboard-overlay';
+        overlay.innerHTML = `
+            <div class="teacher-dashboard">
+                <div class="dashboard-header">
+                    <h2>👨‍🏫 Lærer Dashboard</h2>
+                    <button id="close-teacher-dashboard" class="close-btn">✕</button>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <h3>📊 Oversigt</h3>
+                            <div class="stat-item">
+                                <span>Antal elever:</span>
+                                <span id="total-students">--</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Gennemsnitlig progress:</span>
+                                <span id="avg-progress">--</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Færdige moduler:</span>
+                                <span id="completed-modules">--</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>🏆 Top Performers</h3>
+                            <div id="top-performers">
+                                <p>Indlæser data...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="highscore-section">
+                        <h3>📈 Highscore - Alle Elever</h3>
+                        <div class="highscore-controls">
+                            <select id="sort-by">
+                                <option value="progress">Progress %</option>
+                                <option value="modules">Moduler færdige</option>
+                                <option value="scenarios">Scenarios oprettet</option>
+                                <option value="rules">Regler oprettet</option>
+                            </select>
+                            <button id="refresh-data" class="btn-small">🔄 Opdater</button>
+                            <button id="export-data" class="btn-small">📊 Eksporter</button>
+                        </div>
+                        
+                        <div class="highscore-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Rang</th>
+                                        <th>Elev</th>
+                                        <th>Email</th>
+                                        <th>Progress</th>
+                                        <th>Moduler</th>
+                                        <th>Scenarios</th>
+                                        <th>Regler</th>
+                                        <th>Seneste aktivitet</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="highscore-tbody">
+                                    <tr><td colspan="8">Indlæser data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="detailed-stats">
+                        <h3>📋 Detaljeret Statistik</h3>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <h4>Modul Completion</h4>
+                                <div id="module-stats">Indlæser...</div>
+                            </div>
+                            <div class="stat-box">
+                                <h4>Scenarios Oprettet</h4>
+                                <div id="scenario-stats">Indlæser...</div>
+                            </div>
+                            <div class="stat-box">
+                                <h4>Regler Oprettet</h4>
+                                <div id="rule-stats">Indlæser...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        this.addTeacherDashboardStyles();
+        this.setupTeacherDashboardEvents();
+        this.loadTeacherData();
+        
+        this.showNotification('Lærer dashboard åbnet', 'success');
+        console.log('👨‍🏫 Teacher dashboard åbnet');
+    }
+
+    addTeacherDashboardStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            #teacher-dashboard-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 10000;
+                overflow-y: auto;
+            }
+            
+            .teacher-dashboard {
+                max-width: 1200px;
+                margin: 20px auto;
+                background: #1a1a1a;
+                border-radius: 10px;
+                color: white;
+                font-family: 'Segoe UI', sans-serif;
+            }
+            
+            .dashboard-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+                border-bottom: 2px solid #333;
+                background: linear-gradient(135deg, #2c3e50, #34495e);
+            }
+            
+            .dashboard-header h2 {
+                margin: 0;
+                color: #00ff88;
+            }
+            
+            .close-btn {
+                background: #d32f2f;
+                border: none;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+            
+            .close-btn:hover {
+                background: #b71c1c;
+            }
+            
+            .dashboard-content {
+                padding: 20px;
+            }
+            
+            .dashboard-stats {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+            
+            .stat-card {
+                background: #2c2c2c;
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid #444;
+            }
+            
+            .stat-card h3 {
+                margin: 0 0 15px 0;
+                color: #00ff88;
+            }
+            
+            .stat-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                padding: 5px 0;
+                border-bottom: 1px solid #444;
+            }
+            
+            .highscore-section {
+                margin-bottom: 30px;
+            }
+            
+            .highscore-section h3 {
+                color: #00ff88;
+                margin-bottom: 15px;
+            }
+            
+            .highscore-controls {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+                align-items: center;
+            }
+            
+            .highscore-controls select {
+                padding: 8px;
+                background: #333;
+                border: 1px solid #555;
+                border-radius: 4px;
+                color: white;
+            }
+            
+            .btn-small {
+                padding: 6px 12px;
+                background: #333;
+                border: 1px solid #555;
+                border-radius: 4px;
+                color: white;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            
+            .btn-small:hover {
+                background: #555;
+            }
+            
+            .highscore-table {
+                background: #2c2c2c;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            .highscore-table table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            .highscore-table th,
+            .highscore-table td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #444;
+            }
+            
+            .highscore-table th {
+                background: #333;
+                color: #00ff88;
+                font-weight: bold;
+            }
+            
+            .highscore-table tr:hover {
+                background: #3c3c3c;
+            }
+            
+            .detailed-stats h3 {
+                color: #00ff88;
+                margin-bottom: 15px;
+            }
+            
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+            }
+            
+            .stat-box {
+                background: #2c2c2c;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #444;
+            }
+            
+            .stat-box h4 {
+                margin: 0 0 10px 0;
+                color: #00ff88;
+            }
+            
+            .rank-1 { color: #ffd700; font-weight: bold; }
+            .rank-2 { color: #c0c0c0; font-weight: bold; }
+            .rank-3 { color: #cd7f32; font-weight: bold; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    setupTeacherDashboardEvents() {
+        document.getElementById('close-teacher-dashboard').addEventListener('click', () => {
+            document.getElementById('teacher-dashboard-overlay').remove();
+        });
+        
+        document.getElementById('refresh-data').addEventListener('click', () => {
+            this.loadTeacherData();
+        });
+        
+        document.getElementById('export-data').addEventListener('click', () => {
+            this.exportTeacherData();
+        });
+        
+        document.getElementById('sort-by').addEventListener('change', (e) => {
+            this.sortHighscore(e.target.value);
+        });
+    }
+
+    async loadTeacherData() {
+        try {
+            this.showNotification('Indlæser elev data fra Firebase...', 'info');
+            
+            // Load real student data from Firebase
+            const students = await this.loadStudentsFromFirebase();
+            
+            if (students && students.length > 0) {
+                this.displayTeacherData(students);
+                this.showNotification(`${students.length} elever indlæst fra Firebase`, 'success');
+            } else {
+                // Fallback to mock data if no Firebase data
+                console.log('No Firebase data found, using mock data');
+                const mockData = this.generateMockStudentData();
+                this.displayTeacherData(mockData);
+                this.showNotification('Ingen Firebase data fundet - viser eksempel data', 'warning');
+            }
+        } catch (error) {
+            console.error('Error loading teacher data:', error);
+            this.showNotification('Fejl ved indlæsning af elev data', 'error');
+            
+            // Fallback to mock data
+            const mockData = this.generateMockStudentData();
+            this.displayTeacherData(mockData);
+        }
+    }
+
+    async loadStudentsFromFirebase() {
+        if (!window.FirebaseConfig || !window.FirebaseConfig.db) {
+            throw new Error('Firebase not initialized');
+        }
+
+        const db = window.FirebaseConfig.db;
+        const students = [];
+
+        try {
+            // Get all users from Firebase
+            const usersSnapshot = await db.collection('users').get();
+            
+            for (const userDoc of usersSnapshot.docs) {
+                const userData = userDoc.data();
+                const userId = userDoc.id;
+                
+                // Get user's progress data
+                const progressSnapshot = await db.collection('userProgress').doc(userId).get();
+                const progressData = progressSnapshot.exists ? progressSnapshot.data() : {};
+                
+                // Get user's scenarios
+                const scenariosSnapshot = await db.collection('scenarios').where('userId', '==', userId).get();
+                const scenariosCount = scenariosSnapshot.size;
+                
+                // Get user's rules
+                const rulesSnapshot = await db.collection('rules').where('userId', '==', userId).get();
+                const rulesCount = rulesSnapshot.size;
+                
+                // Calculate progress percentage
+                const completedModules = progressData.completedModules ? Object.keys(progressData.completedModules).length : 0;
+                const totalModules = 8; // Total number of learning modules
+                const progressPercentage = Math.round((completedModules / totalModules) * 100);
+                
+                // Get last activity timestamp
+                const lastActivity = userData.lastLogin ? 
+                    new Date(userData.lastLogin.seconds * 1000).toISOString().split('T')[0] : 
+                    'Ukendt';
+                
+                students.push({
+                    id: userId,
+                    name: userData.displayName || userData.email || 'Anonym elev',
+                    email: userData.email || 'Ingen email',
+                    progress: progressPercentage,
+                    modules: completedModules,
+                    scenarios: scenariosCount,
+                    rules: rulesCount,
+                    lastActivity: lastActivity,
+                    createdAt: userData.createdAt ? new Date(userData.createdAt.seconds * 1000).toISOString().split('T')[0] : 'Ukendt'
+                });
+            }
+            
+            return students;
+        } catch (error) {
+            console.error('Error loading students from Firebase:', error);
+            throw error;
+        }
+    }
+
+    generateMockStudentData() {
+        const students = [
+            { name: 'Anna Andersen', progress: 95, modules: 8, scenarios: 12, rules: 15, lastActivity: '2024-12-20' },
+            { name: 'Lars Larsen', progress: 87, modules: 7, scenarios: 10, rules: 12, lastActivity: '2024-12-19' },
+            { name: 'Maria Møller', progress: 92, modules: 8, scenarios: 11, rules: 14, lastActivity: '2024-12-20' },
+            { name: 'Peter Petersen', progress: 78, modules: 6, scenarios: 8, rules: 9, lastActivity: '2024-12-18' },
+            { name: 'Sofia Sørensen', progress: 88, modules: 7, scenarios: 9, rules: 11, lastActivity: '2024-12-19' },
+            { name: 'Thomas Thomsen', progress: 82, modules: 6, scenarios: 7, rules: 10, lastActivity: '2024-12-17' },
+            { name: 'Emma Eriksen', progress: 90, modules: 8, scenarios: 10, rules: 13, lastActivity: '2024-12-20' },
+            { name: 'Nikolaj Nielsen', progress: 75, modules: 5, scenarios: 6, rules: 8, lastActivity: '2024-12-16' }
+        ];
+        
+        return students;
+    }
+
+    displayTeacherData(students) {
+        // Update overview stats
+        const totalStudents = students.length;
+        const avgProgress = Math.round(students.reduce((sum, s) => sum + s.progress, 0) / totalStudents);
+        const completedModules = students.reduce((sum, s) => sum + s.modules, 0);
+        
+        document.getElementById('total-students').textContent = totalStudents;
+        document.getElementById('avg-progress').textContent = avgProgress + '%';
+        document.getElementById('completed-modules').textContent = completedModules;
+        
+        // Update top performers
+        const topPerformers = students
+            .sort((a, b) => b.progress - a.progress)
+            .slice(0, 3);
+        
+        document.getElementById('top-performers').innerHTML = topPerformers
+            .map((student, index) => `
+                <div class="stat-item">
+                    <span>${index + 1}. ${student.name}</span>
+                    <span>${student.progress}%</span>
+                </div>
+            `).join('');
+        
+        // Update highscore table
+        this.updateHighscoreTable(students);
+        
+        // Update detailed stats
+        this.updateDetailedStats(students);
+    }
+
+    updateHighscoreTable(students) {
+        const tbody = document.getElementById('highscore-tbody');
+        tbody.innerHTML = students
+            .sort((a, b) => b.progress - a.progress)
+            .map((student, index) => `
+                <tr class="rank-${index < 3 ? index + 1 : ''}">
+                    <td>${index + 1}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.progress}%</td>
+                    <td>${student.modules}</td>
+                    <td>${student.scenarios}</td>
+                    <td>${student.rules}</td>
+                    <td>${student.lastActivity}</td>
+                </tr>
+            `).join('');
+    }
+
+    updateDetailedStats(students) {
+        // Module completion stats
+        const moduleStats = students.reduce((acc, student) => {
+            acc[student.modules] = (acc[student.modules] || 0) + 1;
+            return acc;
+        }, {});
+        
+        document.getElementById('module-stats').innerHTML = Object.entries(moduleStats)
+            .sort(([a], [b]) => b - a)
+            .map(([modules, count]) => `
+                <div class="stat-item">
+                    <span>${modules} moduler:</span>
+                    <span>${count} elever</span>
+                </div>
+            `).join('');
+        
+        // Scenario stats
+        const scenarioStats = students.reduce((acc, student) => {
+            acc[student.scenarios] = (acc[student.scenarios] || 0) + 1;
+            return acc;
+        }, {});
+        
+        document.getElementById('scenario-stats').innerHTML = Object.entries(scenarioStats)
+            .sort(([a], [b]) => b - a)
+            .map(([scenarios, count]) => `
+                <div class="stat-item">
+                    <span>${scenarios} scenarios:</span>
+                    <span>${count} elever</span>
+                </div>
+            `).join('');
+        
+        // Rule stats
+        const ruleStats = students.reduce((acc, student) => {
+            acc[student.rules] = (acc[student.rules] || 0) + 1;
+            return acc;
+        }, {});
+        
+        document.getElementById('rule-stats').innerHTML = Object.entries(ruleStats)
+            .sort(([a], [b]) => b - a)
+            .map(([rules, count]) => `
+                <div class="stat-item">
+                    <span>${rules} regler:</span>
+                    <span>${count} elever</span>
+                </div>
+            `).join('');
+    }
+
+    sortHighscore(sortBy) {
+        const tbody = document.getElementById('highscore-tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        rows.sort((a, b) => {
+            const aValue = this.getSortValue(a, sortBy);
+            const bValue = this.getSortValue(b, sortBy);
+            return bValue - aValue;
+        });
+        
+        rows.forEach((row, index) => {
+            row.className = `rank-${index < 3 ? index + 1 : ''}`;
+            row.querySelector('td').textContent = index + 1;
+            tbody.appendChild(row);
+        });
+    }
+
+    getSortValue(row, sortBy) {
+        const cells = row.querySelectorAll('td');
+        switch(sortBy) {
+            case 'progress': return parseInt(cells[3].textContent);
+            case 'modules': return parseInt(cells[4].textContent);
+            case 'scenarios': return parseInt(cells[5].textContent);
+            case 'rules': return parseInt(cells[6].textContent);
+            default: return 0;
+        }
+    }
+
+    exportTeacherData() {
+        const data = {
+            timestamp: new Date().toISOString(),
+            students: this.generateMockStudentData(),
+            summary: {
+                totalStudents: document.getElementById('total-students').textContent,
+                avgProgress: document.getElementById('avg-progress').textContent,
+                completedModules: document.getElementById('completed-modules').textContent
+            }
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `teacher-dashboard-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('Lærer data eksporteret', 'success');
+    }
+
     // Performance optimization utilities
     throttle(func, delay = 100) {
         const key = func.toString();
