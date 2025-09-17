@@ -1522,6 +1522,15 @@ class AppManager {
         try {
             this.showNotification('Indlæser elev data fra Firebase...', 'info');
             
+            // Check if user is logged in first
+            if (!this.currentUser) {
+                console.log('No user logged in, using mock data');
+                const mockData = this.generateMockStudentData();
+                this.displayTeacherData(mockData);
+                this.showNotification('Ikke logget ind - viser eksempel data', 'warning');
+                return;
+            }
+            
             // Load real student data from Firebase
             const students = await this.loadStudentsFromFirebase();
             
@@ -1537,7 +1546,7 @@ class AppManager {
             }
         } catch (error) {
             console.error('Error loading teacher data:', error);
-            this.showNotification('Fejl ved indlæsning af elev data', 'error');
+            this.showNotification('Firebase ikke tilgængelig - viser eksempel data', 'warning');
             
             // Fallback to mock data
             const mockData = this.generateMockStudentData();
@@ -1546,8 +1555,15 @@ class AppManager {
     }
 
     async loadStudentsFromFirebase() {
-        if (!window.FirebaseConfig || !window.FirebaseConfig.db) {
-            throw new Error('Firebase not initialized');
+        // Check if Firebase is available and initialized
+        if (!window.FirebaseConfig) {
+            console.log('FirebaseConfig not available');
+            throw new Error('Firebase configuration not available');
+        }
+        
+        if (!window.FirebaseConfig.db) {
+            console.log('Firebase database not initialized');
+            throw new Error('Firebase database not initialized');
         }
 
         const db = window.FirebaseConfig.db;
