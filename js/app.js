@@ -1605,14 +1605,14 @@ class AppManager {
         // Check if it's a humidity sensor
         if (sensorId && sensorId.includes('fugtmaaler')) {
             return `
-                <select class="block-select" onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorCondition', this.value)" 
+                <select class="block-select" name="sensorCondition" onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorCondition', this.value)" 
                         style="margin-top: 5px;">
                     <option value="">Vælg betingelse...</option>
                     <option value="above" ${block.config.sensorCondition === 'above' ? 'selected' : ''}>Over</option>
                     <option value="below" ${block.config.sensorCondition === 'below' ? 'selected' : ''}>Under</option>
                     <option value="equal" ${block.config.sensorCondition === 'equal' ? 'selected' : ''}>Lig med</option>
                 </select>
-                <input type="number" class="block-input" placeholder="Værdi (%)" 
+                <input type="number" class="block-input" name="sensorValue" placeholder="Værdi (%)" 
                        value="${block.config.sensorValue || ''}" 
                        onchange="window.appManager.updateBlockConfig('${block.id}', 'sensorValue', this.value)"
                        style="margin-top: 5px;">
@@ -3775,7 +3775,7 @@ class AppManager {
                 )
             );
             
-            if (matchingTriggers.length > 0 && isActive) {
+            if (matchingTriggers.length > 0) {
                 console.log(`Found matching trigger for block scene rule: ${rule.name}`);
                 console.log(`Rule has ${rule.triggers.length} triggers total`);
                 
@@ -3786,14 +3786,19 @@ class AppManager {
                     
                     if (allTriggersActive) {
                         console.log(`✅ Triggering block scene rule: ${rule.name}`);
-                this.executeBlockScene(rule);
-            } else {
+                        this.executeBlockScene(rule);
+                    } else {
                         console.log(`❌ Not all block scene triggers are active for rule: ${rule.name}`);
                     }
                 } else {
-                    // Single trigger - execute immediately
-                    console.log(`✅ Triggering single trigger block scene rule: ${rule.name}`);
-                    this.executeBlockScene(rule);
+                    // Single trigger - check if it should be active
+                    const shouldTrigger = this.checkSingleBlockSceneTrigger(matchingTriggers[0]);
+                    if (shouldTrigger) {
+                        console.log(`✅ Triggering single trigger block scene rule: ${rule.name}`);
+                        this.executeBlockScene(rule);
+                    } else {
+                        console.log(`❌ Single trigger not active for rule: ${rule.name}`);
+                    }
                 }
             }
         });
@@ -3808,7 +3813,7 @@ class AppManager {
                 trigger === deviceName || trigger === deviceId
             );
             
-            if (matchingTriggers.length > 0 && isActive) {
+            if (matchingTriggers.length > 0) {
                 console.log(`Found matching trigger for rule ${rule.id}:`, matchingTriggers);
                 console.log(`Rule has ${rule.triggers.length} triggers total`);
                 
@@ -3853,9 +3858,31 @@ class AppManager {
             console.log('Device element found:', deviceElement);
             console.log('Device value:', deviceElement?.dataset.value);
             
-            if (!deviceElement || deviceElement.dataset.value !== 'true') {
-                console.log('Trigger not active:', triggerName, 'Device value:', deviceElement?.dataset.value);
+            if (!deviceElement) {
+                console.log('Trigger device not found:', triggerName);
                 return false;
+            }
+            
+            // Check if it's a humidity sensor with numeric conditions
+            if (deviceId.includes('fugtmaaler') || deviceId.includes('fugtighedssensor')) {
+                // For humidity sensors, we need to check if the value is above a threshold
+                // This is a simplified check - in a real implementation, you'd need to store
+                // the threshold value somewhere accessible
+                const currentValue = parseFloat(deviceElement.dataset.value) || 0;
+                const threshold = 70; // Default threshold for high humidity
+                
+                console.log(`Humidity trigger check: ${currentValue} > ${threshold} = ${currentValue > threshold}`);
+                
+                if (currentValue <= threshold) {
+                    console.log('Humidity trigger not active:', triggerName, 'Current:', currentValue, 'Threshold:', threshold);
+                    return false;
+                }
+            } else {
+                // For regular boolean sensors
+                if (deviceElement.dataset.value !== 'true') {
+                    console.log('Trigger not active:', triggerName, 'Device value:', deviceElement?.dataset.value);
+                    return false;
+                }
             }
         }
         
@@ -3881,14 +3908,113 @@ class AppManager {
             console.log('Device element found:', deviceElement);
             console.log('Device value:', deviceElement?.dataset.value);
             
-            if (!deviceElement || deviceElement.dataset.value !== 'true') {
-                console.log('Block scene trigger not active:', trigger.sensorId, 'Device value:', deviceElement?.dataset.value);
+            if (!deviceElement) {
+                console.log('Block scene trigger device not found:', trigger.sensorId);
                 return false;
+            }
+            
+            // Check if it's a humidity sensor with numeric conditions
+            if (trigger.sensorId.includes('fugtmaaler')) {
+                const currentValue = parseFloat(deviceElement.dataset.value) || 0;
+                
+                // Check if we have proper config with sensorCondition and sensorValue
+                if (trigger.config && trigger.config.sensorCondition && 
+                    trigger.config.sensorValue) {
+                    const targetValue = parseFloat(trigger.config.sensorValue);
+                    let shouldTrigger = false;
+                    
+                    switch (trigger.config.sensorCondition) {
+                        case 'above':
+                            shouldTrigger = currentValue > targetValue;
+                            break;
+                        case 'below':
+                            shouldTrigger = currentValue < targetValue;
+                            break;
+                        case 'equal':
+                            shouldTrigger = Math.abs(currentValue - targetValue) < 1; // Within 1%
+                            break;
+                    }
+                    
+                    console.log(`Humidity trigger check: ${currentValue} ${trigger.config.sensorCondition} ${targetValue} = ${shouldTrigger}`);
+                    
+                    if (!shouldTrigger) {
+                        console.log('Block scene humidity trigger not active:', trigger.sensorId, 'Current:', currentValue, 'Target:', targetValue, 'Condition:', trigger.config.sensorCondition);
+                        return false;
+                    }
+                } else {
+                    // Fallback: if no proper config, use default threshold of 70%
+                    const threshold = 70;
+                    const shouldTrigger = currentValue > threshold;
+                    console.log(`Block scene humidity trigger fallback check: ${currentValue} > ${threshold} = ${shouldTrigger}`);
+                    
+                    if (!shouldTrigger) {
+                        console.log('Block scene humidity trigger not active (fallback):', trigger.sensorId, 'Current:', currentValue, 'Threshold:', threshold);
+                        return false;
+                    }
+                }
+            } else {
+                // For regular boolean sensors
+                if (deviceElement.dataset.value !== 'true') {
+                    console.log('Block scene trigger not active:', trigger.sensorId, 'Device value:', deviceElement?.dataset.value);
+                    return false;
+                }
             }
         }
         
         console.log('All block scene triggers are active!');
         return true;
+    }
+
+    checkSingleBlockSceneTrigger(trigger) {
+        console.log('=== CHECKING SINGLE BLOCK SCENE TRIGGER ===');
+        console.log('Trigger:', trigger);
+        
+        const deviceElement = document.querySelector(`[data-device="${trigger.sensorId}"]`);
+        console.log('Device element found:', deviceElement);
+        console.log('Device value:', deviceElement?.dataset.value);
+        
+        if (!deviceElement) {
+            console.log('Trigger device not found:', trigger.sensorId);
+            return false;
+        }
+        
+        // Check if it's a humidity sensor with numeric conditions
+        if (trigger.sensorId.includes('fugtmaaler')) {
+            const currentValue = parseFloat(deviceElement.dataset.value) || 0;
+            
+            // Check if we have proper config with sensorCondition and sensorValue
+            if (trigger.config && trigger.config.sensorCondition && 
+                trigger.config.sensorValue) {
+                const targetValue = parseFloat(trigger.config.sensorValue);
+                let shouldTrigger = false;
+                
+                switch (trigger.config.sensorCondition) {
+                    case 'above':
+                        shouldTrigger = currentValue > targetValue;
+                        break;
+                    case 'below':
+                        shouldTrigger = currentValue < targetValue;
+                        break;
+                    case 'equal':
+                        shouldTrigger = Math.abs(currentValue - targetValue) < 1; // Within 1%
+                        break;
+                }
+                
+                console.log(`Single humidity trigger check: ${currentValue} ${trigger.config.sensorCondition} ${targetValue} = ${shouldTrigger}`);
+                return shouldTrigger;
+            } else {
+                // Fallback: if no proper config, use default threshold of 70%
+                const threshold = 70;
+                const shouldTrigger = currentValue > threshold;
+                console.log(`Single humidity trigger fallback check: ${currentValue} > ${threshold} = ${shouldTrigger}`);
+                return shouldTrigger;
+            }
+        } else {
+            // For regular boolean sensors
+            const isActive = deviceElement.dataset.value === 'true';
+            console.log(`Single boolean trigger check: ${trigger.sensorId} = ${isActive}`);
+            return isActive;
+        }
     }
 
     getDeviceIdFromName(deviceName) {
@@ -5829,8 +5955,11 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             // Update visual appearance
             this.updateSmartIconAppearance(humidityIcon);
             
-            // Check for active rules that should trigger
-            this.checkActiveRules('badevaerelse-fugtmaaler', true);
+            // Check for active rules that should trigger based on the actual humidity value
+            // We need to check if the humidity is above threshold (e.g., 70%) to determine if rules should be active
+            const humidityValue = parseFloat(newHumidity);
+            const isAboveThreshold = humidityValue > 70; // Adjust threshold as needed
+            this.checkActiveRules('badevaerelse-fugtmaaler', isAboveThreshold);
             
             this.showNotification(`Fugtniveau sat til ${newHumidity}%`, 'success');
             this.hideHumidityPopup();
