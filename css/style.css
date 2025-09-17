@@ -5464,23 +5464,94 @@ body.alarm-active::before {
 /* ===== PERFORMANCE OPTIMIZED MODE (Default) ===== */
 /* Optimized for maximum performance on all devices */
 
-/* Reduce transition times for better performance */
-* {
-    transition-duration: 0.2s !important;
+/* Use transform and opacity for better performance */
+.smart-icon {
+    will-change: transform, opacity;
+    transform: translateZ(0); /* Force hardware acceleration */
 }
 
-/* Optimize hover effects */
+/* Reduce transition times for better performance */
+* {
+    transition-duration: 0.15s !important;
+    transition-timing-function: ease-out !important;
+}
+
+/* Optimize hover effects with transform3d for hardware acceleration */
 .btn:hover,
 .nav-btn:hover,
-.topic-card:hover {
-    transition-duration: 0.15s !important;
+.topic-card:hover,
+.smart-icon:hover {
+    transition-duration: 0.1s !important;
+    transform: translate3d(0, 0, 0) scale(1.05);
 }
 
 /* Optimize form elements */
 input,
 select,
 textarea {
+    transition-duration: 0.08s !important;
+}
+
+/* Disable expensive box-shadow animations on hover */
+.smart-icon:hover {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+/* Optimize dragging performance */
+.smart-icon.dragging {
+    transition: none !important;
+    will-change: transform, left, top;
+    transform: translate3d(0, 0, 0) scale(1.15);
+}
+
+/* Reduce animation complexity for better performance */
+@keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -10px, 0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+}
+
+/* ===== PERFORMANCE MODE STYLES ===== */
+.performance-mode * {
     transition-duration: 0.1s !important;
+    animation-duration: 0.3s !important;
+}
+
+.performance-mode .smart-icon {
+    will-change: auto;
+    transform: none;
+}
+
+.performance-mode .smart-icon:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 1px 4px rgba(255, 255, 255, 0.2) !important;
+}
+
+.performance-mode .smart-icon.dragging {
+    transform: scale(1.05) !important;
+}
+
+/* Disable expensive animations in performance mode */
+.performance-mode .floating-icon,
+.performance-mode .particles,
+.performance-mode .holographic {
+    animation: none !important;
+}
+
+/* Reduce box-shadow complexity */
+.performance-mode .smart-icon {
+    box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Optimize hover effects */
+.performance-mode .btn:hover,
+.performance-mode .nav-btn:hover,
+.performance-mode .topic-card:hover {
+    transform: scale(1.02) !important;
 }
 
 /* ===== AI ASSISTANT STYLES ===== */

@@ -1133,6 +1133,17 @@ class AppManager {
         this.saveSetting('disableAnimations', isEnabled);
     }
 
+    // Performance Mode
+    togglePerformanceMode() {
+        const body = document.body;
+        if (body.classList.contains('performance-mode')) {
+            body.classList.remove('performance-mode');
+            this.showNotification('Performance mode deaktiveret', 'success');
+        } else {
+            body.classList.add('performance-mode');
+            this.showNotification('Performance mode aktiveret - optimeret for bærbare PC\'er', 'success');
+        }
+    }
 
     // Sound Notifications
     toggleSoundNotifications() {
@@ -1219,7 +1230,7 @@ class AppManager {
             document.getElementById('save-settings').checked = true;
             
             // Remove all setting classes
-            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'disable-animations', 'sound-notifications', 'desktop-notifications', 'auto-logout');
+            document.body.classList.remove('compact-view', 'high-contrast', 'large-text', 'disable-animations', 'performance-mode', 'sound-notifications', 'desktop-notifications', 'auto-logout');
             
             // Clear localStorage
             Object.keys(localStorage).forEach(key => {
@@ -1271,6 +1282,7 @@ class AppManager {
             'highContrast',
             'largeText',
             'disableAnimations',
+            'performanceMode',
             'soundNotifications',
             'desktopNotifications',
             'autoLogout',
@@ -1284,6 +1296,7 @@ class AppManager {
             'highContrast': { id: 'high-contrast', class: 'high-contrast' },
             'largeText': { id: 'large-text', class: 'large-text' },
             'disableAnimations': { id: 'disable-animations', class: 'disable-animations' },
+            'performanceMode': { id: 'performance-mode', class: 'performance-mode' },
             'soundNotifications': { id: 'sound-notifications', class: 'sound-notifications' },
             'desktopNotifications': { id: 'desktop-notifications', class: 'desktop-notifications' },
             'autoLogout': { id: 'auto-logout', class: 'auto-logout' },
@@ -4949,9 +4962,12 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         // Update container dimensions when switching to smarthome tab
         const smarthomeTab = document.getElementById('smarthome-tab');
         if (smarthomeTab) {
+            let resizeTimeout;
             const observer = new MutationObserver(() => {
                 if (smarthomeTab.classList.contains('active')) {
-                    setTimeout(() => {
+                    // Debounce resize events for better performance
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
                         const container = document.querySelector('.floor-plan-container');
                         if (container) {
                             const rect = container.getBoundingClientRect();
@@ -4960,7 +4976,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                                 window.dispatchEvent(new Event('resize'));
                             }
                         }
-                    }, 50);
+                    }, 100); // Increased delay for better performance
                 }
             });
             
@@ -5000,7 +5016,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             let dragStartTime = 0;
             let hasMoved = false;
             let lastMoveTime = 0;
-            const MOVE_THROTTLE = 16; // ~60fps
+            const MOVE_THROTTLE = 32; // ~30fps for better performance on laptops
 
             // Mouse events
             icon.addEventListener('mousedown', (e) => {
@@ -5052,7 +5068,8 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     hasMoved = true;
                 }
                 
-                // Direct calculation for maximum responsiveness (no requestAnimationFrame)
+                // Use requestAnimationFrame for better performance
+                requestAnimationFrame(() => {
                     const containerWidth = containerDimensions.width;
                     const containerHeight = containerDimensions.height;
                     
@@ -5081,6 +5098,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                         icon.style.left = newX + '%';
                         icon.style.top = newY + '%';
                     }
+                });
             };
 
             document.addEventListener('mousemove', (e) => {
@@ -5535,7 +5553,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             const power = Math.max(0, powerData.base + powerData.amplitude * Math.sin(time * powerData.frequency));
             this.updateSocketPowerDisplay(deviceId, power);
             time += 0.1;
-        }, 100); // Update every 100ms for smooth animation
+        }, 200); // Reduced frequency for better performance
     }
     
     stopSocketSimulation(deviceId) {
@@ -5573,7 +5591,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         
         this.radiatorInterval = setInterval(() => {
             this.updateRadiatorTemperature();
-        }, 10000); // Update every 10 seconds for better performance
+        }, 15000); // Reduced frequency for better performance
     }
     
     stopRadiatorTemperatureControl() {
