@@ -42,6 +42,9 @@ class AppManager {
         // AI Assistant
         this.aiAssistantActive = false;
         
+        // Performance optimization
+        this.throttleTimers = new Map();
+        this.debounceTimers = new Map();
         
         this.init();
     }
@@ -1115,34 +1118,61 @@ class AppManager {
         this.saveSetting('largeText', isEnabled);
     }
 
-    // Disable Animations
-    toggleAnimations() {
-        const checkbox = document.getElementById('disable-animations');
+
+    // Laptop Optimization
+    toggleLaptopOptimization() {
+        const checkbox = document.getElementById('laptop-optimization');
         const isEnabled = checkbox.checked;
         
         if (isEnabled) {
-            document.body.classList.add('disable-animations');
-            this.showNotification('Alle animationer deaktiveret', 'success');
-            console.log('🚫 Alle animationer deaktiveret for maksimal performance');
+            document.body.classList.add('laptop-optimized');
+            this.showNotification('Performance optimering aktiveret - appen kører nu optimalt på bærbare PC\'er', 'success');
+            console.log('🚀 Laptop optimization aktiveret');
         } else {
-            document.body.classList.remove('disable-animations');
-            this.showNotification('Animationer aktiveret igen', 'info');
-            console.log('✨ Animationer aktiveret igen');
+            document.body.classList.remove('laptop-optimized');
+            this.showNotification('Performance optimering deaktiveret - appen kører nu med fulde effekter', 'info');
+            console.log('✨ Laptop optimization deaktiveret');
         }
         
-        this.saveSetting('disableAnimations', isEnabled);
+        this.saveSetting('laptopOptimization', isEnabled);
     }
 
-    // Performance Mode
-    togglePerformanceMode() {
-        const body = document.body;
-        if (body.classList.contains('performance-mode')) {
-            body.classList.remove('performance-mode');
-            this.showNotification('Performance mode deaktiveret', 'success');
-        } else {
-            body.classList.add('performance-mode');
-            this.showNotification('Performance mode aktiveret - optimeret for bærbare PC\'er', 'success');
+    // Performance optimization utilities
+    throttle(func, delay = 100) {
+        const key = func.toString();
+        if (this.throttleTimers.has(key)) {
+            return this.throttleTimers.get(key);
         }
+        
+        let lastCall = 0;
+        const throttled = (...args) => {
+            const now = Date.now();
+            if (now - lastCall >= delay) {
+                lastCall = now;
+                return func.apply(this, args);
+            }
+        };
+        
+        this.throttleTimers.set(key, throttled);
+        return throttled;
+    }
+    
+    debounce(func, delay = 300) {
+        const key = func.toString();
+        if (this.debounceTimers.has(key)) {
+            clearTimeout(this.debounceTimers.get(key));
+        }
+        
+        const debounced = (...args) => {
+            const timer = setTimeout(() => {
+                func.apply(this, args);
+                this.debounceTimers.delete(key);
+            }, delay);
+            
+            this.debounceTimers.set(key, timer);
+        };
+        
+        return debounced;
     }
 
     // Sound Notifications
@@ -1281,8 +1311,7 @@ class AppManager {
             'compactView',
             'highContrast',
             'largeText',
-            'disableAnimations',
-            'performanceMode',
+            'laptopOptimization',
             'soundNotifications',
             'desktopNotifications',
             'autoLogout',
@@ -1295,8 +1324,7 @@ class AppManager {
             'compactView': { id: 'compact-view', class: 'compact-view' },
             'highContrast': { id: 'high-contrast', class: 'high-contrast' },
             'largeText': { id: 'large-text', class: 'large-text' },
-            'disableAnimations': { id: 'disable-animations', class: 'disable-animations' },
-            'performanceMode': { id: 'performance-mode', class: 'performance-mode' },
+            'laptopOptimization': { id: 'laptop-optimization', class: 'laptop-optimized' },
             'soundNotifications': { id: 'sound-notifications', class: 'sound-notifications' },
             'desktopNotifications': { id: 'desktop-notifications', class: 'desktop-notifications' },
             'autoLogout': { id: 'auto-logout', class: 'auto-logout' },
@@ -6138,10 +6166,12 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     updateSmartIconAppearance(icon) {
         if (!icon) return;
         
-        const isOn = icon.dataset.value === 'true';
-        const iconContent = icon.querySelector('.icon-content');
-        
-        if (!iconContent) return;
+        // Use requestAnimationFrame for better performance
+        requestAnimationFrame(() => {
+            const isOn = icon.dataset.value === 'true';
+            const iconContent = icon.querySelector('.icon-content');
+            
+            if (!iconContent) return;
         
         // Handle different device types
         if (icon.dataset.device.includes('stikkontakt')) {
@@ -6216,6 +6246,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 icon.style.borderColor = '#ffffff';
             }
         }
+        });
     }
 
     // ===== E-LEARNING FUNCTIONALITY =====
