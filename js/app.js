@@ -1227,11 +1227,29 @@ class AppManager {
             console.log('FirebaseConfig available:', !!window.FirebaseConfig);
             console.log('isFirebaseReady function:', typeof window.FirebaseConfig?.isFirebaseReady);
             
-            if (window.FirebaseConfig && 
-                typeof window.FirebaseConfig.isFirebaseReady === 'function' && 
-                window.FirebaseConfig.isFirebaseReady()) {
-                console.log('✅ Firebase is ready!');
-                return;
+            // Try to call isFirebaseReady if it exists
+            if (window.FirebaseConfig && typeof window.FirebaseConfig.isFirebaseReady === 'function') {
+                try {
+                    const isReady = window.FirebaseConfig.isFirebaseReady();
+                    console.log('isFirebaseReady result:', isReady);
+                    if (isReady) {
+                        console.log('✅ Firebase is ready!');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error calling isFirebaseReady:', error);
+                }
+            } else {
+                console.log('isFirebaseReady not available, trying to initialize Firebase...');
+                // Try to initialize Firebase if not done
+                if (typeof firebase !== 'undefined' && !app) {
+                    try {
+                        await window.FirebaseConfig?.initializeFirebase();
+                        console.log('Firebase initialization attempted');
+                    } catch (error) {
+                        console.error('Failed to initialize Firebase:', error);
+                    }
+                }
             }
             
             console.log('❌ Firebase not ready yet, waiting...');
@@ -1244,8 +1262,25 @@ class AppManager {
             FirebaseConfig: !!window.FirebaseConfig,
             isFirebaseReady: typeof window.FirebaseConfig?.isFirebaseReady,
             firebase: typeof firebase,
+            app: !!app,
+            auth: !!auth,
+            db: !!db,
             environment: window.location.hostname
         });
+        
+        // Final attempt - try to initialize Firebase directly
+        if (typeof firebase !== 'undefined' && !app) {
+            console.log('🔄 Final attempt: Direct Firebase initialization...');
+            try {
+                await window.FirebaseConfig?.initializeFirebase();
+                if (window.FirebaseConfig?.isFirebaseReady()) {
+                    console.log('✅ Firebase ready after final attempt!');
+                    return;
+                }
+            } catch (error) {
+                console.error('❌ Final Firebase initialization failed:', error);
+            }
+        }
         
         throw new Error('Firebase not available after waiting');
     }
