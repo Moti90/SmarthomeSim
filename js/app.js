@@ -1594,12 +1594,12 @@ class AppManager {
             
             // Wait for Firebase to be ready with retry logic
             let retryCount = 0;
-            const maxRetries = 5;
+            const maxRetries = 10; // Increased retries
             
             while (retryCount < maxRetries) {
                 console.log(`Checking Firebase readiness... (attempt ${retryCount + 1}/${maxRetries})`);
                 console.log('FirebaseConfig available:', !!window.FirebaseConfig);
-                console.log('isFirebaseReady function:', typeof window.FirebaseConfig.isFirebaseReady);
+                console.log('isFirebaseReady function:', typeof window.FirebaseConfig?.isFirebaseReady);
                 
                 if (window.FirebaseConfig && 
                     typeof window.FirebaseConfig.isFirebaseReady === 'function' && 
@@ -1616,6 +1616,7 @@ class AppManager {
             if (!window.FirebaseConfig || 
                 typeof window.FirebaseConfig.isFirebaseReady !== 'function' || 
                 !window.FirebaseConfig.isFirebaseReady()) {
+                console.error('❌ Firebase still not ready after', maxRetries, 'attempts');
                 throw new Error('Firebase not available after waiting - please try again');
             }
             
@@ -2003,11 +2004,19 @@ class AppManager {
         }
         
         try {
-            const db = window.FirebaseConfig.getFirestore();
-            if (!db) {
-                this.showNotification('Firebase ikke tilgængelig', 'error');
+            // Check if Firebase is ready
+            if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
+                this.showNotification('Firebase initialiserer stadig - prøv igen om et øjeblik', 'warning');
                 return;
             }
+            
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                this.showNotification('Firebase database ikke tilgængelig', 'error');
+                return;
+            }
+            
+            console.log('🔍 Checking if class code exists:', classCode);
             
             // Check if class code already exists
             const existingClass = await db.collection('classes').where('code', '==', classCode).get();
@@ -2015,6 +2024,8 @@ class AppManager {
                 this.showNotification('Klasse kode findes allerede - vælg en anden', 'warning');
                 return;
             }
+            
+            console.log('✅ Class code is unique, creating class...');
             
             // Create class
             const classData = {
@@ -2026,7 +2037,10 @@ class AppManager {
                 students: []
             };
             
-            await db.collection('classes').add(classData);
+            console.log('📝 Creating class with data:', classData);
+            
+            const docRef = await db.collection('classes').add(classData);
+            console.log('✅ Class created with ID:', docRef.id);
             
             this.showNotification(`Klasse "${className}" oprettet med kode: ${classCode}`, 'success');
             document.querySelector('.password-popup').remove();
@@ -2035,8 +2049,14 @@ class AppManager {
             this.loadCurrentClassInfo();
             
         } catch (error) {
-            console.error('Error creating class:', error);
-            this.showNotification('Fejl ved oprettelse af klasse', 'error');
+            console.error('❌ Error creating class:', error);
+            if (error.code === 'permission-denied') {
+                this.showNotification('Ingen tilladelse til at oprette klasse - tjek Firebase regler', 'error');
+            } else if (error.code === 'unavailable') {
+                this.showNotification('Firebase ikke tilgængelig - prøv igen', 'error');
+            } else {
+                this.showNotification(`Fejl ved oprettelse af klasse: ${error.message}`, 'error');
+            }
         }
     }
 

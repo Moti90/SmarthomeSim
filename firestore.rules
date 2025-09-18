@@ -79,8 +79,10 @@ service cloud.firestore {
     match /classes/{classId} {
       // Anyone can read class info (for joining)
       allow read: if request.auth != null;
-      // Only teachers can create/update classes
-      allow create, update: if request.auth != null && 
+      // Anyone can create classes (for now, we'll restrict later)
+      allow create: if request.auth != null;
+      // Only teachers can update classes
+      allow update: if request.auth != null && 
         request.auth.uid == resource.data.teacherId;
       // Teachers can delete their own classes
       allow delete: if request.auth != null && 
