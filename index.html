@@ -99,6 +99,7 @@
                 </nav>
                 
                 <div class="header-right">
+                    <button id="student-name-btn" class="btn btn-secondary" style="margin-right: 10px;">Indtast Navn</button>
                     <span id="user-info" class="user-info">rasmusjakobsen1990@gmail.com</span>
                     <button id="logout-btn" class="logout-btn">Log Ud</button>
                 </div>
@@ -1567,6 +1568,19 @@
             <div class="sensor-popup-footer">
                 <button class="btn btn-secondary" onclick="window.appManager.closeSensorStatusPopup()">Annuller</button>
                 <button class="btn btn-primary" onclick="window.appManager.applySensorStatus()">Anvend</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Name Input Popup -->
+    <div id="student-name-popup" class="password-popup">
+        <div class="password-popup-content">
+            <h3>Indtast dit navn</h3>
+            <p>Indtast dit navn så læreren kan identificere dine fremskridt:</p>
+            <input type="text" id="student-name-input" placeholder="Dit fulde navn" maxlength="50">
+            <div class="password-popup-buttons">
+                <button class="btn btn-secondary" onclick="window.appManager.closeStudentNamePopup()">Annuller</button>
+                <button class="btn btn-primary" onclick="window.appManager.saveStudentName()">Gem Navn</button>
             </div>
         </div>
     </div>

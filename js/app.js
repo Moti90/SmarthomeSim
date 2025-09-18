@@ -746,6 +746,9 @@ class AppManager {
                     // Load user's learning progress and sync with Firebase
                     await this.loadLearningProgress();
                     await this.syncProgressWithFirebase();
+                    
+                    // Check if user needs to set their name
+                    this.checkAndPromptForName();
                 } else {
                     // User is signed out
                     this.currentUser = null;
@@ -833,7 +836,11 @@ class AppManager {
 
     updateUserInfo() {
         if (this.currentUser) {
-            document.getElementById('user-info').textContent = this.currentUser.email;
+            const userInfo = document.getElementById('user-info');
+            const studentName = localStorage.getItem('studentName');
+            if (userInfo) {
+                userInfo.textContent = studentName || this.currentUser.email;
+            }
         }
     }
 
@@ -1540,6 +1547,9 @@ class AppManager {
         refreshContainer.appendChild(retryButton);
         refreshContainer.appendChild(testQuizButton);
         
+        // Setup student name input events
+        this.setupStudentNameEvents();
+        
         document.getElementById('export-data').addEventListener('click', () => {
             this.exportTeacherData();
         });
@@ -1562,11 +1572,21 @@ class AppManager {
                 return;
             }
             
+            // Check if FirebaseConfig is available
+            if (!window.FirebaseConfig) {
+                console.error('❌ window.FirebaseConfig not available');
+                throw new Error('Firebase configuration not loaded - please refresh the page');
+            }
+            
             // Wait for Firebase to be ready with retry logic
             let retryCount = 0;
             const maxRetries = 5;
             
             while (retryCount < maxRetries) {
+                console.log(`Checking Firebase readiness... (attempt ${retryCount + 1}/${maxRetries})`);
+                console.log('FirebaseConfig available:', !!window.FirebaseConfig);
+                console.log('isFirebaseReady function:', typeof window.FirebaseConfig.isFirebaseReady);
+                
                 if (window.FirebaseConfig && 
                     typeof window.FirebaseConfig.isFirebaseReady === 'function' && 
                     window.FirebaseConfig.isFirebaseReady()) {
@@ -1648,9 +1668,15 @@ class AppManager {
                 const userData = userDoc.data();
                 const userId = userDoc.id;
                 
-                // Get user's progress data
-                const progressSnapshot = await db.collection('userProgress').doc(userId).get();
-                const progressData = progressSnapshot.exists ? progressSnapshot.data() : {};
+                // Get user's progress data from learning_progress collection
+                const progressSnapshot = await db.collection('learning_progress').where('userId', '==', userId).get();
+                const progressData = { completedModules: {} };
+                progressSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.subtopicId) {
+                        progressData.completedModules[data.subtopicId] = true;
+                    }
+                });
                 
                 // Get user's scenarios
                 const scenariosSnapshot = await db.collection('scenarios').where('userId', '==', userId).get();
@@ -1684,7 +1710,7 @@ class AppManager {
                 
                 // Calculate progress percentage
                 const completedModules = progressData.completedModules ? Object.keys(progressData.completedModules).length : 0;
-                const totalModules = 8; // Total number of learning modules
+                const totalModules = 20; // Total number of learning modules
                 const progressPercentage = Math.round((completedModules / totalModules) * 100);
                 
                 // Get last activity timestamp
@@ -1694,7 +1720,7 @@ class AppManager {
                 
                 students.push({
                     id: userId,
-                    name: userData.displayName || userData.email || 'Anonym elev',
+                    name: userData.studentName || userData.displayName || userData.email || 'Anonym elev',
                     email: userData.email || 'Ingen email',
                     progress: progressPercentage,
                     modules: completedModules,
@@ -1717,24 +1743,14 @@ class AppManager {
     }
 
     generateMockStudentData() {
-        const students = [
-            { name: 'Anna Andersen', progress: 95, modules: 8, scenarios: 12, rules: 15, lastActivity: '2024-12-20' },
-            { name: 'Lars Larsen', progress: 87, modules: 7, scenarios: 10, rules: 12, lastActivity: '2024-12-19' },
-            { name: 'Maria Møller', progress: 92, modules: 8, scenarios: 11, rules: 14, lastActivity: '2024-12-20' },
-            { name: 'Peter Petersen', progress: 78, modules: 6, scenarios: 8, rules: 9, lastActivity: '2024-12-18' },
-            { name: 'Sofia Sørensen', progress: 88, modules: 7, scenarios: 9, rules: 11, lastActivity: '2024-12-19' },
-            { name: 'Thomas Thomsen', progress: 82, modules: 6, scenarios: 7, rules: 10, lastActivity: '2024-12-17' },
-            { name: 'Emma Eriksen', progress: 90, modules: 8, scenarios: 10, rules: 13, lastActivity: '2024-12-20' },
-            { name: 'Nikolaj Nielsen', progress: 75, modules: 5, scenarios: 6, rules: 8, lastActivity: '2024-12-16' }
-        ];
-        
-        return students;
+        // Return empty array - no mock data, only real Firebase data
+        return [];
     }
 
     displayTeacherData(students) {
         // Update overview stats
         const totalStudents = students.length;
-        const avgProgress = Math.round(students.reduce((sum, s) => sum + s.progress, 0) / totalStudents);
+        const avgProgress = totalStudents > 0 ? Math.round(students.reduce((sum, s) => sum + s.progress, 0) / totalStudents) : 0;
         const completedModules = students.reduce((sum, s) => sum + s.modules, 0);
         
         document.getElementById('total-students').textContent = totalStudents;
@@ -1881,6 +1897,113 @@ class AppManager {
                 const quizResult = cells[7].textContent.split('/');
                 return parseInt(quizResult[0]) || 0;
             default: return 0;
+        }
+    }
+
+    setupStudentNameEvents() {
+        // Setup student name input button
+        const studentNameBtn = document.getElementById('student-name-btn');
+        if (studentNameBtn) {
+            studentNameBtn.addEventListener('click', () => {
+                this.showStudentNamePopup();
+            });
+        }
+        
+        // Setup enter key for name input
+        const nameInput = document.getElementById('student-name-input');
+        if (nameInput) {
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.saveStudentName();
+                }
+            });
+        }
+    }
+
+    showStudentNamePopup() {
+        const popup = document.getElementById('student-name-popup');
+        if (popup) {
+            popup.style.display = 'flex';
+            const input = document.getElementById('student-name-input');
+            if (input) {
+                input.focus();
+                // Load existing name if available
+                const existingName = localStorage.getItem('studentName');
+                if (existingName) {
+                    input.value = existingName;
+                }
+            }
+        }
+    }
+
+    closeStudentNamePopup() {
+        const popup = document.getElementById('student-name-popup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
+    }
+
+    async saveStudentName() {
+        const nameInput = document.getElementById('student-name-input');
+        if (!nameInput) return;
+        
+        const studentName = nameInput.value.trim();
+        if (!studentName) {
+            this.showNotification('Indtast venligst dit navn', 'warning');
+            return;
+        }
+        
+        if (studentName.length < 2) {
+            this.showNotification('Navnet skal være mindst 2 tegn', 'warning');
+            return;
+        }
+        
+        try {
+            // Save to localStorage
+            localStorage.setItem('studentName', studentName);
+            
+            // Save to Firebase if user is logged in
+            if (this.currentUser) {
+                const db = window.FirebaseConfig.getFirestore();
+                if (db) {
+                    await db.collection('users').doc(this.currentUser.uid).update({
+                        displayName: studentName,
+                        studentName: studentName,
+                        lastUpdated: new Date()
+                    });
+                    console.log('✅ Student name saved to Firebase');
+                }
+            }
+            
+            this.showNotification(`Navn gemt: ${studentName}`, 'success');
+            this.closeStudentNamePopup();
+            
+            // Update user info display
+            this.updateUserInfoDisplay();
+            
+        } catch (error) {
+            console.error('Error saving student name:', error);
+            this.showNotification('Fejl ved gemning af navn', 'error');
+        }
+    }
+
+    updateUserInfoDisplay() {
+        const userInfo = document.getElementById('user-info');
+        const studentName = localStorage.getItem('studentName');
+        if (userInfo && studentName) {
+            userInfo.textContent = studentName;
+        }
+    }
+
+    checkAndPromptForName() {
+        // Check if user is logged in but hasn't set a name
+        if (this.currentUser && !localStorage.getItem('studentName')) {
+            // Show a notification suggesting to set name
+            this.showNotification('Indtast venligst dit navn så læreren kan identificere dine fremskridt', 'info');
+            // Auto-open name input after a short delay
+            setTimeout(() => {
+                this.showStudentNamePopup();
+            }, 2000);
         }
     }
 
@@ -10971,7 +11094,13 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         
         if (this.currentUser && subtopicId) {
             try {
-                console.log('💾 Attempting to save quiz result to Firebase...');
+                // Save learning progress (mark module as completed)
+                console.log('💾 Saving learning progress...');
+                await this.saveLearningProgress(subtopicId);
+                console.log('✅ Learning progress saved');
+                
+                // Also save detailed quiz result
+                console.log('💾 Saving detailed quiz result...');
                 await this.saveQuizResult(subtopicId, {
                     score: score,
                     totalQuestions: questions.length,
@@ -10984,11 +11113,11 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 });
                 console.log('✅ Quiz result saved successfully');
             } catch (error) {
-                console.error('❌ Error saving quiz result:', error);
+                console.error('❌ Error saving data:', error);
                 // Still show notification even if save fails
             }
         } else {
-            console.log('⚠️ Cannot save quiz result:', {
+            console.log('⚠️ Cannot save data:', {
                 reason: !this.currentUser ? 'No user logged in' : 'No subtopicId',
                 currentUser: !!this.currentUser,
                 subtopicId: subtopicId
