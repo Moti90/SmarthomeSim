@@ -99,6 +99,7 @@
                 </nav>
                 
                 <div class="header-right">
+                    <button id="join-class-btn" class="btn btn-secondary" style="margin-right: 10px;">Tilslut til Klasse</button>
                     <span id="user-info" class="user-info">rasmusjakobsen1990@gmail.com</span>
                     <button id="logout-btn" class="logout-btn">Log Ud</button>
                 </div>
@@ -1571,6 +1572,25 @@
         </div>
     </div>
 
+    <!-- Join Class Popup -->
+    <div id="join-class-popup" class="password-popup">
+        <div class="password-popup-content">
+            <h3>🏫 Tilslut til Klasse</h3>
+            <p>Indtast klasse koden for at tilslutte dig en klasse:</p>
+            <div class="password-popup-body">
+                <div class="password-input-group">
+                    <input type="text" id="class-code-join-input" placeholder="Klasse kode (f.eks. ABC123)" maxlength="10">
+                </div>
+                <div class="password-input-group" style="margin-top: 10px;">
+                    <input type="text" id="student-name-join-input" placeholder="Dit navn (valgfrit)" maxlength="50">
+                </div>
+            </div>
+            <div class="password-popup-footer">
+                <button class="btn btn-secondary" onclick="window.appManager.closeJoinClassPopup()">Annuller</button>
+                <button class="btn btn-primary" onclick="window.appManager.joinClass()">Tilslut Klasse</button>
+            </div>
+        </div>
+    </div>
 
     
 </body>

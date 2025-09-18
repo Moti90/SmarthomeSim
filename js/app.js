@@ -747,6 +747,9 @@ class AppManager {
                     await this.loadLearningProgress();
                     await this.syncProgressWithFirebase();
                     
+                    // Setup student class events
+                    this.setupStudentClassEvents();
+                    
                 } else {
                     // User is signed out
                     this.currentUser = null;
@@ -1252,6 +1255,17 @@ class AppManager {
                         </div>
                         
                         <div class="stat-card">
+                            <h3>🏫 Klasse Administration</h3>
+                            <div class="class-management">
+                                <button id="create-class-btn" class="btn btn-primary">➕ Opret Ny Klasse</button>
+                                <button id="manage-classes-btn" class="btn btn-secondary">📋 Mine Klasser</button>
+                            </div>
+                            <div id="current-class-info" style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                                <p>Ingen klasse valgt</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
                             <h3>🏆 Top Performers</h3>
                             <div id="top-performers">
                                 <p>Indlæser data...</p>
@@ -1280,6 +1294,7 @@ class AppManager {
                                     <tr>
                                         <th>Rang</th>
                                         <th>Elev</th>
+                                        <th>Klasse</th>
                                         <th>Email</th>
                                         <th>Progress</th>
                                         <th>Moduler</th>
@@ -1326,6 +1341,7 @@ class AppManager {
         this.addTeacherDashboardStyles();
         this.setupTeacherDashboardEvents();
         this.loadTeacherData();
+        this.loadCurrentClassInfo();
         
         this.showNotification('Lærer dashboard åbnet', 'success');
         console.log('👨‍🏫 Teacher dashboard åbnet');
@@ -1549,6 +1565,12 @@ class AppManager {
         document.getElementById('sort-by').addEventListener('change', (e) => {
             this.sortHighscore(e.target.value);
         });
+        
+        // Setup class management events
+        this.setupClassManagementEvents();
+        
+        // Setup student class joining events
+        this.setupStudentClassEvents();
     }
 
     async loadTeacherData() {
@@ -1710,10 +1732,29 @@ class AppManager {
                     new Date(userData.lastLogin.seconds * 1000).toISOString().split('T')[0] : 
                     'Ukendt';
                 
+                // Get student class info
+                const studentSnapshot = await db.collection('students').where('userId', '==', userId).get();
+                let studentName = userData.email || 'Anonym elev';
+                let className = 'Ingen klasse';
+                
+                if (!studentSnapshot.empty) {
+                    const studentData = studentSnapshot.docs[0].data();
+                    if (studentData.name) {
+                        studentName = studentData.name;
+                    }
+                    if (studentData.classId) {
+                        const classDoc = await db.collection('classes').doc(studentData.classId).get();
+                        if (classDoc.exists) {
+                            className = classDoc.data().name;
+                        }
+                    }
+                }
+                
                 students.push({
                     id: userId,
-                    name: userData.email || 'Anonym elev',
+                    name: studentName,
                     email: userData.email || 'Ingen email',
+                    className: className,
                     progress: progressPercentage,
                     modules: completedModules,
                     scenarios: scenariosCount,
@@ -1777,6 +1818,7 @@ class AppManager {
                 <tr class="rank-${index < 3 ? index + 1 : ''}">
                     <td>${index + 1}</td>
                     <td>${student.name}</td>
+                    <td>${student.className || 'Ingen klasse'}</td>
                     <td>${student.email}</td>
                     <td>${student.progress}%</td>
                     <td>${student.modules}</td>
@@ -1892,6 +1934,300 @@ class AppManager {
         }
     }
 
+
+    setupClassManagementEvents() {
+        // Create class button
+        const createClassBtn = document.getElementById('create-class-btn');
+        if (createClassBtn) {
+            createClassBtn.addEventListener('click', () => {
+                this.showCreateClassPopup();
+            });
+        }
+        
+        // Manage classes button
+        const manageClassesBtn = document.getElementById('manage-classes-btn');
+        if (manageClassesBtn) {
+            manageClassesBtn.addEventListener('click', () => {
+                this.showManageClassesPopup();
+            });
+        }
+    }
+
+    showCreateClassPopup() {
+        const popup = document.createElement('div');
+        popup.className = 'password-popup';
+        popup.style.display = 'flex';
+        popup.innerHTML = `
+            <div class="password-popup-content">
+                <h3>➕ Opret Ny Klasse</h3>
+                <div class="password-popup-body">
+                    <div class="password-input-group">
+                        <input type="text" id="class-name-input" placeholder="Klasse navn (f.eks. 9A, IT-klassen)" maxlength="50">
+                    </div>
+                    <div class="password-input-group" style="margin-top: 10px;">
+                        <input type="text" id="class-code-input" placeholder="Klasse kode (f.eks. ABC123)" maxlength="10">
+                        <button type="button" id="generate-code-btn" class="btn btn-secondary">Generer</button>
+                    </div>
+                </div>
+                <div class="password-popup-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.password-popup').remove()">Annuller</button>
+                    <button class="btn btn-primary" onclick="window.appManager.createClass()">Opret Klasse</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        // Generate random code
+        document.getElementById('generate-code-btn').addEventListener('click', () => {
+            const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('class-code-input').value = code;
+        });
+        
+        // Focus on class name input
+        document.getElementById('class-name-input').focus();
+    }
+
+    async createClass() {
+        const className = document.getElementById('class-name-input').value.trim();
+        const classCode = document.getElementById('class-code-input').value.trim().toUpperCase();
+        
+        if (!className || !classCode) {
+            this.showNotification('Indtast venligst både klasse navn og kode', 'warning');
+            return;
+        }
+        
+        if (classCode.length < 4) {
+            this.showNotification('Klasse kode skal være mindst 4 tegn', 'warning');
+            return;
+        }
+        
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                this.showNotification('Firebase ikke tilgængelig', 'error');
+                return;
+            }
+            
+            // Check if class code already exists
+            const existingClass = await db.collection('classes').where('code', '==', classCode).get();
+            if (!existingClass.empty) {
+                this.showNotification('Klasse kode findes allerede - vælg en anden', 'warning');
+                return;
+            }
+            
+            // Create class
+            const classData = {
+                name: className,
+                code: classCode,
+                teacherId: this.currentUser.uid,
+                teacherEmail: this.currentUser.email,
+                createdAt: new Date(),
+                students: []
+            };
+            
+            await db.collection('classes').add(classData);
+            
+            this.showNotification(`Klasse "${className}" oprettet med kode: ${classCode}`, 'success');
+            document.querySelector('.password-popup').remove();
+            
+            // Refresh class info
+            this.loadCurrentClassInfo();
+            
+        } catch (error) {
+            console.error('Error creating class:', error);
+            this.showNotification('Fejl ved oprettelse af klasse', 'error');
+        }
+    }
+
+    async loadCurrentClassInfo() {
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db || !this.currentUser) return;
+            
+            // Get teacher's classes
+            const classesSnapshot = await db.collection('classes')
+                .where('teacherId', '==', this.currentUser.uid)
+                .get();
+            
+            const currentClassInfo = document.getElementById('current-class-info');
+            if (!currentClassInfo) return;
+            
+            if (classesSnapshot.empty) {
+                currentClassInfo.innerHTML = '<p>Ingen klasser oprettet endnu</p>';
+                return;
+            }
+            
+            const classes = [];
+            classesSnapshot.forEach(doc => {
+                classes.push({ id: doc.id, ...doc.data() });
+            });
+            
+            if (classes.length === 1) {
+                const classData = classes[0];
+                currentClassInfo.innerHTML = `
+                    <p><strong>${classData.name}</strong></p>
+                    <p>Kode: <code>${classData.code}</code></p>
+                    <p>Elever: ${classData.students.length}</p>
+                `;
+            } else {
+                currentClassInfo.innerHTML = `
+                    <p><strong>${classes.length} klasser oprettet</strong></p>
+                    <p>Klik "Mine Klasser" for at se detaljer</p>
+                `;
+            }
+            
+        } catch (error) {
+            console.error('Error loading class info:', error);
+        }
+    }
+
+    showManageClassesPopup() {
+        // This will be implemented next
+        this.showNotification('Klasse administration kommer snart', 'info');
+    }
+
+    setupStudentClassEvents() {
+        // Join class button
+        const joinClassBtn = document.getElementById('join-class-btn');
+        if (joinClassBtn) {
+            joinClassBtn.addEventListener('click', () => {
+                this.showJoinClassPopup();
+            });
+        }
+        
+        // Check if student is already in a class
+        this.checkStudentClassStatus();
+    }
+
+    showJoinClassPopup() {
+        const popup = document.getElementById('join-class-popup');
+        if (popup) {
+            popup.style.display = 'flex';
+            const codeInput = document.getElementById('class-code-join-input');
+            if (codeInput) {
+                codeInput.focus();
+                codeInput.value = '';
+            }
+            const nameInput = document.getElementById('student-name-join-input');
+            if (nameInput) {
+                nameInput.value = '';
+            }
+        }
+    }
+
+    closeJoinClassPopup() {
+        const popup = document.getElementById('join-class-popup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
+    }
+
+    async joinClass() {
+        const classCode = document.getElementById('class-code-join-input').value.trim().toUpperCase();
+        const studentName = document.getElementById('student-name-join-input').value.trim();
+        
+        if (!classCode) {
+            this.showNotification('Indtast venligst klasse koden', 'warning');
+            return;
+        }
+        
+        if (classCode.length < 4) {
+            this.showNotification('Klasse kode skal være mindst 4 tegn', 'warning');
+            return;
+        }
+        
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                this.showNotification('Firebase ikke tilgængelig', 'error');
+                return;
+            }
+            
+            // Find class by code
+            const classSnapshot = await db.collection('classes').where('code', '==', classCode).get();
+            if (classSnapshot.empty) {
+                this.showNotification('Klasse kode ikke fundet - tjek koden', 'warning');
+                return;
+            }
+            
+            const classDoc = classSnapshot.docs[0];
+            const classData = classDoc.data();
+            const classId = classDoc.id;
+            
+            // Check if student is already in this class
+            if (classData.students && classData.students.includes(this.currentUser.uid)) {
+                this.showNotification('Du er allerede tilmeldt denne klasse', 'info');
+                this.closeJoinClassPopup();
+                return;
+            }
+            
+            // Add student to class
+            const updatedStudents = [...(classData.students || []), this.currentUser.uid];
+            await db.collection('classes').doc(classId).update({
+                students: updatedStudents
+            });
+            
+            // Create student record
+            const studentData = {
+                userId: this.currentUser.uid,
+                email: this.currentUser.email,
+                name: studentName || this.currentUser.email,
+                classId: classId,
+                classCode: classCode,
+                joinedAt: new Date()
+            };
+            
+            await db.collection('students').doc(this.currentUser.uid).set(studentData, { merge: true });
+            
+            this.showNotification(`Tilsluttet til klasse: ${classData.name}`, 'success');
+            this.closeJoinClassPopup();
+            
+            // Update UI to show class status
+            this.updateStudentClassStatus(classData.name, classCode);
+            
+        } catch (error) {
+            console.error('Error joining class:', error);
+            this.showNotification('Fejl ved tilslutning til klasse', 'error');
+        }
+    }
+
+    async checkStudentClassStatus() {
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db || !this.currentUser) return;
+            
+            // Check if student is in any class
+            const studentSnapshot = await db.collection('students')
+                .where('userId', '==', this.currentUser.uid)
+                .get();
+            
+            if (!studentSnapshot.empty) {
+                const studentData = studentSnapshot.docs[0].data();
+                if (studentData.classId) {
+                    // Get class info
+                    const classDoc = await db.collection('classes').doc(studentData.classId).get();
+                    if (classDoc.exists) {
+                        const classData = classDoc.data();
+                        this.updateStudentClassStatus(classData.name, classData.code);
+                    }
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error checking student class status:', error);
+        }
+    }
+
+    updateStudentClassStatus(className, classCode) {
+        const joinBtn = document.getElementById('join-class-btn');
+        if (joinBtn) {
+            joinBtn.textContent = `🏫 ${className}`;
+            joinBtn.title = `Tilsluttet til klasse: ${className} (${classCode})`;
+            joinBtn.style.backgroundColor = '#28a745';
+            joinBtn.style.color = 'white';
+        }
+    }
 
     async createTestQuizData() {
         if (!this.currentUser) {
