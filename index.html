@@ -171,7 +171,6 @@
                             <div class="panel-header">
                                 <h2>Vælg Emne</h2>
                                 <div class="header-controls">
-                                    <button id="join-class-btn" class="btn btn-secondary" style="margin-right: 10px;">🏫 Tilslut til Klasse</button>
                                     <div class="search-box">
                                         <input type="text" id="topic-search" placeholder="Søg emner...">
                                         <span class="search-icon">🔍</span>
@@ -1235,15 +1234,6 @@
                                     </label>
                                 </div>
 
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <h4>Lærer Dashboard</h4>
-                                        <p>Åbn lærer dashboard for at se highscore og progress over alle elever</p>
-                                    </div>
-                                    <button class="btn btn-secondary" onclick="window.appManager.openTeacherDashboard()">
-                                        👨‍🏫 Åbn Lærer Dashboard
-                                    </button>
-                                </div>
 
                             </div>
                         </div>
@@ -1497,26 +1487,6 @@
     </div>
 
     <!-- Teacher Dashboard Password Popup -->
-    <div id="teacher-password-popup" class="password-popup">
-        <div class="password-popup-content">
-            <div class="password-popup-header">
-                <h3>👨‍🏫 Lærer Dashboard</h3>
-                <p>Indtast lærer koden for at åbne elev highscore dashboard</p>
-            </div>
-            <div class="password-popup-body">
-                <div class="password-input-group">
-                    <input type="password" id="teacher-password-input" placeholder="Indtast lærer kode..." autocomplete="current-password" maxlength="20">
-                    <button type="button" id="toggle-teacher-password-visibility" class="password-toggle">
-                        <span class="password-icon">👁️</span>
-                    </button>
-                </div>
-            </div>
-            <div class="password-popup-footer">
-                <button type="button" id="cancel-teacher-password" class="btn btn-secondary">Annuller</button>
-                <button type="button" id="submit-teacher-password" class="btn btn-primary">Åbn Dashboard</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Dæmper Dialog Popup -->
     <div id="dimmer-dialog" class="dimmer-popup">
@@ -1575,24 +1545,6 @@
     </div>
 
     <!-- Join Class Popup -->
-    <div id="join-class-popup" class="password-popup">
-        <div class="password-popup-content">
-            <h3>🏫 Tilslut til Klasse</h3>
-            <p>Indtast klasse koden for at tilslutte dig en klasse:</p>
-            <div class="password-popup-body">
-                <div class="password-input-group">
-                    <input type="text" id="class-code-join-input" placeholder="Klasse kode (f.eks. ABC123)" maxlength="10">
-                </div>
-                <div class="password-input-group" style="margin-top: 10px;">
-                    <input type="text" id="student-name-join-input" placeholder="Dit navn (valgfrit)" maxlength="50">
-                </div>
-            </div>
-            <div class="password-popup-footer">
-                <button class="btn btn-secondary" onclick="window.appManager.closeJoinClassPopup()">Annuller</button>
-                <button class="btn btn-primary" onclick="window.appManager.joinClass()">Tilslut Klasse</button>
-            </div>
-        </div>
-    </div>
 
     
 </body>
