@@ -46,6 +46,17 @@ service cloud.firestore {
         request.auth.uid == request.resource.data.userId;
     }
     
+    // Quiz results - users can access their own quiz results, teachers can read all
+    match /quiz_results/{quizId} {
+      // Users can read and write their own quiz results
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      // Teachers can read all quiz results (for dashboard)
+      allow read: if request.auth != null;
+    }
+    
     // Rules - users can only access their own rules
     match /rules/{ruleId} {
       allow read, write: if request.auth != null && 

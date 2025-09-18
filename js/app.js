@@ -1552,15 +1552,23 @@ class AppManager {
                 return;
             }
             
-            // Wait for Firebase to be ready
-            if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
-                console.log('Firebase not ready yet, waiting...');
-                // Wait a bit for Firebase to initialize
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
-                    throw new Error('Firebase not available after waiting');
+            // Wait for Firebase to be ready with retry logic
+            let retryCount = 0;
+            const maxRetries = 5;
+            
+            while (retryCount < maxRetries) {
+                if (window.FirebaseConfig && window.FirebaseConfig.isFirebaseReady()) {
+                    console.log('✅ Firebase is ready');
+                    break;
                 }
+                
+                console.log(`Firebase not ready yet, waiting... (attempt ${retryCount + 1}/${maxRetries})`);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                retryCount++;
+            }
+            
+            if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
+                throw new Error('Firebase not available after waiting - please try again');
             }
             
             // Load real student data from Firebase
@@ -1586,7 +1594,9 @@ class AppManager {
             } else if (error.message.includes('configuration not available')) {
                 errorMessage = 'Firebase konfiguration mangler - tjek forbindelsen';
             } else if (error.message.includes('database not initialized')) {
-                errorMessage = 'Firebase database ikke klar - prøv igen';
+                errorMessage = 'Firebase database ikke klar - prøv "Prøv igen" knappen';
+            } else if (error.message.includes('not available after waiting')) {
+                errorMessage = 'Firebase tager for lang tid at starte - prøv "Prøv igen" knappen';
             }
             
             this.showNotification(errorMessage, 'warning');
