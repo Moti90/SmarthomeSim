@@ -1245,7 +1245,7 @@ class AppManager {
         }
     }
 
-    validateTeacherPassword() {
+    async validateTeacherPassword() {
         const passwordInput = document.getElementById('teacher-password-input');
         const enteredPassword = passwordInput.value.trim().toUpperCase();
         
