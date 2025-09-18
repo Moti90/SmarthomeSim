@@ -505,7 +505,7 @@
                                 </div>
                                 
                                 <!-- Altanlys -->
-                                <div class="smart-icon" data-device="altan-lys" data-type="light" data-value="false" data-default-left="10" data-default-top="10" data-device-name="Altanlys" style="left: 10%; top: 10%;">
+                                <div class="smart-icon" data-device="altan-lys" data-type="dimmer" data-value="0" data-default-left="10" data-default-top="10" data-device-name="Altanlys" style="left: 10%; top: 10%;">
                                     <div class="icon-content">
                                         <span class="icon-symbol">💡</span>
                                     </div>
@@ -612,12 +612,10 @@
                                     
                                     <!-- Altanlys -->
                                     <div class="control-item">
-                                        <label for="altan-lys-toggle">Altanlys</label>
-                                        <div class="toggle-container">
-                                            <input type="checkbox" id="altan-lys-toggle" class="device-toggle" data-device="altan-lys">
-                                            <label for="altan-lys-toggle" class="toggle-switch">
-                                                <span class="toggle-slider"></span>
-                                            </label>
+                                        <label for="altan-lys-dimmer">Altanlys</label>
+                                        <div class="dimmer-container">
+                                            <input type="range" id="altan-lys-dimmer" class="dimmer-slider" data-device="altan-lys" min="0" max="100" value="0">
+                                            <span class="dimmer-value">0%</span>
                                         </div>
                                     </div>
                                     
@@ -932,11 +930,11 @@
                             </div>
                             
                             <!-- Altanlys -->
-                            <div class="block-item" draggable="true" data-block-type="action" data-block-subtype="light" data-actuator-id="altan-lys">
+                            <div class="block-item" draggable="true" data-block-type="action" data-block-subtype="dimmer" data-actuator-id="altan-lys">
                                 <span class="block-icon">💡</span>
                                 <div>
                                     <div class="block-name">Altanlys</div>
-                                    <div class="block-description">Tænd/sluk altanlys</div>
+                                    <div class="block-description">Dæmp altanlys</div>
                                 </div>
                             </div>
                             

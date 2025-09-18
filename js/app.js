@@ -3335,11 +3335,11 @@ class AppManager {
                     properties: ['status', 'speed', 'auto_mode']
                 },
                 'altan-lys': {
-                    type: 'light',
+                    type: 'dimmer',
                     name: 'Altanlys',
                     room: 'Altan',
                     icon: '💡',
-                    properties: ['status', 'timer']
+                    properties: ['status', 'brightness', 'dimmer']
                 },
                 'stue-stikkontakt': {
                     type: 'light',
@@ -5989,7 +5989,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     setupSliderControls() {
         console.log('Setting up slider controls...');
         try {
-            const switches = document.querySelectorAll('.lamp-switch, .device-toggle');
+            const switches = document.querySelectorAll('.lamp-switch');
             const sliders = document.querySelectorAll('.lamp-slider, .dimmer-slider, .device-slider');
             
             console.log('Found switches:', switches.length);
@@ -6836,13 +6836,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         }
         
         if (icon.dataset.device.includes('altan-lys')) {
-            // Altanlys - simple toggle light
-            if (isOn) {
+            // Altanlys dimmer - show brightness percentage
+            const brightness = icon.dataset.value || '0';
+            const brightnessNum = parseInt(brightness);
+            if (brightnessNum > 0) {
                 icon.classList.add('active');
-                iconContent.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #ffa500)';
+                iconContent.innerHTML = `<span class="icon-symbol">💡</span><div class="power-display">${brightness}%</div>`;
             } else {
                 icon.classList.remove('active');
-                iconContent.style.filter = 'brightness(0.7)';
+                iconContent.innerHTML = '<span class="icon-symbol">💡</span>';
             }
             return;
         }
