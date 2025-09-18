@@ -3335,11 +3335,11 @@ class AppManager {
                     properties: ['status', 'speed', 'auto_mode']
                 },
                 'altan-lys': {
-                    type: 'dimmer',
+                    type: 'light',
                     name: 'Altanlys',
                     room: 'Altan',
                     icon: '💡',
-                    properties: ['brightness', 'mode', 'timer']
+                    properties: ['status', 'timer']
                 },
                 'stue-stikkontakt': {
                     type: 'light',
@@ -4373,7 +4373,7 @@ class AppManager {
                 this.showNotification(`${action.actuatorId} ${currentState ? 'slukket' : 'tændt'}`, 'success');
             }
         } else if (action.type === 'dimmer' && action.actuatorId) {
-            // Execute dimmer action (for altanlys)
+            // Execute dimmer action (for other dimmers, not altanlys)
             const deviceElement = document.querySelector(`[data-device="${action.actuatorId}"]`);
             if (deviceElement) {
                 // Set dimmer to 50% for demo
@@ -5989,7 +5989,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     setupSliderControls() {
         console.log('Setting up slider controls...');
         try {
-            const switches = document.querySelectorAll('.lamp-switch');
+            const switches = document.querySelectorAll('.lamp-switch, .device-toggle');
             const sliders = document.querySelectorAll('.lamp-slider, .dimmer-slider, .device-slider');
             
             console.log('Found switches:', switches.length);
@@ -6836,15 +6836,13 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         }
         
         if (icon.dataset.device.includes('altan-lys')) {
-            // Altanlys dimmer - show brightness percentage
-            const brightness = icon.dataset.value || '0';
-            const brightnessNum = parseInt(brightness);
-            if (brightnessNum > 0) {
+            // Altanlys - simple toggle light
+            if (isOn) {
                 icon.classList.add('active');
-                iconContent.innerHTML = `<span class="icon-symbol">💡</span><div class="power-display">${brightness}%</div>`;
+                iconContent.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #ffa500)';
             } else {
                 icon.classList.remove('active');
-                iconContent.innerHTML = '<span class="icon-symbol">💡</span>';
+                iconContent.style.filter = 'brightness(0.7)';
             }
             return;
         }
