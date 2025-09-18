@@ -3335,7 +3335,7 @@ class AppManager {
                     properties: ['status', 'speed', 'auto_mode']
                 },
                 'altan-lys': {
-                    type: 'dimmer',
+                    type: 'light',
                     name: 'Altanlys',
                     room: 'Altan',
                     icon: '💡',
@@ -6836,15 +6836,13 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         }
         
         if (icon.dataset.device.includes('altan-lys')) {
-            // Altanlys dimmer - show brightness percentage
-            const brightness = icon.dataset.value || '0';
-            const brightnessNum = parseInt(brightness);
-            if (brightnessNum > 0) {
+            // Altanlys - simple toggle light like other lamps
+            if (isOn) {
                 icon.classList.add('active');
-                iconContent.innerHTML = `<span class="icon-symbol">💡</span><div class="power-display">${brightness}%</div>`;
+                iconContent.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #ffa500)';
             } else {
                 icon.classList.remove('active');
-                iconContent.innerHTML = '<span class="icon-symbol">💡</span>';
+                iconContent.style.filter = 'brightness(0.7)';
             }
             return;
         }
