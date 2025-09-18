@@ -1526,9 +1526,19 @@ class AppManager {
             this.loadTeacherData();
         });
         
-        // Add retry button to the refresh button container
+        // Add test quiz data button
+        const testQuizButton = document.createElement('button');
+        testQuizButton.textContent = 'Test Quiz Data';
+        testQuizButton.className = 'btn btn-secondary';
+        testQuizButton.style.marginLeft = '10px';
+        testQuizButton.addEventListener('click', () => {
+            this.createTestQuizData();
+        });
+        
+        // Add buttons to the refresh button container
         const refreshContainer = document.getElementById('refresh-data').parentElement;
         refreshContainer.appendChild(retryButton);
+        refreshContainer.appendChild(testQuizButton);
         
         document.getElementById('export-data').addEventListener('click', () => {
             this.exportTeacherData();
@@ -1557,7 +1567,9 @@ class AppManager {
             const maxRetries = 5;
             
             while (retryCount < maxRetries) {
-                if (window.FirebaseConfig && window.FirebaseConfig.isFirebaseReady()) {
+                if (window.FirebaseConfig && 
+                    typeof window.FirebaseConfig.isFirebaseReady === 'function' && 
+                    window.FirebaseConfig.isFirebaseReady()) {
                     console.log('✅ Firebase is ready');
                     break;
                 }
@@ -1567,7 +1579,9 @@ class AppManager {
                 retryCount++;
             }
             
-            if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
+            if (!window.FirebaseConfig || 
+                typeof window.FirebaseConfig.isFirebaseReady !== 'function' || 
+                !window.FirebaseConfig.isFirebaseReady()) {
                 throw new Error('Firebase not available after waiting - please try again');
             }
             
@@ -1867,6 +1881,60 @@ class AppManager {
                 const quizResult = cells[7].textContent.split('/');
                 return parseInt(quizResult[0]) || 0;
             default: return 0;
+        }
+    }
+
+    async createTestQuizData() {
+        if (!this.currentUser) {
+            this.showNotification('Du skal være logget ind for at oprette test data', 'warning');
+            return;
+        }
+        
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                this.showNotification('Firebase ikke tilgængelig', 'error');
+                return;
+            }
+            
+            const testResults = [
+                {
+                    userId: this.currentUser.uid,
+                    subtopicId: "udendørs-temperatur",
+                    score: 4,
+                    totalQuestions: 4,
+                    percentage: 100,
+                    passed: true,
+                    userAnswers: ["a", "b", "b", "b"],
+                    correctAnswers: ["a", "b", "b", "b"],
+                    timestamp: new Date().toISOString(),
+                    createdAt: new Date()
+                },
+                {
+                    userId: this.currentUser.uid,
+                    subtopicId: "pir-bevaegelsessensor",
+                    score: 3,
+                    totalQuestions: 4,
+                    percentage: 75,
+                    passed: true,
+                    userAnswers: ["b", "b", "b", "a"],
+                    correctAnswers: ["b", "b", "b", "b"],
+                    timestamp: new Date().toISOString(),
+                    createdAt: new Date()
+                }
+            ];
+            
+            for (const result of testResults) {
+                await db.collection('quiz_results').add(result);
+                console.log('✅ Test quiz result created:', result.subtopicId);
+            }
+            
+            this.showNotification('Test quiz data oprettet!', 'success');
+            this.loadTeacherData(); // Refresh the dashboard
+            
+        } catch (error) {
+            console.error('Error creating test quiz data:', error);
+            this.showNotification('Fejl ved oprettelse af test data', 'error');
         }
     }
 
@@ -10816,12 +10884,17 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     async saveQuizResult(subtopicId, quizData) {
-        if (!this.currentUser) return;
+        if (!this.currentUser) {
+            console.log('❌ No current user, cannot save quiz result');
+            return;
+        }
+        
+        console.log('💾 Saving quiz result:', { subtopicId, userId: this.currentUser.uid });
         
         try {
             const db = window.FirebaseConfig.getFirestore();
             if (!db) {
-                console.log('Firebase not available, saving to localStorage only');
+                console.log('⚠️ Firebase not available, saving to localStorage only');
                 this.saveQuizResultToLocalStorage(subtopicId, quizData);
                 return;
             }
@@ -10834,12 +10907,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                 createdAt: new Date()
             };
 
+            console.log('📝 Quiz result data:', quizResult);
+
             // Save to Firebase
-            await db.collection('quiz_results').add(quizResult);
-            console.log('✅ Quiz result saved to Firebase');
+            const docRef = await db.collection('quiz_results').add(quizResult);
+            console.log('✅ Quiz result saved to Firebase with ID:', docRef.id);
             
         } catch (error) {
-            console.error('Error saving quiz result to Firebase:', error);
+            console.error('❌ Error saving quiz result to Firebase:', error);
+            console.log('🔄 Falling back to localStorage...');
             // Fallback to localStorage
             this.saveQuizResultToLocalStorage(subtopicId, quizData);
         }
@@ -10885,8 +10961,17 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const subtopicId = popup.dataset.subtopicId;
         
         // Save quiz result to Firebase
+        console.log('🔍 Quiz completion check:', {
+            currentUser: !!this.currentUser,
+            subtopicId: subtopicId,
+            score: score,
+            percentage: percentage,
+            passed: passed
+        });
+        
         if (this.currentUser && subtopicId) {
             try {
+                console.log('💾 Attempting to save quiz result to Firebase...');
                 await this.saveQuizResult(subtopicId, {
                     score: score,
                     totalQuestions: questions.length,
@@ -10897,10 +10982,17 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     timestamp: new Date().toISOString(),
                     subtopicId: subtopicId
                 });
+                console.log('✅ Quiz result saved successfully');
             } catch (error) {
-                console.error('Error saving quiz result:', error);
+                console.error('❌ Error saving quiz result:', error);
                 // Still show notification even if save fails
             }
+        } else {
+            console.log('⚠️ Cannot save quiz result:', {
+                reason: !this.currentUser ? 'No user logged in' : 'No subtopicId',
+                currentUser: !!this.currentUser,
+                subtopicId: subtopicId
+            });
         }
         
         this.showNotification(`Quiz gennemført! Du fik ${score}/${questions.length} rigtige (${percentage}%)`, 
