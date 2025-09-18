@@ -747,8 +747,6 @@ class AppManager {
                     await this.loadLearningProgress();
                     await this.syncProgressWithFirebase();
                     
-                    // Check if user needs to set their name
-                    this.checkAndPromptForName();
                 } else {
                     // User is signed out
                     this.currentUser = null;
@@ -836,11 +834,7 @@ class AppManager {
 
     updateUserInfo() {
         if (this.currentUser) {
-            const userInfo = document.getElementById('user-info');
-            const studentName = localStorage.getItem('studentName');
-            if (userInfo) {
-                userInfo.textContent = studentName || this.currentUser.email;
-            }
+            document.getElementById('user-info').textContent = this.currentUser.email;
         }
     }
 
@@ -1547,8 +1541,6 @@ class AppManager {
         refreshContainer.appendChild(retryButton);
         refreshContainer.appendChild(testQuizButton);
         
-        // Setup student name input events
-        this.setupStudentNameEvents();
         
         document.getElementById('export-data').addEventListener('click', () => {
             this.exportTeacherData();
@@ -1720,7 +1712,7 @@ class AppManager {
                 
                 students.push({
                     id: userId,
-                    name: userData.studentName || userData.displayName || userData.email || 'Anonym elev',
+                    name: userData.email || 'Anonym elev',
                     email: userData.email || 'Ingen email',
                     progress: progressPercentage,
                     modules: completedModules,
@@ -1900,115 +1892,6 @@ class AppManager {
         }
     }
 
-    setupStudentNameEvents() {
-        // Setup student name input button
-        const studentNameBtn = document.getElementById('student-name-btn');
-        if (studentNameBtn) {
-            studentNameBtn.addEventListener('click', () => {
-                this.showStudentNamePopup();
-            });
-        }
-        
-        // Setup enter key for name input
-        const nameInput = document.getElementById('student-name-input');
-        if (nameInput) {
-            nameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.saveStudentName();
-                }
-            });
-        }
-    }
-
-    showStudentNamePopup() {
-        const popup = document.getElementById('student-name-popup');
-        if (popup) {
-            popup.style.display = 'flex';
-            const input = document.getElementById('student-name-input');
-            if (input) {
-                input.focus();
-                // Load existing name if available
-                const existingName = localStorage.getItem('studentName');
-                if (existingName) {
-                    input.value = existingName;
-                }
-            }
-        }
-    }
-
-    closeStudentNamePopup() {
-        const popup = document.getElementById('student-name-popup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
-    }
-
-    async saveStudentName() {
-        const nameInput = document.getElementById('student-name-input');
-        if (!nameInput) return;
-        
-        const studentName = nameInput.value.trim();
-        if (!studentName) {
-            this.showNotification('Indtast venligst dit navn', 'warning');
-            return;
-        }
-        
-        if (studentName.length < 2) {
-            this.showNotification('Navnet skal være mindst 2 tegn', 'warning');
-            return;
-        }
-        
-        try {
-            // Save to localStorage
-            localStorage.setItem('studentName', studentName);
-            
-            // Save to Firebase if user is logged in
-            if (this.currentUser) {
-                const db = window.FirebaseConfig.getFirestore();
-                if (db) {
-                    // Use set() with merge: true to create or update the document
-                    await db.collection('users').doc(this.currentUser.uid).set({
-                        displayName: studentName,
-                        studentName: studentName,
-                        email: this.currentUser.email,
-                        lastUpdated: new Date(),
-                        createdAt: new Date()
-                    }, { merge: true });
-                    console.log('✅ Student name saved to Firebase');
-                }
-            }
-            
-            this.showNotification(`Navn gemt: ${studentName}`, 'success');
-            this.closeStudentNamePopup();
-            
-            // Update user info display
-            this.updateUserInfoDisplay();
-            
-        } catch (error) {
-            console.error('Error saving student name:', error);
-            this.showNotification('Fejl ved gemning af navn', 'error');
-        }
-    }
-
-    updateUserInfoDisplay() {
-        const userInfo = document.getElementById('user-info');
-        const studentName = localStorage.getItem('studentName');
-        if (userInfo && studentName) {
-            userInfo.textContent = studentName;
-        }
-    }
-
-    checkAndPromptForName() {
-        // Check if user is logged in but hasn't set a name
-        if (this.currentUser && !localStorage.getItem('studentName')) {
-            // Show a notification suggesting to set name
-            this.showNotification('Indtast venligst dit navn så læreren kan identificere dine fremskridt', 'info');
-            // Auto-open name input after a short delay
-            setTimeout(() => {
-                this.showStudentNamePopup();
-            }, 2000);
-        }
-    }
 
     async createTestQuizData() {
         if (!this.currentUser) {

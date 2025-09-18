@@ -75,9 +75,39 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
     
-    // Classes - authenticated users only
+    // Classes - teachers can create/read/update, students can only read
     match /classes/{classId} {
-      allow read, write: if request.auth != null;
+      // Anyone can read class info (for joining)
+      allow read: if request.auth != null;
+      // Only teachers can create/update classes
+      allow create, update: if request.auth != null && 
+        request.auth.uid == resource.data.teacherId;
+      // Teachers can delete their own classes
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.teacherId;
+    }
+    
+    // Students - students can read/update their own data, teachers can read all students in their classes
+    match /students/{studentId} {
+      // Students can read and update their own data
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      // Teachers can read students in their classes
+      allow read: if request.auth != null;
+    }
+    
+    // Class enrollments - students can join classes, teachers can manage enrollments
+    match /class_enrollments/{enrollmentId} {
+      // Students can create their own enrollments
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.userId;
+      // Students can read their own enrollments
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      // Teachers can read all enrollments for their classes
+      allow read: if request.auth != null;
     }
     
     // Default deny all
