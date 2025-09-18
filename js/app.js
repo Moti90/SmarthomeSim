@@ -9790,7 +9790,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
                     </div>
                 </div>
                 
-                <button class="check-quiz-btn" onclick="window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
+                <button class="check-quiz-btn" onclick="console.log('Matter quiz button clicked!'); window.appManager.checkQuiz(['b', 'b', 'b', 'b'])">Tjek Svar</button>
             `,
             'thread': `
                 <div class="quiz-question">
@@ -11060,12 +11060,19 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     async checkQuiz(correctAnswers) {
+        console.log('🎯 checkQuiz called with correctAnswers:', correctAnswers);
+        
         const popup = document.querySelector('.learning-module-popup');
-        if (!popup) return;
+        if (!popup) {
+            console.log('❌ No learning module popup found');
+            return;
+        }
         
         let score = 0;
         const questions = popup.querySelectorAll('.quiz-question');
         const userAnswers = [];
+        
+        console.log('📝 Found questions:', questions.length);
         
         questions.forEach((question, index) => {
             const selected = question.querySelector('input:checked');
@@ -11085,6 +11092,14 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         
         // Get current subtopic ID from the popup
         const subtopicId = popup.dataset.subtopicId;
+        
+        console.log('📊 Quiz results:', {
+            score,
+            totalQuestions: questions.length,
+            percentage,
+            passed,
+            subtopicId
+        });
         
         // Save quiz result to Firebase
         console.log('🔍 Quiz completion check:', {
