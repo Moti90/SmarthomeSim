@@ -1266,6 +1266,8 @@ class AppManager {
                                 <option value="modules">Moduler færdige</option>
                                 <option value="scenarios">Scenarios oprettet</option>
                                 <option value="rules">Regler oprettet</option>
+                                <option value="quizScore">Quiz Gennemsnit</option>
+                                <option value="passedQuizzes">Quiz Bestået</option>
                             </select>
                             <button id="refresh-data" class="btn-small">🔄 Opdater</button>
                             <button id="export-data" class="btn-small">📊 Eksporter</button>
@@ -1282,11 +1284,13 @@ class AppManager {
                                         <th>Moduler</th>
                                         <th>Scenarios</th>
                                         <th>Regler</th>
+                                        <th>Quiz Bestået</th>
+                                        <th>Gennemsnit Score</th>
                                         <th>Seneste aktivitet</th>
                                     </tr>
                                 </thead>
                                 <tbody id="highscore-tbody">
-                                    <tr><td colspan="8">Indlæser data...</td></tr>
+                                    <tr><td colspan="10">Indlæser data...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1306,6 +1310,10 @@ class AppManager {
                             <div class="stat-box">
                                 <h4>Regler Oprettet</h4>
                                 <div id="rule-stats">Indlæser...</div>
+                            </div>
+                            <div class="stat-box">
+                                <h4>Quiz Resultater</h4>
+                                <div id="quiz-stats">Indlæser...</div>
                             </div>
                         </div>
                     </div>
@@ -1509,6 +1517,19 @@ class AppManager {
             this.loadTeacherData();
         });
         
+        // Add retry button for Firebase issues
+        const retryButton = document.createElement('button');
+        retryButton.textContent = 'Prøv igen';
+        retryButton.className = 'btn btn-primary';
+        retryButton.style.marginLeft = '10px';
+        retryButton.addEventListener('click', () => {
+            this.loadTeacherData();
+        });
+        
+        // Add retry button to the refresh button container
+        const refreshContainer = document.getElementById('refresh-data').parentElement;
+        refreshContainer.appendChild(retryButton);
+        
         document.getElementById('export-data').addEventListener('click', () => {
             this.exportTeacherData();
         });
@@ -1531,6 +1552,17 @@ class AppManager {
                 return;
             }
             
+            // Wait for Firebase to be ready
+            if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
+                console.log('Firebase not ready yet, waiting...');
+                // Wait a bit for Firebase to initialize
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
+                    throw new Error('Firebase not available after waiting');
+                }
+            }
+            
             // Load real student data from Firebase
             const students = await this.loadStudentsFromFirebase();
             
@@ -1546,7 +1578,18 @@ class AppManager {
             }
         } catch (error) {
             console.error('Error loading teacher data:', error);
-            this.showNotification('Firebase ikke tilgængelig - viser eksempel data', 'warning');
+            
+            // More specific error message
+            let errorMessage = 'Firebase ikke tilgængelig - viser eksempel data';
+            if (error.message.includes('not ready')) {
+                errorMessage = 'Firebase initialiserer stadig - prøv igen om et øjeblik';
+            } else if (error.message.includes('configuration not available')) {
+                errorMessage = 'Firebase konfiguration mangler - tjek forbindelsen';
+            } else if (error.message.includes('database not initialized')) {
+                errorMessage = 'Firebase database ikke klar - prøv igen';
+            }
+            
+            this.showNotification(errorMessage, 'warning');
             
             // Fallback to mock data
             const mockData = this.generateMockStudentData();
@@ -1561,12 +1604,16 @@ class AppManager {
             throw new Error('Firebase configuration not available');
         }
         
-        if (!window.FirebaseConfig.db) {
+        if (!window.FirebaseConfig.isFirebaseReady()) {
+            console.log('Firebase not ready');
+            throw new Error('Firebase not ready');
+        }
+        
+        const db = window.FirebaseConfig.getFirestore();
+        if (!db) {
             console.log('Firebase database not initialized');
             throw new Error('Firebase database not initialized');
         }
-
-        const db = window.FirebaseConfig.db;
         const students = [];
 
         try {
@@ -1589,6 +1636,28 @@ class AppManager {
                 const rulesSnapshot = await db.collection('rules').where('userId', '==', userId).get();
                 const rulesCount = rulesSnapshot.size;
                 
+                // Get user's quiz results
+                const quizResultsSnapshot = await db.collection('quiz_results').where('userId', '==', userId).get();
+                const quizResults = [];
+                let totalQuizScore = 0;
+                let passedQuizzes = 0;
+                
+                quizResultsSnapshot.forEach(doc => {
+                    const quizData = doc.data();
+                    quizResults.push({
+                        subtopicId: quizData.subtopicId,
+                        score: quizData.score,
+                        totalQuestions: quizData.totalQuestions,
+                        percentage: quizData.percentage,
+                        passed: quizData.passed,
+                        timestamp: quizData.timestamp || quizData.createdAt
+                    });
+                    totalQuizScore += quizData.percentage || 0;
+                    if (quizData.passed) passedQuizzes++;
+                });
+                
+                const averageQuizScore = quizResults.length > 0 ? Math.round(totalQuizScore / quizResults.length) : 0;
+                
                 // Calculate progress percentage
                 const completedModules = progressData.completedModules ? Object.keys(progressData.completedModules).length : 0;
                 const totalModules = 8; // Total number of learning modules
@@ -1607,6 +1676,10 @@ class AppManager {
                     modules: completedModules,
                     scenarios: scenariosCount,
                     rules: rulesCount,
+                    quizResults: quizResults,
+                    averageQuizScore: averageQuizScore,
+                    passedQuizzes: passedQuizzes,
+                    totalQuizzes: quizResults.length,
                     lastActivity: lastActivity,
                     createdAt: userData.createdAt ? new Date(userData.createdAt.seconds * 1000).toISOString().split('T')[0] : 'Ukendt'
                 });
@@ -1677,6 +1750,8 @@ class AppManager {
                     <td>${student.modules}</td>
                     <td>${student.scenarios}</td>
                     <td>${student.rules}</td>
+                    <td>${student.passedQuizzes || 0}/${student.totalQuizzes || 0}</td>
+                    <td>${student.averageQuizScore || 0}%</td>
                     <td>${student.lastActivity}</td>
                 </tr>
             `).join('');
@@ -1727,6 +1802,30 @@ class AppManager {
                     <span>${count} elever</span>
                 </div>
             `).join('');
+        
+        // Quiz stats
+        const quizStats = students.reduce((acc, student) => {
+            const passedQuizzes = student.passedQuizzes || 0;
+            const totalQuizzes = student.totalQuizzes || 0;
+            const key = `${passedQuizzes}/${totalQuizzes}`;
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {});
+        
+        document.getElementById('quiz-stats').innerHTML = Object.entries(quizStats)
+            .sort(([a], [b]) => {
+                const [aPassed, aTotal] = a.split('/').map(Number);
+                const [bPassed, bTotal] = b.split('/').map(Number);
+                const aRatio = aTotal > 0 ? aPassed / aTotal : 0;
+                const bRatio = bTotal > 0 ? bPassed / bTotal : 0;
+                return bRatio - aRatio;
+            })
+            .map(([quizResult, count]) => `
+                <div class="stat-item">
+                    <span>${quizResult} bestået:</span>
+                    <span>${count} elever</span>
+                </div>
+            `).join('');
     }
 
     sortHighscore(sortBy) {
@@ -1753,6 +1852,10 @@ class AppManager {
             case 'modules': return parseInt(cells[4].textContent);
             case 'scenarios': return parseInt(cells[5].textContent);
             case 'rules': return parseInt(cells[6].textContent);
+            case 'quizScore': return parseInt(cells[8].textContent) || 0;
+            case 'passedQuizzes': 
+                const quizResult = cells[7].textContent.split('/');
+                return parseInt(quizResult[0]) || 0;
             default: return 0;
         }
     }
@@ -7314,6 +7417,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         // Create learning module popup
         const popup = document.createElement('div');
         popup.className = 'learning-module-popup';
+        popup.dataset.subtopicId = subtopic.id;
         popup.innerHTML = `
             <div class="learning-popup-overlay">
                 <div class="learning-popup-content">
@@ -10701,15 +10805,61 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         return exercises[subtopicId] || '<p>Øvelse kommer snart...</p>';
     }
 
-    checkQuiz(correctAnswers) {
+    async saveQuizResult(subtopicId, quizData) {
+        if (!this.currentUser) return;
+        
+        try {
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                console.log('Firebase not available, saving to localStorage only');
+                this.saveQuizResultToLocalStorage(subtopicId, quizData);
+                return;
+            }
+
+            const userId = this.currentUser.uid;
+            const quizResult = {
+                userId: userId,
+                subtopicId: subtopicId,
+                ...quizData,
+                createdAt: new Date()
+            };
+
+            // Save to Firebase
+            await db.collection('quiz_results').add(quizResult);
+            console.log('✅ Quiz result saved to Firebase');
+            
+        } catch (error) {
+            console.error('Error saving quiz result to Firebase:', error);
+            // Fallback to localStorage
+            this.saveQuizResultToLocalStorage(subtopicId, quizData);
+        }
+    }
+
+    saveQuizResultToLocalStorage(subtopicId, quizData) {
+        const existingResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
+        const newResult = {
+            subtopicId: subtopicId,
+            ...quizData,
+            createdAt: new Date().toISOString()
+        };
+        existingResults.push(newResult);
+        localStorage.setItem('quizResults', JSON.stringify(existingResults));
+        console.log('✅ Quiz result saved to localStorage');
+    }
+
+    async checkQuiz(correctAnswers) {
         const popup = document.querySelector('.learning-module-popup');
         if (!popup) return;
         
         let score = 0;
         const questions = popup.querySelectorAll('.quiz-question');
+        const userAnswers = [];
         
         questions.forEach((question, index) => {
             const selected = question.querySelector('input:checked');
+            const userAnswer = selected ? selected.value : null;
+            userAnswers.push(userAnswer);
+            
             if (selected && selected.value === correctAnswers[index]) {
                 score++;
                 question.classList.add('correct');
@@ -10719,8 +10869,32 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         });
         
         const percentage = Math.round((score / questions.length) * 100);
+        const passed = percentage >= 70;
+        
+        // Get current subtopic ID from the popup
+        const subtopicId = popup.dataset.subtopicId;
+        
+        // Save quiz result to Firebase
+        if (this.currentUser && subtopicId) {
+            try {
+                await this.saveQuizResult(subtopicId, {
+                    score: score,
+                    totalQuestions: questions.length,
+                    percentage: percentage,
+                    passed: passed,
+                    userAnswers: userAnswers,
+                    correctAnswers: correctAnswers,
+                    timestamp: new Date().toISOString(),
+                    subtopicId: subtopicId
+                });
+            } catch (error) {
+                console.error('Error saving quiz result:', error);
+                // Still show notification even if save fails
+            }
+        }
+        
         this.showNotification(`Quiz gennemført! Du fik ${score}/${questions.length} rigtige (${percentage}%)`, 
-            percentage >= 70 ? 'success' : 'info');
+            passed ? 'success' : 'info');
     }
 
     testConfiguration() {
