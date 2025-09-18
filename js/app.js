@@ -1204,19 +1204,48 @@ class AppManager {
     }
 
     async waitForFirebase() {
-        const maxRetries = 10;
+        const maxRetries = 30; // 30 × 500ms = 15 sekunder
         let retryCount = 0;
         
+        console.log('⏳ Waiting for Firebase...');
+        console.log('🌐 Environment:', window.location.hostname);
+        
+        // Try to initialize Firebase if not already done
+        if (!window.FirebaseConfig && typeof firebase !== 'undefined') {
+            console.log('🔄 Firebase not initialized, attempting to initialize...');
+            try {
+                if (typeof window.FirebaseConfig?.initializeFirebase === 'function') {
+                    await window.FirebaseConfig.initializeFirebase();
+                }
+            } catch (error) {
+                console.error('❌ Failed to initialize Firebase:', error);
+            }
+        }
+        
         while (retryCount < maxRetries) {
+            console.log(`🔄 Attempt ${retryCount + 1}/${maxRetries}`);
+            console.log('FirebaseConfig available:', !!window.FirebaseConfig);
+            console.log('isFirebaseReady function:', typeof window.FirebaseConfig?.isFirebaseReady);
+            
             if (window.FirebaseConfig && 
                 typeof window.FirebaseConfig.isFirebaseReady === 'function' && 
                 window.FirebaseConfig.isFirebaseReady()) {
+                console.log('✅ Firebase is ready!');
                 return;
             }
             
+            console.log('❌ Firebase not ready yet, waiting...');
             await new Promise(resolve => setTimeout(resolve, 500));
             retryCount++;
         }
+        
+        console.error('❌ Firebase not available after', maxRetries, 'attempts');
+        console.log('🔍 Debug info:', {
+            FirebaseConfig: !!window.FirebaseConfig,
+            isFirebaseReady: typeof window.FirebaseConfig?.isFirebaseReady,
+            firebase: typeof firebase,
+            environment: window.location.hostname
+        });
         
         throw new Error('Firebase not available after waiting');
     }
