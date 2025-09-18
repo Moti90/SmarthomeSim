@@ -6851,41 +6851,41 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         
         if (icon.dataset.device.includes('lampe')) {
             if (isOn) {
+                icon.classList.add('active');
                 iconContent.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #ffa500)';
-                icon.style.borderColor = '#ffa500';
             } else {
+                icon.classList.remove('active');
                 iconContent.style.filter = 'brightness(0.7)';
-                icon.style.borderColor = '#ffffff';
             }
         } else if (icon.dataset.device.includes('doerlaas')) {
             if (isOn) {
+                icon.classList.add('active');
                 iconContent.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #ff0000)';
-                icon.style.borderColor = '#ff0000';
                 const iconSymbol = iconContent.querySelector('.icon-symbol');
                 if (iconSymbol) iconSymbol.textContent = '🔒';
             } else {
+                icon.classList.remove('active');
                 iconContent.style.filter = 'brightness(0.7)';
-                icon.style.borderColor = '#ffffff';
                 const iconSymbol = iconContent.querySelector('.icon-symbol');
                 if (iconSymbol) iconSymbol.textContent = '🔓';
             }
         } else if (icon.dataset.device.includes('ventilator')) {
             if (isOn) {
+                icon.classList.add('active');
                 iconContent.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #00ff00)';
-                icon.style.borderColor = '#00ff00';
                 iconContent.style.animation = 'spin 2s linear infinite';
             } else {
+                icon.classList.remove('active');
                 iconContent.style.filter = 'brightness(0.7)';
-                icon.style.borderColor = '#ffffff';
                 iconContent.style.animation = 'none';
             }
         } else if (icon.dataset.device.includes('alarmsystem')) {
             if (isOn) {
+                icon.classList.add('active');
                 iconContent.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #ff0000)';
-                icon.style.borderColor = '#ff0000';
             } else {
+                icon.classList.remove('active');
                 iconContent.style.filter = 'brightness(0.7)';
-                icon.style.borderColor = '#ffffff';
             }
         }
         });
