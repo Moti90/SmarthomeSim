@@ -772,6 +772,17 @@ body::after {
     margin-bottom: 16px;
 }
 
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.header-controls .search-box {
+    margin-bottom: 0;
+}
+
 .search-box {
     position: relative;
 }
