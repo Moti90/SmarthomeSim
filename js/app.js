@@ -1182,6 +1182,7 @@ class AppManager {
                 return;
             }
 
+            await this.waitForFirebase();
             const db = window.FirebaseConfig.getFirestore();
             if (!db) {
                 console.error('Firebase not available');
@@ -1200,6 +1201,24 @@ class AppManager {
         } catch (error) {
             console.error('Error setting teacher status:', error);
         }
+    }
+
+    async waitForFirebase() {
+        const maxRetries = 10;
+        let retryCount = 0;
+        
+        while (retryCount < maxRetries) {
+            if (window.FirebaseConfig && 
+                typeof window.FirebaseConfig.isFirebaseReady === 'function' && 
+                window.FirebaseConfig.isFirebaseReady()) {
+                return;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            retryCount++;
+        }
+        
+        throw new Error('Firebase not available after waiting');
     }
 
     cancelTeacherPassword() {
@@ -2032,11 +2051,8 @@ class AppManager {
         }
         
         try {
-            // Check if Firebase is ready
-            if (!window.FirebaseConfig || !window.FirebaseConfig.isFirebaseReady()) {
-                this.showNotification('Firebase initialiserer stadig - prøv igen om et øjeblik', 'warning');
-                return;
-            }
+            // Wait for Firebase to be ready
+            await this.waitForFirebase();
             
             const db = window.FirebaseConfig.getFirestore();
             if (!db) {
