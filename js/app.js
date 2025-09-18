@@ -1966,11 +1966,14 @@ class AppManager {
             if (this.currentUser) {
                 const db = window.FirebaseConfig.getFirestore();
                 if (db) {
-                    await db.collection('users').doc(this.currentUser.uid).update({
+                    // Use set() with merge: true to create or update the document
+                    await db.collection('users').doc(this.currentUser.uid).set({
                         displayName: studentName,
                         studentName: studentName,
-                        lastUpdated: new Date()
-                    });
+                        email: this.currentUser.email,
+                        lastUpdated: new Date(),
+                        createdAt: new Date()
+                    }, { merge: true });
                     console.log('✅ Student name saved to Firebase');
                 }
             }
