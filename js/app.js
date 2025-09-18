@@ -1175,6 +1175,33 @@ class AppManager {
         document.removeEventListener('keydown', this.handleTeacherPasswordPopupEscape);
     }
 
+    async setTeacherStatus() {
+        try {
+            if (!this.currentUser) {
+                console.error('No user logged in');
+                return;
+            }
+
+            const db = window.FirebaseConfig.getFirestore();
+            if (!db) {
+                console.error('Firebase not available');
+                return;
+            }
+
+            // Set teacher status in user document
+            await db.collection('users').doc(this.currentUser.uid).set({
+                isTeacher: true,
+                teacherVerifiedAt: new Date(),
+                email: this.currentUser.email
+            }, { merge: true });
+
+            console.log('✅ Teacher status set for user:', this.currentUser.uid);
+            
+        } catch (error) {
+            console.error('Error setting teacher status:', error);
+        }
+    }
+
     cancelTeacherPassword() {
         this.hideTeacherPasswordPopup();
     }
@@ -1207,7 +1234,8 @@ class AppManager {
         const correctPassword = 'TEC25';
         
         if (enteredPassword === correctPassword) {
-            // Korrekt kode - åbn lærer dashboard
+            // Korrekt kode - sæt lærer status og åbn dashboard
+            await this.setTeacherStatus();
             this.showNotification('🔓 Lærer kode accepteret - åbner dashboard...', 'success');
             this.hideTeacherPasswordPopup();
             this.showTeacherDashboard();
