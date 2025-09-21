@@ -86,43 +86,59 @@ class AppManager {
     }
 
     setupEventListeners() {
+        // Cache frequently used DOM elements
+        this.cachedElements = {
+            loginForm: document.getElementById('login-form'),
+            registerForm: document.getElementById('register-form'),
+            registerLink: document.getElementById('register-link'),
+            loginBackLink: document.getElementById('login-back-link'),
+            forgotLink: document.getElementById('forgot-link'),
+            logoutBtn: document.getElementById('logout-btn'),
+            backToTopics: document.getElementById('back-to-topics')
+        };
+
         // Login/Register forms
-        document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
-        document.getElementById('register-form').addEventListener('submit', (e) => this.handleRegister(e));
+        this.cachedElements.loginForm?.addEventListener('submit', (e) => this.handleLogin(e));
+        this.cachedElements.registerForm?.addEventListener('submit', (e) => this.handleRegister(e));
         
         // Auth links
-        document.getElementById('register-link').addEventListener('click', (e) => this.showRegister(e));
-        document.getElementById('login-back-link').addEventListener('click', (e) => this.showLogin(e));
-        document.getElementById('forgot-link').addEventListener('click', (e) => this.handleForgotPassword(e));
+        this.cachedElements.registerLink?.addEventListener('click', (e) => this.showRegister(e));
+        this.cachedElements.loginBackLink?.addEventListener('click', (e) => this.showLogin(e));
+        this.cachedElements.forgotLink?.addEventListener('click', (e) => this.handleForgotPassword(e));
         
         // Logout
-        document.getElementById('logout-btn').addEventListener('click', () => this.handleLogout());
+        this.cachedElements.logoutBtn?.addEventListener('click', () => this.handleLogout());
         
-        // Tab navigation
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        // Use event delegation for better performance
+        document.addEventListener('click', (e) => {
+            // Tab navigation
+            if (e.target.closest('.nav-btn')) {
                 e.preventDefault();
+                const btn = e.target.closest('.nav-btn');
                 const tabName = btn.dataset.tab;
                 console.log('Nav button clicked:', tabName);
                 this.switchTab(tabName);
-            });
-        });
-        
-        // Theme selection
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.addEventListener('click', (e) => this.switchTheme(e.target.closest('.theme-option').dataset.theme));
-        });
-        
-        // Device controls
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.toggleDevice(e.target));
-        });
-
-        // Smart icon clicks are handled by the existing switch functionality
-
-        // E-Learning topic cards
-        document.querySelectorAll('.topic-card').forEach(card => {
-            card.addEventListener('click', (e) => this.handleTopicClick(e.currentTarget));
+                return;
+            }
+            
+            // Theme selection
+            if (e.target.closest('.theme-option')) {
+                const option = e.target.closest('.theme-option');
+                this.switchTheme(option.dataset.theme);
+                return;
+            }
+            
+            // Device controls
+            if (e.target.closest('.toggle-btn')) {
+                this.toggleDevice(e.target);
+                return;
+            }
+            
+            // E-Learning topic cards
+            if (e.target.closest('.topic-card')) {
+                this.handleTopicClick(e.target.closest('.topic-card'));
+                return;
+            }
         });
 
         // Back to topics button
@@ -131,10 +147,12 @@ class AppManager {
             backBtn.addEventListener('click', () => this.showWelcomeContent());
         }
 
-        // Search functionality
+        // Search functionality with debouncing
         const searchInput = document.getElementById('topic-search');
         if (searchInput) {
-            searchInput.addEventListener('input', (e) => this.filterTopics(e.target.value));
+            searchInput.addEventListener('input', (e) => {
+                this.debounce(() => this.filterTopics(e.target.value), 300);
+            });
         }
 
         
@@ -4104,10 +4122,12 @@ class AppManager {
     setupBlockEditorDragAndDrop() {
         console.log('Setting up Block Editor drag and drop...');
         const blockItems = document.querySelectorAll('.block-item');
-        const canvas = document.getElementById('scene-canvas');
+        const triggersZone = document.getElementById('triggers-zone');
+        const actionsZone = document.getElementById('actions-zone');
         
         console.log('Found block items:', blockItems.length);
-        console.log('Found canvas:', canvas);
+        console.log('Found triggers zone:', triggersZone);
+        console.log('Found actions zone:', actionsZone);
         
         blockItems.forEach(item => {
             item.addEventListener('dragstart', (e) => {
@@ -4136,21 +4156,58 @@ class AppManager {
             });
         });
         
-        canvas.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            canvas.classList.add('drag-over');
-        });
-        
-        canvas.addEventListener('dragleave', (e) => {
-            canvas.classList.remove('drag-over');
-        });
-        
-        canvas.addEventListener('drop', (e) => {
-            e.preventDefault();
-            canvas.classList.remove('drag-over');
+        // Setup trigger slots drop handling
+        const triggerSlots = document.querySelectorAll('.trigger-slot');
+        triggerSlots.forEach(slot => {
+            slot.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                slot.classList.add('drag-over');
+            });
             
-            const blockData = JSON.parse(e.dataTransfer.getData('text/plain'));
-            this.addBlockToCanvas(blockData, e.offsetX, e.offsetY);
+            slot.addEventListener('dragleave', (e) => {
+                slot.classList.remove('drag-over');
+            });
+            
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('drag-over');
+                
+                const blockData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                
+                // Only allow triggers in trigger slots
+                if (blockData.type === 'trigger') {
+                    this.addBlockToSlot(blockData, slot);
+                } else {
+                    this.showNotification('Kun triggers kan placeres i trigger slots', 'warning');
+                }
+            });
+        });
+        
+        // Setup action slots drop handling
+        const actionSlots = document.querySelectorAll('.action-slot');
+        actionSlots.forEach(slot => {
+            slot.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                slot.classList.add('drag-over');
+            });
+            
+            slot.addEventListener('dragleave', (e) => {
+                slot.classList.remove('drag-over');
+            });
+            
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('drag-over');
+                
+                const blockData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                
+                // Only allow actions in action slots
+                if (blockData.type === 'action') {
+                    this.addActionToSlot(blockData, slot);
+                } else {
+                    this.showNotification('Kun handlinger kan placeres i action slots', 'warning');
+                }
+            });
         });
     }
     
@@ -4207,6 +4264,202 @@ class AppManager {
         const dropZoneText = canvas.querySelector('div[style*="text-align: center"]');
         if (dropZoneText) {
             dropZoneText.style.display = 'none';
+        }
+    }
+    
+    addBlockToZone(blockData, zoneType) {
+        console.log('Adding block to zone:', blockData, zoneType);
+        
+        const zone = document.getElementById(`${zoneType}-zone`);
+        const blockElement = document.createElement('div');
+        blockElement.className = 'zone-block';
+        
+        // Set data attributes for rule conversion
+        blockElement.dataset.blockType = blockData.type;
+        blockElement.dataset.blockSubtype = blockData.subtype;
+        if (blockData.sensorId) {
+            blockElement.dataset.sensorId = blockData.sensorId;
+        }
+        if (blockData.actuatorId) {
+            blockElement.dataset.actuatorId = blockData.actuatorId;
+        }
+        
+        // Style the block based on zone type
+        const isTriggerZone = zoneType === 'triggers';
+        blockElement.style.background = isTriggerZone ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'linear-gradient(135deg, #4facfe, #00f2fe)';
+        blockElement.style.border = isTriggerZone ? '2px solid #ff6b9d' : '2px solid #10b981';
+        blockElement.style.borderRadius = '12px';
+        blockElement.style.padding = '15px';
+        blockElement.style.cursor = 'pointer';
+        blockElement.style.transition = 'all 0.3s ease';
+        blockElement.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+        blockElement.style.position = 'static';
+        
+        blockElement.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));">${blockData.icon}</span>
+                <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: ${isTriggerZone ? 'rgba(255, 107, 157, 0.2)' : 'rgba(16, 185, 129, 0.2)'}; color: ${isTriggerZone ? '#ff6b9d' : '#10b981'};">${blockData.type.toUpperCase()}</span>
+            </div>
+            <div style="font-size: 1rem; font-weight: 500; color: #e2e8f0; margin-bottom: 5px;">${blockData.name}</div>
+            <div style="font-size: 0.85rem; color: #94a3b8;">${blockData.description}</div>
+            <button class="remove-block" onclick="this.parentElement.remove(); this.updateZonePlaceholder('${zoneType}')" style="position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.8); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 16px; line-height: 1;">×</button>
+        `;
+        
+        // Add click handler for properties
+        blockElement.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-block')) return;
+            e.stopPropagation();
+            this.selectBlock(blockElement, blockData);
+        });
+        
+        // Add to zone
+        zone.appendChild(blockElement);
+        
+        // Hide placeholder if this is the first block
+        this.updateZonePlaceholder(zoneType);
+        
+        console.log('Block added to zone');
+    }
+    
+    addBlockToSlot(blockData, slot) {
+        console.log('Adding block to slot:', blockData, slot);
+        
+        // Clear the slot first
+        slot.innerHTML = '';
+        
+        // Create block element
+        const blockElement = document.createElement('div');
+        blockElement.className = 'slot-block';
+        
+        // Set data attributes
+        blockElement.dataset.blockType = blockData.type;
+        blockElement.dataset.blockSubtype = blockData.subtype;
+        if (blockData.sensorId) {
+            blockElement.dataset.sensorId = blockData.sensorId;
+        }
+        if (blockData.actuatorId) {
+            blockElement.dataset.actuatorId = blockData.actuatorId;
+        }
+        
+        // Style the block
+        blockElement.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+        blockElement.style.border = '2px solid #ff6b9d';
+        blockElement.style.borderRadius = '12px';
+        blockElement.style.padding = '15px';
+        blockElement.style.cursor = 'pointer';
+        blockElement.style.transition = 'all 0.3s ease';
+        blockElement.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+        blockElement.style.position = 'relative';
+        blockElement.style.width = '100%';
+        
+        blockElement.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));">${blockData.icon}</span>
+                <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: rgba(255, 107, 157, 0.2); color: #ff6b9d;">${blockData.type.toUpperCase()}</span>
+            </div>
+            <div style="font-size: 1rem; font-weight: 500; color: #e2e8f0; margin-bottom: 5px;">${blockData.name}</div>
+            <div style="font-size: 0.85rem; color: #94a3b8;">${blockData.description}</div>
+            <button class="remove-block" onclick="window.appManager.clearSlot(this.parentElement.parentElement)" style="position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.8); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 16px; line-height: 1;">×</button>
+        `;
+        
+        // Add click handler for properties
+        blockElement.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-block')) return;
+            e.stopPropagation();
+            this.selectBlock(blockElement, blockData);
+        });
+        
+        // Add to slot
+        slot.appendChild(blockElement);
+        slot.classList.add('occupied');
+        
+        console.log('Block added to slot');
+    }
+    
+    addActionToSlot(blockData, slot) {
+        console.log('Adding action to slot:', blockData, slot);
+        
+        // Clear the slot first
+        slot.innerHTML = '';
+        
+        // Create block element
+        const blockElement = document.createElement('div');
+        blockElement.className = 'slot-block';
+        
+        // Set data attributes
+        blockElement.dataset.blockType = blockData.type;
+        blockElement.dataset.blockSubtype = blockData.subtype;
+        if (blockData.sensorId) {
+            blockElement.dataset.sensorId = blockData.sensorId;
+        }
+        if (blockData.actuatorId) {
+            blockElement.dataset.actuatorId = blockData.actuatorId;
+        }
+        
+        // Style the block for actions (green theme)
+        blockElement.style.background = 'linear-gradient(135deg, #4facfe, #00f2fe)';
+        blockElement.style.border = '2px solid #10b981';
+        blockElement.style.borderRadius = '12px';
+        blockElement.style.padding = '15px';
+        blockElement.style.cursor = 'pointer';
+        blockElement.style.transition = 'all 0.3s ease';
+        blockElement.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+        blockElement.style.position = 'relative';
+        blockElement.style.width = '100%';
+        
+        blockElement.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 1.2rem; filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));">${blockData.icon}</span>
+                <span style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.2); color: #10b981;">${blockData.type.toUpperCase()}</span>
+            </div>
+            <div style="font-size: 1rem; font-weight: 500; color: #e2e8f0; margin-bottom: 5px;">${blockData.name}</div>
+            <div style="font-size: 0.85rem; color: #94a3b8;">${blockData.description}</div>
+            <button class="remove-block" onclick="window.appManager.clearActionSlot(this.parentElement.parentElement)" style="position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.8); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 16px; line-height: 1;">×</button>
+        `;
+        
+        // Add click handler for properties
+        blockElement.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-block')) return;
+            e.stopPropagation();
+            this.selectBlock(blockElement, blockData);
+        });
+        
+        // Add to slot
+        slot.appendChild(blockElement);
+        slot.classList.add('occupied');
+        
+        console.log('Action added to slot');
+    }
+    
+    clearSlot(slot) {
+        slot.innerHTML = `
+            <div class="slot-placeholder">
+                <div class="slot-icon">🎯</div>
+                <div class="slot-text">Træk trigger her</div>
+            </div>
+        `;
+        slot.classList.remove('occupied');
+    }
+    
+    clearActionSlot(slot) {
+        slot.innerHTML = `
+            <div class="slot-placeholder">
+                <div class="slot-icon">⚡</div>
+                <div class="slot-text">Træk handling her</div>
+            </div>
+        `;
+        slot.classList.remove('occupied');
+    }
+    
+    updateZonePlaceholder(zoneType) {
+        const zone = document.getElementById(`${zoneType}-zone`);
+        const placeholder = zone.querySelector('.zone-placeholder');
+        const blocks = zone.querySelectorAll('.zone-block');
+        
+        if (blocks.length > 0) {
+            placeholder.style.display = 'none';
+        } else {
+            placeholder.style.display = 'block';
         }
     }
     
@@ -4272,13 +4525,17 @@ class AppManager {
     }
     
     selectBlock(blockElement, blockData) {
-        // Remove previous selection
-        document.querySelectorAll('.canvas-block').forEach(block => {
-            block.style.border = block.style.border.replace('3px solid #00d4ff', '2px solid ' + this.getBlockBorderColor(blockData.type));
+        // Remove previous selection from all blocks
+        document.querySelectorAll('.canvas-block, .slot-block').forEach(block => {
+            block.style.border = block.style.border.replace('3px solid #00d4ff', '2px solid');
         });
         
         // Select current block
         blockElement.style.border = '3px solid #00d4ff';
+        
+        // Store selected block data for properties editing
+        this.selectedBlock = blockData;
+        this.selectedBlockElement = blockElement;
         
         // Update properties panel
         this.updateBlockProperties(blockData);
@@ -4308,11 +4565,17 @@ class AppManager {
                 } else if (blockData.subtype === 'door') {
                     propertiesHTML += this.getDoorProperties(blockData);
                 } else if (blockData.subtype === 'humidity') {
-                    propertiesHTML += this.getHumidityProperties(blockData);
+                    if (blockData.name.includes('Vandlækage')) {
+                        propertiesHTML += this.getWaterLeakProperties(blockData);
+                    } else {
+                        propertiesHTML += this.getHumidityProperties(blockData);
+                    }
                 } else if (blockData.subtype === 'temperature') {
                     propertiesHTML += this.getTemperatureProperties(blockData);
                 } else if (blockData.subtype === 'weather') {
                     propertiesHTML += this.getWeatherProperties(blockData);
+                } else if (blockData.subtype === 'smoke') {
+                    propertiesHTML += this.getSmokeProperties(blockData);
                 }
             } else if (blockData.type === 'condition') {
                 if (blockData.subtype === 'time') {
@@ -4364,8 +4627,21 @@ class AppManager {
     getTimeProperties() {
         return `
             <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Tids Type</label>
+                <select class="property-select" style="width: 100%;" onchange="window.appManager.toggleTimeType(this.value)">
+                    <option value="specific">Specifikt tidspunkt</option>
+                    <option value="interval">Tidsinterval</option>
+                </select>
+            </div>
+            <div id="time-specific-settings" style="margin-bottom: 15px;">
                 <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Tid</label>
                 <input type="time" class="property-input" value="18:00">
+            </div>
+            <div id="time-interval-settings" style="margin-bottom: 15px; display: none;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Start Tid</label>
+                <input type="time" class="property-input" value="08:00" style="margin-bottom: 10px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Slut Tid</label>
+                <input type="time" class="property-input" value="16:00">
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Dage</label>
@@ -4466,14 +4742,130 @@ class AppManager {
         return `
             <div style="margin-bottom: 15px;">
                 <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Besked</label>
-                <input type="text" class="property-input" placeholder="Indtast besked..." value="Scene aktiveret">
+                <input type="text" class="property-input" placeholder="Indtast besked..." 
+                       onchange="window.appManager.updateNotificationMessage(this.value)">
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Type</label>
+                <select class="property-select" style="width: 100%;" 
+                        onchange="window.appManager.updateNotificationType(this.value)">
+                    <option value="info">Info</option>
+                    <option value="warning">Advarsel</option>
+                    <option value="error">Fejl</option>
+                    <option value="success">Succes</option>
+                </select>
+            </div>
+        `;
+    }
+    
+    updateNotificationMessage(message) {
+        if (this.selectedBlock) {
+            this.selectedBlock.message = message;
+            console.log('Updated notification message:', message);
+        }
+    }
+    
+    updateNotificationType(type) {
+        if (this.selectedBlock) {
+            this.selectedBlock.notificationType = type;
+            console.log('Updated notification type:', type);
+        }
+    }
+    
+    toggleTimeType(timeType) {
+        const specificSettings = document.getElementById('time-specific-settings');
+        const intervalSettings = document.getElementById('time-interval-settings');
+        
+        if (timeType === 'specific') {
+            specificSettings.style.display = 'block';
+            intervalSettings.style.display = 'none';
+        } else if (timeType === 'interval') {
+            specificSettings.style.display = 'none';
+            intervalSettings.style.display = 'block';
+        }
+        
+        console.log('Time type changed to:', timeType);
+    }
+    
+    getTriggerDisplayName(trigger) {
+        const typeNames = {
+            'motion': 'Bevægelse',
+            'door': 'Dør',
+            'temperature': 'Temperatur',
+            'humidity': 'Fugtighed',
+            'smoke': 'Røgalarm',
+            'time': 'Tid',
+            'weather': 'Vejr'
+        };
+        
+        const baseName = typeNames[trigger.type] || trigger.type;
+        
+        // Add sensor location if available
+        if (trigger.sensorId) {
+            const deviceName = this.getDeviceName(trigger.sensorId);
+            return `${baseName} (${deviceName})`;
+        }
+        
+        return baseName;
+    }
+    
+    getActionDisplayName(action) {
+        const typeNames = {
+            'light': 'Lys',
+            'fan': 'Ventilator',
+            'socket': 'Stikkontakt',
+            'dimmer': 'Dimmer',
+            'notification': 'Notifikation'
+        };
+        
+        const baseName = typeNames[action.type] || action.type;
+        
+        // Add device name if available
+        if (action.actuatorId) {
+            const deviceName = this.getDeviceName(action.actuatorId);
+            return `${baseName} (${deviceName})`;
+        }
+        
+        // Special case for notifications
+        if (action.type === 'notification' && action.message) {
+            return `Notifikation: "${action.message}"`;
+        }
+        
+        return baseName;
+    }
+    
+    getSmokeProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const sensorId = blockData.sensorId;
+        const sensor = setup.sensors[sensorId];
+
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
                 <select class="property-select" style="width: 100%;">
-                    <option>Info</option>
-                    <option>Advarsel</option>
-                    <option>Fejl</option>
+                    <option>${sensor ? sensor.room : 'Køkken'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Røg detekteret</option>
+                    <option>Ingen røg</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Følsomhed</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Høj</option>
+                    <option>Medium</option>
+                    <option>Lav</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Test mode</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Deaktiveret</option>
+                    <option>Aktiveret</option>
                 </select>
             </div>
         `;
@@ -4509,6 +4901,41 @@ class AppManager {
             <div style="margin-bottom: 15px;">
                 <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Timeout (sekunder)</label>
                 <input type="number" class="property-input" placeholder="30" value="30" style="width: 100%;">
+            </div>
+        `;
+    }
+    
+    getWaterLeakProperties(blockData) {
+        const setup = this.getSmartHomeSetup();
+        const sensorId = blockData.sensorId;
+        const sensor = setup.sensors[sensorId];
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Lokation</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>${sensor ? sensor.room : 'Ukendt'}</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Vand detekteret</option>
+                    <option>Ingen vand</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Følsomhed</label>
+                <select class="property-select" style="width: 100%;">
+                    <option>Høj</option>
+                    <option>Medium</option>
+                    <option>Lav</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Timeout</label>
+                <input type="range" class="property-slider" min="1" max="60" value="5" oninput="this.nextElementSibling.textContent = this.value + ' sek'">
+                <div style="text-align: center; color: #00d4ff; margin-top: 5px;">5 sek</div>
             </div>
         `;
     }
@@ -4569,11 +4996,11 @@ class AppManager {
                 </select>
             </div>
             <div style="margin-bottom: 15px;">
-                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Mode</label>
+                <label style="display: block; color: #00d4ff; margin-bottom: 5px; font-weight: 600;">Trigger ved</label>
                 <select class="property-select" style="width: 100%;">
-                    <option>Opvarmning</option>
-                    <option>Køling</option>
-                    <option>Auto</option>
+                    <option>Stigende temperatur</option>
+                    <option>Faldende temperatur</option>
+                    <option>Begge retninger</option>
                 </select>
             </div>
         `;
@@ -4767,9 +5194,10 @@ class AppManager {
     saveScene() {
         console.log('Saving scene...');
         
-        // Get all blocks from canvas
-        const canvas = document.getElementById('scene-canvas');
-        const blocks = Array.from(canvas.querySelectorAll('.canvas-block'));
+        // Get all blocks from both zones
+        const triggersBlocks = Array.from(document.querySelectorAll('.trigger-slot .slot-block'));
+        const actionsBlocks = Array.from(document.querySelectorAll('.action-slot .slot-block'));
+        const blocks = [...triggersBlocks, ...actionsBlocks];
         
         if (blocks.length === 0) {
             this.showNotification('Ingen blokke at gemme', 'warning');
@@ -4799,9 +5227,10 @@ class AppManager {
     testScene() {
         console.log('Testing scene...');
         
-        // Get all blocks from canvas
-        const canvas = document.getElementById('scene-canvas');
-        const blocks = Array.from(canvas.querySelectorAll('.canvas-block'));
+        // Get all blocks from both zones
+        const triggersBlocks = Array.from(document.querySelectorAll('.trigger-slot .slot-block'));
+        const actionsBlocks = Array.from(document.querySelectorAll('.action-slot .slot-block'));
+        const blocks = [...triggersBlocks, ...actionsBlocks];
         
         if (blocks.length === 0) {
             this.showNotification('Ingen blokke at teste', 'warning');
@@ -4824,15 +5253,18 @@ class AppManager {
     
     clearScene() {
         console.log('Clearing scene...');
-        const canvas = document.getElementById('scene-canvas');
-        const blocks = canvas.querySelectorAll('.canvas-block');
-        blocks.forEach(block => block.remove());
         
-        // Show drop zone text again
-        const dropZoneText = canvas.querySelector('div[style*="text-align: center"]');
-        if (dropZoneText) {
-            dropZoneText.style.display = 'block';
-        }
+        // Clear all slots
+        const triggerSlots = document.querySelectorAll('.trigger-slot');
+        const actionSlots = document.querySelectorAll('.action-slot');
+        
+        triggerSlots.forEach(slot => {
+            this.clearSlot(slot);
+        });
+        
+        actionSlots.forEach(slot => {
+            this.clearActionSlot(slot);
+        });
         
         this.showNotification('Scene ryddet!', 'info');
     }
@@ -4858,25 +5290,39 @@ class AppManager {
             return null;
         }
         
-        // Get scene name
+        // Get scene name and description
         const sceneName = document.getElementById('scene-name')?.value || 'Block Scene ' + Date.now();
+        const sceneDescription = document.getElementById('scene-description')?.value || 'Ingen beskrivelse';
         
         // Create rule object
         const rule = {
             id: 'block_scene_' + Date.now(),
             name: sceneName,
-            description: 'Bygget med Block Editor',
+            description: sceneDescription,
             type: 'block_scene',
             triggers: triggerBlocks.map(block => ({
                 type: block.dataset.blockSubtype,
                 sensorId: block.dataset.sensorId,
                 config: this.getBlockConfig(block)
             })),
-            actions: actionBlocks.map(block => ({
-                type: block.dataset.blockSubtype,
-                actuatorId: block.dataset.actuatorId,
-                config: this.getBlockConfig(block)
-            })),
+            actions: actionBlocks.map(block => {
+                const action = {
+                    type: block.dataset.blockSubtype,
+                    actuatorId: block.dataset.actuatorId,
+                    config: this.getBlockConfig(block)
+                };
+                
+                // For notification blocks, include message and type directly
+                if (block.dataset.blockSubtype === 'notification') {
+                    const config = this.getBlockConfig(block);
+                    if (config.message) action.message = config.message;
+                    if (config.notificationType) action.notificationType = config.notificationType;
+                    // Add scene name for default message display
+                    action.sceneName = sceneName;
+                }
+                
+                return action;
+            }),
             created: new Date().toISOString(),
             active: true
         };
@@ -4896,6 +5342,19 @@ class AppManager {
             }
         });
         
+        // For notification blocks, also get message and type from selectedBlock if available
+        if (blockElement.dataset.blockSubtype === 'notification') {
+            // Check if this is the currently selected block
+            if (this.selectedBlockElement === blockElement && this.selectedBlock) {
+                if (this.selectedBlock.message) {
+                    config.message = this.selectedBlock.message;
+                }
+                if (this.selectedBlock.notificationType) {
+                    config.notificationType = this.selectedBlock.notificationType;
+                }
+            }
+        }
+        
         return config;
     }
     
@@ -4906,18 +5365,21 @@ class AppManager {
         this.executingRule = true;
         
         try {
-        // Show rule execution popup
-        this.showRuleExecutionPopup(sceneData.name);
+        // Check if there are notification actions
+        const hasNotifications = sceneData.actions.some(action => action.type === 'notification');
+        
+        // Only show rule execution popup if there are no notifications
+        if (!hasNotifications) {
+            this.showRuleExecutionPopup(sceneData.name);
+        }
         
         // Execute all triggers first
         sceneData.triggers.forEach(trigger => {
             this.executeBlockTrigger(trigger);
         });
         
-        // Execute all actions
-        sceneData.actions.forEach(action => {
-            this.executeBlockAction(action);
-        });
+        // Execute all actions with delay for notifications
+        this.executeActionsWithDelay(sceneData.actions);
         } finally {
             // Reset flag to allow rule checks again
             this.executingRule = false;
@@ -4953,6 +5415,64 @@ class AppManager {
                 }
             }, 300);
         }, 2000);
+    }
+    
+    showNotificationPopup(message, type = 'info', sceneName = null) {
+        // Create popup element
+        const popup = document.createElement('div');
+        popup.className = 'rule-execution-popup notification-popup';
+        
+        // Choose icon based on type
+        let icon = '📢';
+        if (type === 'warning') icon = '⚠️';
+        else if (type === 'error') icon = '❌';
+        else if (type === 'success') icon = '✅';
+        
+        // Show scene name if no specific message
+        const displayMessage = message === 'Scene aktiveret' && sceneName ? 
+            `${sceneName} aktiveret` : message;
+        
+        popup.innerHTML = `
+            <div class="rule-execution-content">
+                <div class="rule-execution-icon">${icon}</div>
+                <div class="rule-execution-text">${displayMessage}</div>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(popup);
+        
+        // Show popup with animation
+        setTimeout(() => {
+            popup.classList.add('show');
+        }, 10);
+        
+        // Hide and remove popup after 3 seconds (longer than rule popup)
+        setTimeout(() => {
+            popup.classList.remove('show');
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    executeActionsWithDelay(actions) {
+        let delay = 0;
+        
+        actions.forEach((action, index) => {
+            if (action.type === 'notification') {
+                // Delay notifications to show one at a time
+                setTimeout(() => {
+                    this.executeBlockAction(action);
+                }, delay);
+                delay += 3500; // 3.5 seconds between notifications (3s display + 0.5s gap)
+            } else {
+                // Execute non-notification actions immediately
+                this.executeBlockAction(action);
+            }
+        });
     }
     
     executeBlockTrigger(trigger) {
@@ -5038,6 +5558,13 @@ class AppManager {
                 
                 this.showNotification(`${action.actuatorId} sat til 50%`, 'success');
             }
+        } else if (action.type === 'notification') {
+            // Execute notification action
+            const message = action.message || 'Scene aktiveret';
+            const type = action.notificationType || 'info';
+            const sceneName = action.sceneName || null;
+            this.showNotificationPopup(message, type, sceneName);
+            console.log('Notification sent:', message, type);
         } else {
             console.log('Unknown action type:', action.type, 'or missing actuatorId:', action.actuatorId);
         }
@@ -5515,11 +6042,16 @@ class AppManager {
                         <span class="toggle-label">${rule.active !== false ? 'Aktiveret' : 'Deaktiveret'}</span>
                     </div>
                     <div class="rule-details">
+                        ${rule.description && rule.description !== 'Ingen beskrivelse' ? `
+                            <div class="rule-description" style="margin-bottom: 8px; padding: 8px; background: rgba(0, 212, 255, 0.1); border-radius: 4px; font-style: italic;">
+                                ${rule.description}
+                            </div>
+                        ` : ''}
                         <div class="rule-triggers">
-                            <strong>Triggers:</strong> ${rule.triggers ? rule.triggers.map(t => t.name).join(', ') : 'Ingen'}
+                            <strong>Triggers:</strong> ${rule.triggers ? rule.triggers.map(t => this.getTriggerDisplayName(t)).join(', ') : 'Ingen'}
                         </div>
                         <div class="rule-actions">
-                            <strong>Actions:</strong> ${rule.actions ? rule.actions.map(a => a.name).join(', ') : 'Ingen'}
+                            <strong>Actions:</strong> ${rule.actions ? rule.actions.map(a => this.getActionDisplayName(a)).join(', ') : 'Ingen'}
                         </div>
                         <div style="margin-top: 8px; font-size: 0.8rem; color: #718096;">
                             Oprettet: ${new Date(rule.createdAt || Date.now()).toLocaleString('da-DK')}
@@ -6261,15 +6793,20 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
 
     // ===== DEVICE CONTROLS =====
     toggleDevice(button) {
-        const isOn = button.textContent.includes('Tænd');
-        button.textContent = isOn ? 'Sluk' : 'Tænd';
-        button.style.background = isOn ? '#f56565' : '#48bb78';
-        
-        // Add visual feedback
-        button.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            button.style.transform = 'scale(1)';
-        }, 150);
+        // Use requestAnimationFrame for better performance
+        requestAnimationFrame(() => {
+            const isOn = button.textContent.includes('Tænd');
+            button.textContent = isOn ? 'Sluk' : 'Tænd';
+            button.style.background = isOn ? '#f56565' : '#48bb78';
+            
+            // Add visual feedback with CSS transition instead of setTimeout
+            button.style.transition = 'transform 0.15s ease';
+            button.style.transform = 'scale(0.95)';
+            
+            requestAnimationFrame(() => {
+                button.style.transform = 'scale(1)';
+            });
+        });
     }
 
     // ===== SMART ICONS FUNCTIONALITY =====
@@ -6758,6 +7295,38 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             }
         });
         
+        // Handle temperature control buttons
+        const tempButtons = document.querySelectorAll('.temp-control-btn');
+        tempButtons.forEach(button => {
+            const deviceId = button.dataset.device;
+            const tempDisplay = document.getElementById(`${deviceId}-display`);
+            const icon = document.querySelector(`[data-device="${deviceId}"]`);
+            
+            // Update display when icon changes
+            const updateTempDisplay = () => {
+                if (icon && tempDisplay) {
+                    const iconValue = icon.dataset.value;
+                    tempDisplay.textContent = iconValue + '°C';
+                }
+            };
+            
+            // Handle button click
+            button.addEventListener('click', () => {
+                this.showTemperaturePopup();
+            });
+            
+            // Listen for icon changes
+            if (icon) {
+                const observer = new MutationObserver(() => {
+                    updateTempDisplay();
+                });
+                observer.observe(icon, { attributes: true, attributeFilter: ['data-value'] });
+                
+                // Initial update
+                updateTempDisplay();
+            }
+        });
+
         // Handle sliders
         sliders.forEach(slider => {
             const deviceId = slider.dataset.device;
@@ -7109,28 +7678,40 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         this.isShowingNotification = true;
         const { message, type } = this.notificationQueue.shift();
         
+        // Cache notification container to avoid repeated DOM queries
+        if (!this.notificationContainer) {
+            this.notificationContainer = document.createElement('div');
+            this.notificationContainer.id = 'notification-container';
+            this.notificationContainer.style.cssText = `
+                position: fixed;
+                right: 20px;
+                top: 80px;
+                z-index: 1001;
+                pointer-events: none;
+            `;
+            document.body.appendChild(this.notificationContainer);
+        }
+        
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
         notification.style.cssText = `
-            position: fixed;
-            right: 20px;
-            top: 80px;
             background: var(--bg-secondary);
             color: var(--text-primary);
             padding: 12px 20px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             box-shadow: 0 10px 25px -5px var(--shadow-color);
-            z-index: 1001;
             animation: slideIn 0.3s ease;
             max-width: 300px;
             word-wrap: break-word;
+            margin-bottom: 10px;
+            pointer-events: auto;
         `;
         
-        // Add to DOM
-        document.body.appendChild(notification);
+        // Add to cached container
+        this.notificationContainer.appendChild(notification);
         
         // Remove from DOM after 2 seconds
         setTimeout(() => {
@@ -11517,14 +12098,21 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     }
 
     filterTopics(searchTerm) {
-        const topicCards = document.querySelectorAll('.topic-card');
+        // Cache topic cards to avoid repeated DOM queries
+        if (!this.cachedTopicCards) {
+            this.cachedTopicCards = document.querySelectorAll('.topic-card');
+        }
+        
         const term = searchTerm.toLowerCase();
         
-        topicCards.forEach(card => {
-            const title = card.querySelector('h3').textContent.toLowerCase();
-            const description = card.querySelector('p').textContent.toLowerCase();
+        this.cachedTopicCards.forEach(card => {
+            // Cache title and description to avoid repeated queries
+            if (!card._cachedTitle) {
+                card._cachedTitle = card.querySelector('h3').textContent.toLowerCase();
+                card._cachedDescription = card.querySelector('p').textContent.toLowerCase();
+            }
             
-            if (title.includes(term) || description.includes(term)) {
+            if (card._cachedTitle.includes(term) || card._cachedDescription.includes(term)) {
                 card.style.display = 'flex';
             } else {
                 card.style.display = 'none';
@@ -11538,20 +12126,20 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         const completedCount = this.completedModules.length;
         const percentage = Math.round((completedCount / totalModules) * 100);
         
-        // Find the "Samlet Fremgang" progress display
-        const progressElements = document.querySelectorAll('.stat-number');
-        let progressElement = null;
-        
-        // Find the element that contains "Samlet Fremgang"
-        progressElements.forEach(element => {
-            const parent = element.closest('.stat-card');
-            if (parent && parent.textContent.includes('Samlet Fremgang')) {
-                progressElement = element;
+        // Cache progress element to avoid repeated DOM queries
+        if (!this.cachedProgressElement) {
+            const progressElements = document.querySelectorAll('.stat-number');
+            for (const element of progressElements) {
+                const parent = element.closest('.stat-card');
+                if (parent && parent.textContent.includes('Samlet Fremgang')) {
+                    this.cachedProgressElement = element;
+                    break;
+                }
             }
-        });
+        }
         
-        if (progressElement) {
-            progressElement.textContent = `${percentage}%`;
+        if (this.cachedProgressElement) {
+            this.cachedProgressElement.textContent = `${percentage}%`;
             console.log(`✅ Updated "Samlet Fremgang" to: ${percentage}%`);
         } else {
             console.log('❌ Could not find "Samlet Fremgang" element');
@@ -11737,7 +12325,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         console.log(`Applied progress to UI: ${this.completedModules.length} modules completed, ${buttonsUpdated} buttons updated`);
     }
 
-    refreshElearningProgress() {
+    refreshElearningProgress(retryCount = 0) {
         // Force refresh of e-learning progress display
         console.log('🔄 NEW VERSION: Refreshing e-learning progress display...');
         
@@ -11747,9 +12335,15 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         console.log('🔍 Number of available subtopic buttons:', allAvailableButtons.length);
         
         if (allAvailableButtons.length === 0) {
-            console.log('⚠️ E-learning content not loaded yet, retrying in 1 second...');
+            // Add retry limit to prevent infinite loop
+            if (retryCount >= 10) {
+                console.log('❌ Max retries reached, stopping e-learning progress refresh');
+                return;
+            }
+            
+            console.log(`⚠️ E-learning content not loaded yet, retrying in 1 second... (${retryCount + 1}/10)`);
             setTimeout(() => {
-                this.refreshElearningProgress();
+                this.refreshElearningProgress(retryCount + 1);
             }, 1000);
             return;
         }

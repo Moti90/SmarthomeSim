@@ -684,10 +684,13 @@
                                     
                                     <!-- Soveværelse Temperatursensor -->
                                     <div class="control-item">
-                                        <label for="sovevaerelse-temperatur-slider">Soveværelse Temperatur</label>
-                                        <div class="slider-container">
-                                            <input type="range" id="sovevaerelse-temperatur-slider" class="device-slider" data-device="sovevaerelse-temperatur" min="15" max="30" value="21">
-                                            <span class="slider-value">21°C</span>
+                                        <label for="sovevaerelse-temperatur-btn">Soveværelse Temperatur</label>
+                                        <div class="temp-control-container">
+                                            <span id="sovevaerelse-temperatur-display" class="temp-display">21°C</span>
+                                            <button id="sovevaerelse-temperatur-btn" class="temp-control-btn" data-device="sovevaerelse-temperatur">
+                                                <span class="btn-icon">🌡️</span>
+                                                <span class="btn-text">Indstil</span>
+                                            </button>
                                         </div>
                                     </div>
                                     
@@ -828,7 +831,7 @@
                             </div>
                             
                             <!-- Røgalarm -->
-                            <div class="block-item" draggable="true" data-block-type="trigger" data-block-subtype="motion" data-sensor-id="koekken-roegalarm">
+                            <div class="block-item" draggable="true" data-block-type="trigger" data-block-subtype="smoke" data-sensor-id="koekken-roegalarm">
                                 <span class="block-icon">🚨</span>
                                 <div>
                                     <div class="block-name">Røgalarm</div>
@@ -873,23 +876,6 @@
                             </div>
                         </div>
 
-                        <div class="block-category">
-                            <h4 class="category-title">🔍 Betingelser</h4>
-                            <div class="block-item" draggable="true" data-block-type="condition" data-block-subtype="time">
-                                <span class="block-icon">⏱️</span>
-                                <div>
-                                    <div class="block-name">Tidsinterval</div>
-                                    <div class="block-description">Mellem 18:00-22:00</div>
-                                </div>
-                            </div>
-                            <div class="block-item" draggable="true" data-block-type="condition" data-block-subtype="compare">
-                                <span class="block-icon">🔢</span>
-                                <div>
-                                    <div class="block-name">Sammenlign</div>
-                                    <div class="block-description">Større end, mindre end</div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="block-category">
                             <h4 class="category-title">⚡ Handlinger</h4>
@@ -994,7 +980,7 @@
                         </div>
                     </div>
 
-                    <!-- Canvas Area -->
+                    <!-- Scene Editor with Zones -->
                     <div class="canvas-area">
                         <div class="canvas-header">
                             <h3 class="canvas-title">🎨 Scene Editor</h3>
@@ -1006,13 +992,75 @@
                                 <button class="action-btn" onclick="window.appManager.showSavedRules()">📋 Mine Regler</button>
                             </div>
                         </div>
-                        <div class="canvas-content">
-                            <div class="drop-zone" id="scene-canvas">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 3rem; margin-bottom: 15px;">🎯</div>
-                                    <div>Træk blokke hertil for at bygge din scene</div>
-                                    <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">
-                                        Start med en trigger, tilføj betingelser, og afslut med handlinger
+                        <div class="zones-container">
+                            <!-- Triggers & Betingelser Zone -->
+                            <div class="zone triggers-zone">
+                                <div class="zone-header">
+                                    <span class="zone-icon">🎯</span>
+                                    <div>
+                                        <div class="zone-title">Triggers & Betingelser</div>
+                                        <div class="zone-subtitle">Alle skal være opfyldt (implicit AND)</div>
+                                    </div>
+                                </div>
+                                <div class="zone-content">
+                                    <div class="trigger-slots">
+                                        <div class="trigger-slot" data-slot="1">
+                                            <div class="slot-placeholder">
+                                                <div class="slot-icon">🎯</div>
+                                                <div class="slot-text">Træk trigger her</div>
+                                            </div>
+                                        </div>
+                                        <div class="trigger-slot" data-slot="2">
+                                            <div class="slot-placeholder">
+                                                <div class="slot-icon">🎯</div>
+                                                <div class="slot-text">Træk trigger her</div>
+                                            </div>
+                                        </div>
+                                        <div class="trigger-slot" data-slot="3">
+                                            <div class="slot-placeholder">
+                                                <div class="slot-icon">🎯</div>
+                                                <div class="slot-text">Træk trigger her</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Flow Arrow -->
+                            <div class="flow-arrow">
+                                <div class="arrow-icon">➡️</div>
+                                <div class="arrow-text">Hvis alle opfyldt</div>
+                            </div>
+
+                            <!-- Actions Zone -->
+                            <div class="zone actions-zone">
+                                <div class="zone-header">
+                                    <span class="zone-icon">⚡</span>
+                                    <div>
+                                        <div class="zone-title">Handlinger</div>
+                                        <div class="zone-subtitle">Alle udføres samtidigt</div>
+                                    </div>
+                                </div>
+                                <div class="zone-content">
+                                    <div class="action-slots">
+                                        <div class="action-slot" data-slot="1">
+                                            <div class="slot-placeholder">
+                                                <div class="slot-icon">⚡</div>
+                                                <div class="slot-text">Træk handling her</div>
+                                            </div>
+                                        </div>
+                                        <div class="action-slot" data-slot="2">
+                                            <div class="slot-placeholder">
+                                                <div class="slot-icon">⚡</div>
+                                                <div class="slot-text">Træk handling her</div>
+                                            </div>
+                                        </div>
+                                        <div class="action-slot" data-slot="3">
+                                            <div class="slot-placeholder">
+                                                <div class="slot-icon">⚡</div>
+                                                <div class="slot-text">Træk handling her</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1045,7 +1093,7 @@
                             <label class="property-label">Valgt Blok</label>
                             <div class="selected-block-info" id="selected-block-info">
                                 <div class="selected-block-name">Ingen blok valgt</div>
-                                <div class="selected-block-type">Træk en blok til canvas</div>
+                                <div class="selected-block-type">Klik på en blok for at se indstillinger</div>
                             </div>
                         </div>
 
