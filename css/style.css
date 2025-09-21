@@ -2724,7 +2724,8 @@ body.alarm-active::before {
 .weather-value {
     font-size: 12px;
     font-weight: 600;
-    color: var(--accent-primary);
+    color: #00d4ff;
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
 }
 
 /* Weather Popup */
@@ -2856,11 +2857,12 @@ body.alarm-active::before {
     text-align: center;
     font-size: 14px;
     font-weight: 600;
-    color: var(--accent-primary);
-    background: var(--accent-primary);
+    color: #ffffff;
+    background: rgba(0, 212, 255, 0.2);
     padding: 4px 8px;
     border-radius: 6px;
-    border: 1px solid rgba(120, 219, 255, 0.2);
+    border: 1px solid rgba(0, 212, 255, 0.5);
+    text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
 }
 
 .weather-popup-footer {
@@ -10770,5 +10772,20 @@ textarea {
     font-weight: 600;
     margin-top: 2px;
     text-align: center;
+}
+
+.clickable-temp {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+    background: rgba(255, 107, 53, 0.1);
+}
+
+.clickable-temp:hover {
+    background: rgba(255, 107, 53, 0.2);
+    border-color: rgba(255, 107, 53, 0.5);
+    transform: scale(1.05);
 }
 

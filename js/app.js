@@ -4396,8 +4396,8 @@ class AppManager {
             blockElement.dataset.actuatorId = blockData.actuatorId;
         }
         
-        // Style the block for actions (green theme)
-        blockElement.style.background = 'linear-gradient(135deg, #4facfe, #00f2fe)';
+        // Style the block for actions (darker green theme)
+        blockElement.style.background = 'linear-gradient(135deg, #065f46, #047857)';
         blockElement.style.border = '2px solid #10b981';
         blockElement.style.borderRadius = '12px';
         blockElement.style.padding = '15px';
@@ -7752,7 +7752,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             }
         }
     }
-
+    
     setupHumidityMeter() {
         const humidityIcon = document.querySelector('[data-device="badevaerelse-fugtmaaler"]');
         const humidityPopup = document.getElementById('humidity-popup');
@@ -7799,17 +7799,52 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     
     setupTemperatureMeter() {
         const tempIcon = document.querySelector('[data-device="sovevaerelse-temperatur"]');
+        const radiatorIcon = document.querySelector('[data-device="aktuator-radiator"]');
+        const tempDisplay = document.getElementById('sovevaerelse-temperatur-display');
+        
+        console.log('Setting up temperature meter...');
+        console.log('Radiator icon found:', radiatorIcon);
         const tempPopup = document.getElementById('temperature-popup');
         const tempSlider = document.getElementById('temperature-slider');
         const tempValue = document.getElementById('temperature-value');
         const tempClose = document.querySelector('.temperature-popup-close');
         const tempSave = document.querySelector('.temperature-save-btn');
 
+        // Setup click handler for the soveværelse temperature icon
         if (tempIcon) {
             tempIcon.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this.showTemperaturePopup();
+                this.showTemperaturePopup('sovevaerelse-temperatur');
+            });
+        }
+        
+        // Setup simple click handler for the radiator icon
+        if (radiatorIcon) {
+            radiatorIcon.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get current state and set to opposite
+                const currentIconState = radiatorIcon.dataset.value === 'true';
+                const newState = !currentIconState;
+                const switchElement = document.getElementById('aktuator-radiator-switch');
+                
+                if (switchElement) {
+                    // Set switch to the new (opposite) state
+                    switchElement.checked = newState;
+                    // Trigger the switch change event
+                    switchElement.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+        
+        // Setup click handler for the control panel temperature display
+        if (tempDisplay) {
+            tempDisplay.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showTemperaturePopup('sovevaerelse-temperatur');
             });
         }
 
@@ -7889,14 +7924,17 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
         }
     }
     
-    showTemperaturePopup() {
+    showTemperaturePopup(deviceId = 'sovevaerelse-temperatur') {
         const tempPopup = document.getElementById('temperature-popup');
-        const tempIcon = document.querySelector('[data-device="sovevaerelse-temperatur"]');
+        const tempIcon = document.querySelector(`[data-device="${deviceId}"]`);
         
         if (tempPopup && tempIcon) {
             const currentTemp = tempIcon.dataset.value || '21';
             const tempSlider = document.getElementById('temperature-slider');
             const tempValue = document.getElementById('temperature-value');
+            
+            // Store which device we're editing
+            tempPopup.dataset.editingDevice = deviceId;
             
             tempSlider.value = currentTemp;
             tempValue.textContent = currentTemp + '°C';
@@ -7915,6 +7953,7 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
     saveTemperatureSettings() {
         const tempSlider = document.getElementById('temperature-slider');
         const tempIcon = document.querySelector('[data-device="sovevaerelse-temperatur"]');
+        const tempDisplay = document.getElementById('sovevaerelse-temperatur-display');
         
         if (tempSlider && tempIcon) {
             const newTemp = tempSlider.value;
@@ -7922,6 +7961,11 @@ Spørg mig om specifikke sensorer, forbindelser eller enheder for mere detaljere
             
             // Update visual appearance
             this.updateSmartIconAppearance(tempIcon);
+            
+            // Update control panel display
+            if (tempDisplay) {
+                tempDisplay.textContent = `${newTemp}°C`;
+            }
             
             // Check for active rules that should trigger
             this.checkActiveRules('sovevaerelse-temperatur', true);
