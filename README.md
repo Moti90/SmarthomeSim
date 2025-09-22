@@ -26,6 +26,22 @@ Appen er konfigureret til at køre på GitHub Pages uden følsomme API nøgler.
 2. Kopier `firebase-config.template.js` til `firebase-config.js`
 3. Erstat placeholder værdierne med dine rigtige Firebase konfigurationsdetaljer
 
+### Feedback Email (Resend)
+- I `firebase.json` er `functions` konfigureret til mappen `functions/`
+- Opret miljøvariabler til Cloud Functions (cmd):
+  ```cmd
+  firebase functions:config:set resend.key="DIN_RESEND_API_KEY" feedback.to="dinmodtager@example.com" feedback.from="no-reply@din-domæne.dk"
+  ```
+  Alternativt (for Node 18 uden functions:config): brug runtime env vars i hosting/CI eller `.env` ved emulator.
+
+- Deploy functions:
+  ```cmd
+  cd functions && npm install && cd ..
+  firebase deploy --only functions
+  ```
+
+- Frontend kalder `sendFeedbackEmail` via Firebase Functions. Sørg for at brugeren er logget ind for at vedhæfte email automatisk (ellers bruges anonym afsender).
+
 ### Sikkerhed
 - `firebase-config.js` er i `.gitignore` og uploades ikke til GitHub
 - Kun `firebase-config-github.js` (med placeholder værdier) er i repositoryet

@@ -221,6 +221,14 @@ git commit -m "BACKUP: [Feature/Bug/Refactor] - [Beskrivelse] - %date%"
 - [ ] **Readability** - God kontrast og typografi
 - [ ] **Educational Value** - Praktiske anvendelser og tips
 
+### Debugging Standard
+- [ ] **Primær metode: print statements** – Brug `console.log`, `console.error`, `console.table`, `console.time/timeEnd` til at inspicere flow og værdier
+- [ ] **Tydelige labels** – Inkludér kontekst i logs: `console.log('fetch:userId', userId)`
+- [ ] **Feature-toggle** – Indfør `const DEBUG = true/false` og log kun når `DEBUG` er sand
+- [ ] **Breakpoint ved behov** – Brug `debugger;` sparsomt til at pause i DevTools
+- [ ] **Fjern midlertidige logs** – Ryd op før commit/backup, behold kun nødvendige fejl-logs
+- [ ] **Ingen følsomme data** – Log ikke adgangstokens, persondata eller hemmeligheder
+
 ---
 
 **Last Updated**: 2024-01-15

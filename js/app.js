@@ -180,6 +180,79 @@ class AppManager {
         }, 100);
     }
 
+    // ===== FEEDBACK =====
+    async submitFeedback() {
+        const DEBUG = true;
+        try {
+            const subjectInput = document.getElementById('feedback-subject');
+            const messageInput = document.getElementById('feedback-message');
+            const subject = subjectInput ? subjectInput.value.trim() : '';
+            const message = messageInput ? messageInput.value.trim() : '';
+
+            if (DEBUG) console.log('feedback:input', { subject, messageLength: message.length });
+
+            if (!subject) {
+                this.showNotification('Angiv et emne for din feedback', 'warning');
+                return;
+            }
+            if (!message || message.length < 10) {
+                this.showNotification('Skriv en besked (mindst 10 tegn)', 'warning');
+                return;
+            }
+
+            const userEmail = this.currentUser?.email || 'anon@smarthome.local';
+            const payload = {
+                subject,
+                message,
+                userEmail,
+                userAgent: navigator.userAgent,
+                timestamp: Date.now()
+            };
+            if (DEBUG) console.log('feedback:payload', payload);
+
+            // Simpelt endpoint fallback: brug FEEDBACK_ENDPOINT hvis sat (ingen Firebase nødvendig)
+            const endpoint = (typeof window !== 'undefined' && window.FEEDBACK_ENDPOINT) ? window.FEEDBACK_ENDPOINT : '';
+            if (endpoint) {
+                if (DEBUG) console.log('feedback:endpoint', endpoint);
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                let data = null;
+                try { data = await res.json(); } catch (_) {}
+                if (res.ok && (data?.ok !== false)) {
+                    this.showNotification('Tak for din feedback! Vi har modtaget den.', 'success');
+                    if (subjectInput) subjectInput.value = '';
+                    if (messageInput) messageInput.value = '';
+                    return;
+                } else {
+                    if (DEBUG) console.error('feedback:endpointFailed', { status: res.status, data });
+                    // Falder tilbage til Firebase nedenfor hvis muligt
+                }
+            }
+
+            const functions = window.FirebaseConfig?.getFunctions?.();
+            if (!functions) {
+                this.showNotification('Firebase Functions ikke tilgængelig', 'error');
+                if (DEBUG) console.error('feedback:functionsMissing');
+                return;
+            }
+
+            const callable = firebase.app().functions('europe-west1').httpsCallable('sendFeedbackEmail');
+            if (DEBUG) console.log('feedback:callingFunction');
+            const result = await callable(payload);
+            if (DEBUG) console.log('feedback:result', result?.data);
+
+            this.showNotification('Tak for din feedback! Vi har modtaget den.', 'success');
+            if (subjectInput) subjectInput.value = '';
+            if (messageInput) messageInput.value = '';
+        } catch (error) {
+            console.error('feedback:error', error);
+            this.showNotification('Kunne ikke sende feedback. Prøv igen senere.', 'error');
+        }
+    }
+
     // ===== SENSOR COMPONENT HANDLERS =====
     
     setupSensorComponentHandlers() {

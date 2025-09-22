@@ -1341,6 +1341,37 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Feedback Sektion -->
+                        <div class="settings-column">
+                            <div class="settings-group">
+                                <h3>💬 Feedback</h3>
+                                <p>Send forslag, fejl eller idéer til os</p>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Emne</h4>
+                                        <p>Kort titel for din feedback</p>
+                                    </div>
+                                    <input type="text" id="feedback-subject" placeholder="Fx: Forslag til tema" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #4a5568; background: #1f2937; color: #e2e8f0;">
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h4>Besked</h4>
+                                        <p>Beskriv hvad du oplevede</p>
+                                    </div>
+                                    <textarea id="feedback-message" rows="5" placeholder="Skriv din feedback her..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #4a5568; background: #1f2937; color: #e2e8f0; resize: vertical;"></textarea>
+                                </div>
+
+                                <div class="setting-actions">
+                                    <button class="btn btn-primary" onclick="window.appManager.submitFeedback()">Send Feedback</button>
+                                </div>
+                                <div class="setting-note">
+                                    <small>Din email vedhæftes automatisk, hvis du er logget ind.</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1501,6 +1532,12 @@
         console.log('  - debugFirebase.refresh() - Refresh the page');
         console.log('  - debugFirebase.createTestProgress() - Create test progress data');
         console.log('  - debugFirebase.checkProgress() - Check current progress status');
+    </script>
+
+    <!-- Feedback Endpoint for Resend (Vercel) -->
+    <script>
+        window.FEEDBACK_ENDPOINT = 'https://feedback-ej1k6gx0q-rasmusjakobsen1990-8890s-projects.vercel.app/api/send-feedback';
+        console.log('💬 Feedback endpoint set:', window.FEEDBACK_ENDPOINT);
     </script>
 
     <!-- Advanced Mode Password Popup -->
