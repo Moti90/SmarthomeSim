@@ -69,16 +69,30 @@ class AppManager {
         console.log('🔥 Initializing Firebase...');
         console.log('🔥 FirebaseConfig available:', !!window.FirebaseConfig);
         
-        // Initialize Firebase using your existing setup
-        if (window.FirebaseConfig) {
-            const success = window.FirebaseConfig.initializeFirebase();
-            console.log('🔥 Firebase initialization result:', success);
-            
-            if (success) {
-                this.setupAuthStateListener();
-                console.log('✅ Firebase setup complete');
+        // Initialize Firebase using your existing setup (support both sync and async variants)
+        if (window.FirebaseConfig && typeof window.FirebaseConfig.initializeFirebase === 'function') {
+            const initResult = window.FirebaseConfig.initializeFirebase();
+            // If a Promise is returned (async variant)
+            if (initResult && typeof initResult.then === 'function') {
+                initResult.then((ok) => {
+                    console.log('🔥 Firebase initialization result (async):', ok);
+                    if (ok) {
+                        this.setupAuthStateListener();
+                        console.log('✅ Firebase setup complete');
+                    } else {
+                        console.error('❌ Firebase initialization failed');
+                    }
+                }).catch((err) => {
+                    console.error('❌ Firebase initialization error:', err);
+                });
             } else {
-                console.error('❌ Firebase initialization failed');
+                console.log('🔥 Firebase initialization result:', initResult);
+                if (initResult) {
+                    this.setupAuthStateListener();
+                    console.log('✅ Firebase setup complete');
+                } else {
+                    console.error('❌ Firebase initialization failed');
+                }
             }
         } else {
             console.error('❌ Firebase configuration not found');
@@ -953,11 +967,9 @@ class AppManager {
         }
         
         // Apply theme
-        document.body.classList.remove('theme-crimson-gold', 'theme-warm-green');
-        if (themeName === 'crimson-gold') {
-            document.body.classList.add('theme-crimson-gold');
-        } else if (themeName === 'warm-green') {
-            document.body.classList.add('theme-warm-green');
+        document.body.classList.remove('theme-crimson-gold', 'theme-warm-green', 'theme-dark-luxury');
+        if (themeName === 'dark-luxury') {
+            document.body.classList.add('theme-dark-luxury');
         }
         
         this.currentTheme = themeName;
@@ -1245,10 +1257,16 @@ class AppManager {
             console.log('FirebaseConfig available:', !!window.FirebaseConfig);
             console.log('isFirebaseReady function:', typeof window.FirebaseConfig?.isFirebaseReady);
             
-            // Try to call isFirebaseReady if it exists
-            if (window.FirebaseConfig && typeof window.FirebaseConfig.isFirebaseReady === 'function') {
+            // Try to call readiness function if it exists (support isFirebaseReady and isFirebaseInitialized)
+            const readyFn = (window.FirebaseConfig &&
+                (typeof window.FirebaseConfig.isFirebaseReady === 'function'
+                    ? window.FirebaseConfig.isFirebaseReady
+                    : (typeof window.FirebaseConfig.isFirebaseInitialized === 'function'
+                        ? window.FirebaseConfig.isFirebaseInitialized
+                        : null)));
+            if (readyFn) {
                 try {
-                    const isReady = window.FirebaseConfig.isFirebaseReady();
+                    const isReady = readyFn();
                     console.log('isFirebaseReady result:', isReady);
                     if (isReady) {
                         console.log('✅ Firebase is ready!');
@@ -1279,10 +1297,11 @@ class AppManager {
         console.log('🔍 Debug info:', {
             FirebaseConfig: !!window.FirebaseConfig,
             isFirebaseReady: typeof window.FirebaseConfig?.isFirebaseReady,
+            isFirebaseInitialized: typeof window.FirebaseConfig?.isFirebaseInitialized,
             firebase: typeof firebase,
-            app: !!app,
-            auth: !!auth,
-            db: !!db,
+            app: !!window.FirebaseConfig?.getApp?.(),
+            auth: !!window.FirebaseConfig?.getAuth?.(),
+            db: !!window.FirebaseConfig?.getFirestore?.(),
             environment: window.location.hostname
         });
         
@@ -1291,7 +1310,8 @@ class AppManager {
             console.log('🔄 Final attempt: Direct Firebase initialization...');
             try {
                 await window.FirebaseConfig?.initializeFirebase();
-                if (window.FirebaseConfig?.isFirebaseReady()) {
+                if ((typeof window.FirebaseConfig?.isFirebaseReady === 'function' && window.FirebaseConfig.isFirebaseReady()) ||
+                    (typeof window.FirebaseConfig?.isFirebaseInitialized === 'function' && window.FirebaseConfig.isFirebaseInitialized())) {
                     console.log('✅ Firebase ready after final attempt!');
                     return;
                 }
@@ -4396,7 +4416,7 @@ class AppManager {
             blockElement.dataset.actuatorId = blockData.actuatorId;
         }
         
-        // Style the block for actions (darker green theme)
+        // Style the block for actions
         blockElement.style.background = 'linear-gradient(135deg, #065f46, #047857)';
         blockElement.style.border = '2px solid #10b981';
         blockElement.style.borderRadius = '12px';

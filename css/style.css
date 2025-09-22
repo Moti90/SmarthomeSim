@@ -74,37 +74,180 @@ body::after {
     --warning-color: #ed8936;     /* Orange for advarsler */
 }
 
-.theme-crimson-gold {
+.theme-dark-luxury {
     --bg-primary: #000000;        /* Sort primær baggrund */
-    --bg-secondary: #1a0000;      /* Mørk crimson sekundær baggrund */
-    --bg-tertiary: #2d0000;       /* Lysere crimson kortbaggrunde */
-    --accent-primary: #ff0000;    /* Vibrant rød accent */
-    --accent-secondary: #ff4444;  /* Lysere vibrant rød for hover */
+    --bg-secondary: #0a0a0a;      /* Mørk sekundær baggrund */
+    --bg-tertiary: #1a1a1a;       /* Lysere sort kortbaggrunde */
+    --accent-primary: #d4af37;    /* Ægte guld accent */
+    --accent-secondary: #f4d03f;  /* Lysere guld for hover */
     --text-primary: #ffffff;      /* Hvid primær tekst */
-    --text-secondary: #ffb3b3;    /* Lys crimson sekundær tekst */
-    --text-muted: #cc6666;        /* Muted crimson tekst */
-    --border-color: #d4af37;      /* Ægte guld border farve */
-    --shadow-color: rgba(255, 0, 0, 0.3);
+    --text-secondary: #e8e8e8;    /* Lys grå sekundær tekst */
+    --text-muted: #cccccc;        /* Muted tekst */
+    --border-color: #d4af37;      /* Guld border */
+    --shadow-color: rgba(212, 175, 55, 0.4); /* Guld skygge */
     --success-color: #4caf50;     /* Grøn for succes */
     --error-color: #f44336;       /* Rød for fejl */
     --warning-color: #ff9800;     /* Orange for advarsler */
+    
+    /* Dark Luxury specifikke variabler */
+    --luxury-glow: 0 0 20px rgba(212, 175, 55, 0.6);
+    --luxury-glow-strong: 0 0 30px rgba(212, 175, 55, 0.8);
+    --luxury-gradient-primary: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+    --luxury-gradient-secondary: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+    --luxury-gradient-card: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
 }
 
-.theme-warm-green {
-    --bg-primary: #1a2e1a;        /* Mørk olivengrøn primær baggrund */
-    --bg-secondary: #2d4a2d;      /* Mørk olivengrøn sekundær baggrund */
-    --bg-tertiary: #3d5a3d;       /* Lysere olivengrøn kortbaggrunde */
-    --accent-primary: #7cb342;    /* Varm lime grøn accent */
-    --accent-secondary: #9ccc65;  /* Lysere lime grøn for hover */
-    --text-primary: #f1f8e9;      /* Varm hvid primær tekst */
-    --text-secondary: #c8e6c9;    /* Varm lysegrøn sekundær tekst */
-    --text-muted: #a5d6a7;        /* Muted grøn tekst */
-    --border-color: #689f38;      /* Grøn border farve */
-    --shadow-color: rgba(26, 46, 26, 0.8);
-    --success-color: #4caf50;     /* Grøn for succes */
-    --error-color: #f44336;       /* Rød for fejl */
-    --warning-color: #ff9800;     /* Orange for advarsler */
+/* Dark Luxury tema specifikke styles */
+.theme-dark-luxury .nav-btn {
+    background: var(--luxury-gradient-card);
+    border: 2px solid var(--accent-primary);
+    color: var(--text-primary);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: var(--luxury-glow);
+    transition: all 0.3s ease;
 }
+
+.theme-dark-luxury .nav-btn:hover,
+.theme-dark-luxury .nav-btn.active {
+    background: var(--luxury-gradient-secondary);
+    color: #000000;
+    box-shadow: var(--luxury-glow-strong);
+    transform: translateY(-2px);
+}
+
+.theme-dark-luxury .device-card {
+    background: var(--luxury-gradient-card);
+    border: 2px solid var(--accent-primary);
+    box-shadow: var(--luxury-glow);
+    transition: all 0.3s ease;
+}
+
+.theme-dark-luxury .device-card:hover {
+    box-shadow: var(--luxury-glow-strong);
+    transform: translateY(-3px);
+}
+
+.theme-dark-luxury .toggle-btn {
+    background: var(--luxury-gradient-card);
+    border: 2px solid var(--accent-primary);
+    box-shadow: var(--luxury-glow);
+    transition: all 0.3s ease;
+}
+
+.theme-dark-luxury .toggle-btn.on {
+    background: var(--luxury-gradient-secondary);
+    color: #000000;
+    box-shadow: var(--luxury-glow-strong);
+}
+
+.theme-dark-luxury .btn {
+    background: var(--luxury-gradient-card);
+    border: 2px solid var(--accent-primary);
+    color: var(--text-primary);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    box-shadow: var(--luxury-glow);
+    transition: all 0.3s ease;
+}
+
+.theme-dark-luxury .btn:hover {
+    background: var(--luxury-gradient-secondary);
+    color: #000000;
+    box-shadow: var(--luxury-glow-strong);
+    transform: translateY(-2px);
+}
+
+.theme-dark-luxury .btn-primary {
+    background: var(--luxury-gradient-secondary);
+    color: #000000;
+    box-shadow: var(--luxury-glow-strong);
+}
+
+.theme-dark-luxury .topic-card {
+    background: var(--luxury-gradient-card);
+    border: 2px solid var(--accent-primary);
+    box-shadow: var(--luxury-glow);
+    transition: all 0.3s ease;
+}
+
+.theme-dark-luxury .topic-card:hover {
+    box-shadow: var(--luxury-glow-strong);
+    transform: translateY(-3px);
+}
+
+.theme-dark-luxury .input,
+.theme-dark-luxury input,
+.theme-dark-luxury textarea,
+.theme-dark-luxury select {
+    background: var(--luxury-gradient-card);
+    border: 2px solid var(--accent-primary);
+    color: var(--text-primary);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.theme-dark-luxury .input:focus,
+.theme-dark-luxury input:focus,
+.theme-dark-luxury textarea:focus,
+.theme-dark-luxury select:focus {
+    border-color: var(--accent-secondary);
+    box-shadow: var(--luxury-glow), inset 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.theme-dark-luxury .sidebar {
+    background: var(--luxury-gradient-primary);
+    border-right: 2px solid var(--accent-primary);
+    box-shadow: 2px 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.theme-dark-luxury .main-content {
+    background: var(--luxury-gradient-primary);
+}
+
+.theme-dark-luxury .logo {
+    color: var(--accent-primary);
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.theme-dark-luxury h1,
+.theme-dark-luxury h2,
+.theme-dark-luxury h3,
+.theme-dark-luxury h4 {
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Shimmer animation for luxury feel */
+@keyframes luxury-shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.theme-dark-luxury .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+    background-size: 1000px 100%;
+    animation: luxury-shimmer 3s infinite;
+}
+
+.theme-dark-luxury .progress-bar {
+    background: var(--luxury-gradient-card);
+    border: 2px solid var(--accent-primary);
+    box-shadow: var(--luxury-glow);
+}
+
+.theme-dark-luxury .progress-fill {
+    background: var(--luxury-gradient-secondary);
+    box-shadow: var(--luxury-glow-strong);
+}
+
 
 /* ===== LAYOUT ===== */
 .container {
@@ -5160,13 +5303,12 @@ body.alarm-active::before {
     background: linear-gradient(135deg, #1a1d29 0%, #2d3142 50%, #1a1d29 100%);
 }
 
-.theme-crimson-gold {
-    background: linear-gradient(135deg, #000000 0%, #1a0000 50%, #2d0000 100%);
+.theme-dark-luxury {
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+    border: 2px solid #d4af37;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
 }
 
-.theme-warm-green {
-    background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 50%, #3d5a3d 100%);
-}
 
 .theme-option h4 {
     font-size: 16px;
