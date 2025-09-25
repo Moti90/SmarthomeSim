@@ -1,9 +1,0 @@
-{
-  "name": "feedback-api",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "resend": "^3.4.0"
-  }
-}
-

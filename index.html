@@ -69,37 +69,34 @@
         <header class="app-header">
             <div class="header-content">
                 <div class="header-left">
-                    <div class="logo-small">
+                    <div class="brand-nav">
                         <img src="LOGO.png" alt="Logo" class="logo-icon">
-                        <span class="app-title">Smarthome Simulator</span>
+                        <nav class="header-nav">
+                            <button class="nav-btn active" data-tab="home">
+                                <span class="nav-icon">⌂</span>
+                                <span class="nav-label">Forside</span>
+                            </button>
+                            <button class="nav-btn" data-tab="elearning">
+                                <span class="nav-icon">◊</span>
+                                <span class="nav-label">E-Learning</span>
+                            </button>
+                            <button class="nav-btn advanced-tab" data-tab="advanced">
+                                <span class="nav-icon">☆</span>
+                                <span class="nav-label">Advanced</span>
+                            </button>
+                            <button class="nav-btn" data-tab="smarthome">
+                                <span class="nav-icon">▶</span>
+                                <span class="nav-label">Smarthome Sim</span>
+                            </button>
+                            <button class="nav-btn" data-tab="settings">
+                                <span class="nav-icon">⚙</span>
+                                <span class="nav-label">Indstillinger</span>
+                            </button>
+                        </nav>
                     </div>
                 </div>
                 
-                <nav class="header-nav">
-                    <button class="nav-btn active" data-tab="home">
-                        <span class="nav-icon">⌂</span>
-                        <span class="nav-label">Forside</span>
-                    </button>
-                    <button class="nav-btn" data-tab="elearning">
-                        <span class="nav-icon">◊</span>
-                        <span class="nav-label">E-Learning</span>
-                    </button>
-                    <button class="nav-btn advanced-tab" data-tab="advanced">
-                        <span class="nav-icon">☆</span>
-                        <span class="nav-label">Advanced</span>
-                    </button>
-                    <button class="nav-btn" data-tab="smarthome">
-                        <span class="nav-icon">▶</span>
-                        <span class="nav-label">Smarthome Sim</span>
-                    </button>
-                    <button class="nav-btn" data-tab="settings">
-                        <span class="nav-icon">⚙</span>
-                        <span class="nav-label">Indstillinger</span>
-                    </button>
-                </nav>
-                
                 <div class="header-right">
-                    <span id="user-info" class="user-info">rasmusjakobsen1990@gmail.com</span>
                     <button id="logout-btn" class="logout-btn">Log Ud</button>
                 </div>
             </div>
@@ -1341,37 +1338,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Feedback Sektion -->
-                        <div class="settings-column">
-                            <div class="settings-group">
-                                <h3>💬 Feedback</h3>
-                                <p>Send forslag, fejl eller idéer til os</p>
-
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <h4>Emne</h4>
-                                        <p>Kort titel for din feedback</p>
-                                    </div>
-                                    <input type="text" id="feedback-subject" placeholder="Fx: Forslag til tema" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #4a5568; background: #1f2937; color: #e2e8f0;">
-                                </div>
-
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <h4>Besked</h4>
-                                        <p>Beskriv hvad du oplevede</p>
-                                    </div>
-                                    <textarea id="feedback-message" rows="5" placeholder="Skriv din feedback her..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #4a5568; background: #1f2937; color: #e2e8f0; resize: vertical;"></textarea>
-                                </div>
-
-                                <div class="setting-actions">
-                                    <button class="btn btn-primary" onclick="window.appManager.submitFeedback()">Send Feedback</button>
-                                </div>
-                                <div class="setting-note">
-                                    <small>Din email vedhæftes automatisk, hvis du er logget ind.</small>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1532,12 +1498,6 @@
         console.log('  - debugFirebase.refresh() - Refresh the page');
         console.log('  - debugFirebase.createTestProgress() - Create test progress data');
         console.log('  - debugFirebase.checkProgress() - Check current progress status');
-    </script>
-
-    <!-- Feedback Endpoint for Resend (Vercel) -->
-    <script>
-        window.FEEDBACK_ENDPOINT = 'https://feedback-ej1k6gx0q-rasmusjakobsen1990-8890s-projects.vercel.app/api/send-feedback';
-        console.log('💬 Feedback endpoint set:', window.FEEDBACK_ENDPOINT);
     </script>
 
     <!-- Advanced Mode Password Popup -->
